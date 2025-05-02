@@ -30,8 +30,8 @@ public class GitHubInfoRetrieve {
     private static final String SUFFIX = ".java";
     private static final String PREFIX = "/test/";
 
-    public GitHubInfoRetrieve(String path) throws IOException {
-        this.repo = new FileRepository("C:\\Users\\gianl\\OneDrive\\Desktop\\"+path+"/.git");
+    public GitHubInfoRetrieve(String project) throws IOException {
+        this.repo = new FileRepository("/Users/francescoastolfi/progetto-java/proggetti_clonati/"+project+"/.git");
         this.git = new Git(repo);
     }
 
@@ -173,7 +173,8 @@ public class GitHubInfoRetrieve {
 
     public List<RevCommit> getAllCommits() throws GitAPIException, IOException {
         //lista di tutti i commit
-        String treeName = "refs/heads/master";
+        String defaultBranch = repo.getBranch(); // es: "main" o "master"
+        String treeName = "refs/heads/" + defaultBranch;
         Iterable<RevCommit> allCommits = git.log().add(repo.resolve(treeName)).call();
         List<RevCommit> commitList = new ArrayList<>();
         for (RevCommit revCommit:allCommits){
