@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.apache.commons.io.FileUtils.deleteDirectory;
 import static project.models.MethodInstance.ckSignature;
 
-public class MetricsCalculator1 {
+public class MetricsCalculator {
 
 
     private Git git;
@@ -52,7 +52,7 @@ public class MetricsCalculator1 {
     private Map<String,Release> releaseResults;
 
 
-    public MetricsCalculator1(GitHubInfoRetrieve gitHubInfoRetrieve) throws IOException {
+    public MetricsCalculator(GitHubInfoRetrieve gitHubInfoRetrieve) throws IOException {
         File repoDir = new File(gitHubInfoRetrieve.getPath());
         this.repository = Git.open(repoDir).getRepository();
         this.git = new Git(repository);
@@ -545,16 +545,9 @@ public class MetricsCalculator1 {
                 // Ottieni il nome completo del metodo (ad esempio: Classe.metodo)
 
                 try {
-                    if( ! evauatedClass.containsKey(pathClass) ){
-                        nSmell=PmdRunner.collectCodeSmellMetricsClass(classResult.getClassName(),sourcePath,method.getStartLine(),method.getStartLine()+method.getLoc());
-                        evauatedClass.put(pathClass,nSmell);
-                    }else{
-                        nSmell=(int)evauatedClass.get(pathClass);
-                    }
 
-
-
-
+                    nSmell=PmdRunner.collectCodeSmellMetricsClass(classResult.getClassName(),sourcePath,method.getStartLine(),method.getStartLine()+method.getLoc());
+                    evauatedClass.put(pathClass,nSmell);
 
 
                     ClassFile filled_class=new ClassFile();

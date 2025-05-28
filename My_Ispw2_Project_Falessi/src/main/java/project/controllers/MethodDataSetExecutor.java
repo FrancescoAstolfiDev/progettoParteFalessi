@@ -23,7 +23,7 @@ public class MethodDataSetExecutor {
     private static final Logger LOGGER = Logger.getLogger(JiraInfoRetrieve.class.getName());
     private String currentProject;
     private GitHubInfoRetrieve gitHubInfoRetrieve;
-    private MetricsCalculator1 metricsCalculator;
+    private MetricsCalculator metricsCalculator;
     private List<RevCommit> commits;
     private String basepath="/Users/francescoastolfi/progetto-java/falessi_fra/method_ck_definitive/My_Ispw2_Project_Falessi/csv";
     private List<Release>lastReleaseList;
@@ -122,7 +122,7 @@ public class MethodDataSetExecutor {
             }
         }
 
-        this.metricsCalculator= new MetricsCalculator1(this.gitHubInfoRetrieve);
+        this.metricsCalculator= new MetricsCalculator(this.gitHubInfoRetrieve);
         metricsCalculator.calculateAll(halfReleaseList);
 
 
