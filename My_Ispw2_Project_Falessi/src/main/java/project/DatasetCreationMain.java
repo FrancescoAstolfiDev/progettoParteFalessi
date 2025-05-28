@@ -1,7 +1,6 @@
 package project;
 
-
-import project.controllers.DataSetExecutor;
+import project.controllers.MethodDataSetExecutor;
 
 
 
@@ -12,10 +11,8 @@ public class DatasetCreationMain {
 		//scegliere il progetto tra "openjpa" e "bookeeper"
 		String projectName = "bookkeeper";
 
-		DataSetExecutor mainFlow = new DataSetExecutor(projectName);
+		MethodDataSetExecutor mainFlow = new MethodDataSetExecutor(projectName);
 		mainFlow.executeFlow();
 
 	}
-
-
 }

@@ -2,13 +2,18 @@ package project.controllers;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.json.JSONTokener;
 import project.models.Release;
@@ -17,261 +22,257 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import project.models.Ticket;
 
-import static java.lang.System.*;
+import weka.core.Instances;
+import weka.core.converters.CSVLoader;
+import weka.core.converters.ArffSaver;
 
 
 public class JiraInfoRetrieve {
+    private static final Logger LOGGER = Logger.getLogger(JiraInfoRetrieve.class.getName());
+    private static final int MAX_RETRIES = 5;  // Increased from 3 to 5
+    private static final int CONNECTION_TIMEOUT = 60000;  // Increased to 60 seconds
+    private static final int READ_TIMEOUT = 60000;  // Increased to 60 seconds
+    private static final int RETRY_DELAY_SECONDS = 10;  // Increased delay between retries
 
-    private String projKey;
-    private List<Ticket> ticketsWithValidAV;
+    private final String projKey;
+    private final List<Ticket> ticketsWithValidAV;
 
     public JiraInfoRetrieve(String projName) {
         this.projKey = projName.toUpperCase();
         this.ticketsWithValidAV = new ArrayList<>();
     }
 
-    public List<Ticket> getTicketsWithValidAV(){
+    public List<Ticket> getTicketsWithValidAV() {
         return this.ticketsWithValidAV;
     }
 
-    //DA JIRA PRENDO LE AFFECTED VERSION, LA FIXED VERSION, LA RESOLUTION DATE, LA CREATION DATE E LA KEY
     public List<Ticket> retrieveTickets(List<Release> releasesList) throws IOException, ParseException {
-
         List<Ticket> allTickets = new ArrayList<>();
-        JSONObject jsonObject = getInfoFromJira(1000,0);
+        JSONObject jsonObject = getInfoFromJiraWithRetry(1000, 0);
         JSONArray issues = jsonObject.getJSONArray("issues");
         int total = jsonObject.getInt("total");
         int counter = 0;
 
-        if(total <= issues.length()){
-            return getTickets(issues,releasesList);
-        }
-        else{
+        if (total <= issues.length()) {
+            return getTickets(issues, releasesList);
+        } else {
             do {
                 allTickets.addAll(getTickets(issues, releasesList));
                 if (counter <= total) {
-                    counter = counter+1000;
-                    jsonObject = getInfoFromJira(1000, counter);
+                    counter += 1000;
+                    jsonObject = getInfoFromJiraWithRetry(1000, counter);
                     issues = jsonObject.getJSONArray("issues");
                     total = jsonObject.getInt("total");
                 }
-            }
-            while(counter <= total);
+            } while (counter <= total);
         }
         return allTickets;
-
     }
 
     private List<Ticket> getTickets(JSONArray issues, List<Release> releasesList) throws ParseException {
-
-        int issueLen = issues.length();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-        List<Ticket> allTickets = new ArrayList<>();
+        List<Ticket> tickets = new ArrayList<>();
 
-        for (int i = 0; i < issueLen; i++) {
-
-            //prendo i-esimo ticket
+        for (int i = 0; i < issues.length(); i++) {
             JSONObject issue = issues.getJSONObject(i);
-
-            //prendo la key
             String key = issue.getString("key");
-
-            //accedo area fields
             JSONObject fields = issue.getJSONObject("fields");
 
-            //ottengo direttamente creation e resolution date
             String resolutionDateString = fields.getString("resolutiondate");
             String creationDateString = fields.getString("created");
-
-            //ottengo le AV se ci sono
             JSONArray av = fields.getJSONArray("versions");
+            // Estrazione del tipo di ticket
+            String issueType = fields.getJSONObject("issuetype").getString("name");
+
 
             Date resolutionDate = formatter.parse(resolutionDateString);
             Date creationDate = formatter.parse(creationDateString);
 
+            Release creationRelease = getReleaseFromDate(releasesList, creationDate);
+            Release resolutionRelease = getReleaseFromDate(releasesList, resolutionDate);
+            if (creationRelease == null || resolutionRelease == null) continue;
 
-            //qui ottengo la release di resolution e di creation del ticket
-            Release creationRelease = getReleaseFromDate(releasesList,creationDate);
-            Release resolutionRelease = getReleaseFromDate(releasesList,resolutionDate);
-            if(creationRelease == null || resolutionRelease == null) continue;
             Date firstDate = null;
-
-            if(av.length() > 0){
-                firstDate = validateAV(resolutionRelease,creationRelease,av);
+            if (av.length() > 0) {
+                firstDate = validateAV(resolutionRelease, creationRelease, av);
             }
-
 
             Ticket ticket;
-            //se ha AV valido lo salvo
-            if(firstDate != null && creationRelease.getDate().before(resolutionRelease.getDate())){
-
-                Release corrRelease = getReleaseFromDate(releasesList,firstDate);
-                ticket = new Ticket(key,creationRelease,resolutionRelease,corrRelease);
+            if (firstDate != null && creationRelease.getDate().before(resolutionRelease.getDate())) {
+                Release corrRelease = getReleaseFromDate(releasesList, firstDate);
+                ticket = new Ticket(key, creationRelease, resolutionRelease, corrRelease);
                 this.ticketsWithValidAV.add(ticket);
-
-            }
-            else{
-                ticket = new Ticket(key,creationRelease,resolutionRelease,null);
+            } else {
+                ticket = new Ticket(key, creationRelease, resolutionRelease, null);
             }
 
-            allTickets.add(ticket);
-
+            tickets.add(ticket);
         }
-
-        return allTickets;
+        return tickets;
     }
 
-    //Questo metodo va a verificare che la release di creation e le affected version non siano inconsistenti, ovvero
-    //controlla se IV > OV o se IV = OV
     private Date validateAV(Release resolution, Release creation, JSONArray av) throws ParseException {
-
-        int avLen = av.length();
-        Date firstDate = null;
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        Date firstDate = null;
 
-        for (int i = 0; i < avLen; i++){
+        for (int i = 0; i < av.length(); i++) {
             JSONObject avElem = av.getJSONObject(i);
-            if (avElem.getBoolean("released")){
-                String releaseDateString = null;
+            if (avElem.getBoolean("released")) {
                 try {
-                    releaseDateString = avElem.getString("releaseDate");
-                }
-                catch(JSONException e){
+                    String releaseDateString = avElem.getString("releaseDate");
+                    Date releaseDate = formatter.parse(releaseDateString);
+                    if (releaseDate.before(resolution.getDate()) &&
+                            (firstDate == null || releaseDate.before(firstDate))) {
+                        firstDate = releaseDate;
+                    }
+                } catch (JSONException e) {
                     continue;
                 }
-                Date releaseDate = formatter.parse(releaseDateString);
-
-                Date temp = firstDateGetter(releaseDate,resolution,firstDate);
-                if(temp == null){
-                    return null;
-                }
-                firstDate = temp;
             }
         }
-        // controllo che IV < OV
-        if(firstDate != null && creation.getDate().after(firstDate)){
-            return firstDate;
-        }
-        return null;
+        return (firstDate != null && creation.getDate().after(firstDate)) ? firstDate : null;
     }
 
-    private Date firstDateGetter(Date releaseDate,Release resolution,Date firstDate){
-        Date temp = null;
-        if (releaseDate.before(resolution.getDate()) && (firstDate == null || releaseDate.before(firstDate))){
-                temp = releaseDate;
-        }
-        return temp;
-    }
+    private Release getReleaseFromDate(List<Release> list, Date date) {
+        if (list.isEmpty()) return null;
 
-    private JSONObject getInfoFromJira(int numResults, int startAt) throws IOException {
-        String urlString = "https://issues.apache.org/jira/rest/api/2/search?jql=project=%22"+this.projKey
-                +"%22AND%22issueType%22=%22Bug%22AND(%22status%22=%22closed%22OR%22status%22=%22resolved%22)"+
-                "AND%22resolution%22=%22fixed%22&fields=key,resolutiondate,versions,created&startAt="+startAt+
-                "&maxResults="+numResults;
-
-        URL url = new URL(urlString);
-        InputStream inputStream = url.openStream();
-        JSONTokener tokener = new JSONTokener(inputStream);
-        return new JSONObject(tokener);
-    }
-
-
-    //Questo metodo recupera le release di creazione e risoluzione del ticket
-    private Release getReleaseFromDate(List<Release> list, Date date){
-
-        int len = list.size();
-        if(date.before(list.get(0).getDate()) || date.equals(list.get(0).getDate())){
+        if (date.before(list.get(0).getDate()) || date.equals(list.get(0).getDate())) {
             return list.get(0);
         }
-        if(date.after(list.get(len-1).getDate())){
+        if (date.after(list.get(list.size()-1).getDate())) {
             return null;
         }
 
-
-        for(int i = 0; i < len; i++){
-            if(date.equals(list.get(i).getDate())){
+        for (int i = 0; i < list.size()-1; i++) {
+            if (date.equals(list.get(i).getDate())) {
                 return list.get(i);
             }
-            if(date.after(list.get(i).getDate()) && date.before(list.get(i+1).getDate())){
+            if (date.after(list.get(i).getDate()) && date.before(list.get(i+1).getDate())) {
                 return list.get(i+1);
             }
         }
         return null;
     }
 
+    private JSONObject getInfoFromJiraWithRetry(int numResults, int startAt) throws IOException {
+        int retryCount = 0;
+        IOException lastException = null;
 
-    /*This method retrieves all the versions of the project (Avro or Bookkeeper) that are released and with a release date*/
-    public List<Release> retrieveReleases() throws JSONException, IOException, ParseException {
+        while (retryCount < MAX_RETRIES) {
+            try {
+                LOGGER.info(String.format("Attempting JIRA connection (Attempt %d/%d)",
+                        retryCount + 1, MAX_RETRIES));
+                return getInfoFromJira(numResults, startAt);
+            } catch (IOException e) {
+                lastException = e;
+                retryCount++;
+                LOGGER.log(Level.WARNING, String.format("Attempt %d failed. Waiting %d seconds before retry...",
+                        retryCount, RETRY_DELAY_SECONDS), e);
 
-        List<Release> allRelease = new ArrayList<>();
-
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        String urlString = "https://issues.apache.org/jira/rest/api/latest/project/"+projKey+"/version";
-        URL url = new URL(urlString);
-        InputStream inputStream = url.openStream();
-        JSONTokener tokener = new JSONTokener(inputStream);
-        JSONObject json = new JSONObject(tokener);
-
-        JSONArray values = json.getJSONArray("values");
-
-        for (int i = 0; i < values.length(); i++) {
-            JSONObject value = values.getJSONObject(i);
-            if(value.getBoolean("released")){
-                String name = value.getString("name");
-                String date = null;
-                try {
-                    date = value.getString("releaseDate");
+                if (retryCount < MAX_RETRIES) {
+                    try {
+                        TimeUnit.SECONDS.sleep(RETRY_DELAY_SECONDS);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        throw new IOException("Interrupted during retry", ie);
+                    }
                 }
-                catch(JSONException e){
-                    continue;
-                }
-                Release temp = new Release(-1,name,formatter.parse(date));
-                allRelease.add(temp);
             }
         }
 
-        sortReleaseList(allRelease);
+        LOGGER.log(Level.SEVERE, "All connection attempts failed", lastException);
+        throw new IOException(String.format("Failed after %d attempts to connect to JIRA", MAX_RETRIES), lastException);
+    }
 
+    private JSONObject getInfoFromJira(int numResults, int startAt) throws IOException {
+        // URL encode the JQL query parameters
+        String jql = String.format("project=\"%s\" AND issueType=\"Bug\" AND (status=\"closed\" OR status=\"resolved\") AND resolution=\"fixed\"",
+                this.projKey);
+        String encodedJql = java.net.URLEncoder.encode(jql, "UTF-8");
+
+        String urlString = String.format(
+                "https://issues.apache.org/jira/rest/api/2/search?jql=%s&fields=key,resolutiondate,versions,created,issuetype&startAt=%d&maxResults=%d",
+                encodedJql, startAt, numResults
+        );
+
+        LOGGER.info("Connecting to: " + urlString);
+        URL url = new URL(urlString);
+        URLConnection connection = url.openConnection();
+
+        // Set timeouts and request properties
+        connection.setConnectTimeout(CONNECTION_TIMEOUT);
+        connection.setReadTimeout(READ_TIMEOUT);
+        connection.setRequestProperty("Accept", "application/json");
+        connection.setRequestProperty("User-Agent", "Mozilla/5.0");
+
+        try (InputStream inputStream = connection.getInputStream()) {
+            JSONTokener tokener = new JSONTokener(inputStream);
+            return new JSONObject(tokener);
+        } catch (IOException e) {
+            // Get more detailed error information if available
+            if (connection instanceof HttpURLConnection) {
+                HttpURLConnection httpConn = (HttpURLConnection) connection;
+                String errorResponse = "";
+                try (InputStream errorStream = httpConn.getErrorStream()) {
+                    if (errorStream != null) {
+                        errorResponse = new String(errorStream.readAllBytes());
+                    }
+                }
+                LOGGER.log(Level.SEVERE, "JIRA API Error Response: " + errorResponse, e);
+            }
+            throw e;
+        }
+    }
+
+    public List<Release> retrieveReleases() throws JSONException, IOException, ParseException {
+        List<Release> allRelease = new ArrayList<>();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+
+        String urlString = "https://issues.apache.org/jira/rest/api/latest/project/" + projKey + "/version";
+        URL url = new URL(urlString);
+        URLConnection connection = url.openConnection();
+        connection.setConnectTimeout(CONNECTION_TIMEOUT);
+        connection.setReadTimeout(READ_TIMEOUT);
+
+        try (InputStream inputStream = connection.getInputStream()) {
+            JSONTokener tokener = new JSONTokener(inputStream);
+            JSONObject json = new JSONObject(tokener);
+            JSONArray values = json.getJSONArray("values");
+
+            for (int i = 0; i < values.length(); i++) {
+                JSONObject value = values.getJSONObject(i);
+                if (value.getBoolean("released")) {
+                    try {
+                        String name = value.getString("name");
+                        String date = value.getString("releaseDate");
+                        allRelease.add(new Release(-1, name, formatter.parse(date)));
+                    } catch (JSONException e) {
+                        continue;
+                    }
+                }
+            }
+        }
+        sortReleaseList(allRelease);
         return allRelease;
     }
 
-
-    public void sortReleaseList(List<Release> list){
-
-        int len = list.size();
-
-        Collections.sort(list,new ReleaseComparator());
-
-        for (int i = 0; i < len; i++){
-            list.get(i).setId(i+1);
+    public void sortReleaseList(List<Release> list) {
+        Collections.sort(list, (a, b) -> a.getDate().compareTo(b.getDate()));
+        for (int i = 0; i < list.size(); i++) {
+            list.get(i).setId(i + 1);
         }
-
     }
 
-    //assegno ad ogni release tutti i ticket risolti entro la release stessa, ovvero le fv del ticket deve essere minore
-    // o uguale alla release presa in considerazione dall'iterazione del for
-    public void assignTicketToRelease(List<Release> releaseList, List<Ticket> allTicket){
-        int len = releaseList.size()-1;
-        for (int i = len; i >= 0; i--){
+    public void assignTicketToRelease(List<Release> releaseList, List<Ticket> allTicket) {
+        for (int i = releaseList.size() - 1; i >= 0; i--) {
             int releaseId = releaseList.get(i).getId();
             List<Ticket> releaseTickets = new ArrayList<>();
-            for (Ticket ticket: allTicket){
-                if (ticket.getFv().getId() <= releaseId){
+            for (Ticket ticket : allTicket) {
+                if (ticket.getFv().getId() <= releaseId) {
                     releaseTickets.add(ticket);
                 }
             }
             releaseList.get(i).setAllReleaseTicket(releaseTickets);
-        }
-    }
-
-    public List<Ticket> correctTickets(List<Ticket> allTicket){
-        return allTicket;
-    }
-
-    private class ReleaseComparator implements java.util.Comparator<Release> {
-        @Override
-        public int compare(Release a, Release b) {
-            return a.getDate().compareTo(b.getDate());
         }
     }
 }

@@ -21,20 +21,27 @@ public class Ticket {
 		this.ov = ov;
 		this.fv = fv;
 		this.associatedCommits = new ArrayList<>();
+
 	}
 
 	public void setCalculatedIv(Release calculatedIv) {
+
 		this.calculatedIv = calculatedIv;
+
 	}
 	public Release getCalculatedIv(){
+
 		return this.calculatedIv;
+
 	}
 
 	public List<RevCommit> getAssociatedCommits(){
+
 		return this.associatedCommits;
 	}
 
 	public void addAssociatedCommit(RevCommit commit){
+
 		this.associatedCommits.add(commit);
 	}
 	/**
@@ -99,6 +106,20 @@ public class Ticket {
 	 */
 	public void setFv(Release fv) {
 		this.fv = fv;
+	}
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+
+		builder.append("Ticket ").append(key);
+
+		// Aggiungi informazioni sulle release
+		builder.append("\n  IV: ").append(iv != null ? iv.getId() + " (" + iv.getName() + ")" : "null");
+		builder.append("\n  OV: ").append(ov != null ? ov.getId() + " (" + ov.getName() + ")" : "null");
+		builder.append("\n  FV: ").append(fv != null ? fv.getId() + " (" + fv.getName() + ")" : "null");
+		builder.append("\n  CalcIV: ").append(calculatedIv != null ? calculatedIv.getId() + " (" + calculatedIv.getName() + ")" : "null");
+
+		return builder.toString();
 	}
 
 }

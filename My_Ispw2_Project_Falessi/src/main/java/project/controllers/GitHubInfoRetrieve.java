@@ -10,18 +10,27 @@ import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
-import project.models.ClassFile;
+import project.models.MethodInstance;
 import project.models.Release;
+import project.models.ClassFile;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import project.models.Ticket;
 
 public class GitHubInfoRetrieve {
 
@@ -29,10 +38,171 @@ public class GitHubInfoRetrieve {
     private FileRepository repo;
     private static final String SUFFIX = ".java";
     private static final String PREFIX = "/test/";
+    private String project;
 
     public GitHubInfoRetrieve(String project) throws IOException {
-        this.repo = new FileRepository("/Users/francescoastolfi/progetto-java/proggetti_clonati/"+project+"/.git");
+        this.project = project;
+        this.repo = new FileRepository("/Users/francescoastolfi/progetto-java/proggetti_clonati/" + project + "/.git");
         this.git = new Git(repo);
+        this.project = project;
+    }
+
+    public String getPath() {
+        return "/Users/francescoastolfi/progetto-java/proggetti_clonati/" + this.project;
+    }
+
+
+
+    public void getMethodInstancesOfCommit(Release release) throws IOException {
+        TreeWalk treeWalk = new TreeWalk(repo);
+        RevCommit commit = release.getLastCommitPreRelease();
+        RevTree tree = commit.getTree();
+        treeWalk.addTree(tree);
+        treeWalk.setRecursive(true);
+
+        while (treeWalk.next()) {
+            String filePath = treeWalk.getPathString();
+
+            if (filePath.contains(SUFFIX) && !filePath.contains(PREFIX)) {
+                ObjectId objectId = treeWalk.getObjectId(0);
+                ObjectLoader loader = null;
+                try {
+                    loader = repo.open(objectId);
+                } catch (MissingObjectException e) {
+                    continue;
+                }
+                byte[] fileContentBytes = loader.getBytes();
+                String fileContent = new String(fileContentBytes);
+
+                // Estrai i metodi dal file
+                List<MethodInstance> methods = extractMethodsFromFile(fileContent, filePath);
+                for (MethodInstance method : methods) {
+                    release.addMethod(method);
+                }
+            }
+        }
+        treeWalk.close();
+    }
+
+    private List<MethodInstance> extractMethodsFromFile(String fileContent, String filePath) {
+        List<MethodInstance> methods = new ArrayList<>();
+        JavaParser javaParser = new JavaParser();
+
+        // Parse the file content directly into a CompilationUnit
+        CompilationUnit compilationUnit = javaParser.parse(fileContent).getResult()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Java code"));
+
+        // Extract methods from the CompilationUnit
+        compilationUnit.findAll(MethodDeclaration.class).forEach(methodDeclaration -> {
+            // Use the constructor with parameters to create a MethodInstance instance
+            MethodInstance methodInstance = new MethodInstance(filePath, methodDeclaration.getNameAsString(), methodDeclaration.getSignature().toString());
+            methods.add(methodInstance);
+        });
+        return methods;
+    }
+
+
+
+    public List<RevCommit> getAllCommits() throws GitAPIException, IOException {
+        String defaultBranch = repo.getBranch(); // es: "main" o "master"
+        String treeName = "refs/heads/" + defaultBranch;
+        Iterable<RevCommit> allCommits = git.log().add(repo.resolve(treeName)).call();
+        List<RevCommit> commitList = new ArrayList<>();
+        for (RevCommit revCommit : allCommits) {
+            commitList.add(revCommit);
+        }
+        return commitList;
+    }
+
+    public void orderCommitsByReleaseDate(List<RevCommit> allCommits, List<Release> releasesList) {
+        int numRelease = releasesList.size();
+        for (RevCommit revCommit : allCommits) {
+            Date commitDate = revCommit.getCommitterIdent().getWhen();
+            for (int k = 0; k < numRelease; k++) {
+                Release currentRelease = releasesList.get(k);
+                if (k == 0 && commitDate.before(currentRelease.getDate())) {
+                    currentRelease.addCommitToReleaseList(revCommit);
+                    break;
+                }
+                if ((k == numRelease - 1 && commitDate.before(currentRelease.getDate())) ||
+                        (commitDate.before(currentRelease.getDate()) && commitDate.after(releasesList.get(k - 1).getDate()))) {
+                    currentRelease.addCommitToReleaseList(revCommit);
+                }
+            }
+        }
+        deleteUselessRelease(releasesList);
+    }
+
+    private void deleteUselessRelease(List<Release> releasesList) {
+        List<Release> toDelete = new ArrayList<>();
+        for (Release r : releasesList) {
+            if (r.getAllReleaseCommits().isEmpty()) {
+                toDelete.add(r);
+            }
+        }
+        releasesList.removeAll(toDelete);
+    }
+
+    public void setReleaseLastCommit(List<Release> allRelease) {
+        for (Release release : allRelease) {
+            List<RevCommit> releaseCommits = release.getAllReleaseCommits();
+            RevCommit lastCommit = null;
+            for (RevCommit revCommit : releaseCommits) {
+                Date currentCommitDate = revCommit.getCommitterIdent().getWhen();
+                if (lastCommit == null || currentCommitDate.after(lastCommit.getCommitterIdent().getWhen())) {
+                    lastCommit = revCommit;
+                }
+            }
+            release.setLastCommitPreRelease(lastCommit);
+        }
+    }
+
+
+
+
+
+
+
+
+    public List<String> getDifference(RevCommit commit,boolean searchAdded){
+        RevCommit parent;
+        try{
+            parent = commit.getParent(0);
+        }
+        catch(Exception e){
+            return Collections.emptyList();
+        }
+
+        List<String> allModifiedClass = new ArrayList<>();
+
+        try (DiffFormatter diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE)) {
+            diffFormatter.setRepository(repo);
+            diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
+
+            List<DiffEntry> diffs = diffFormatter.scan(parent.getTree(), commit.getTree());
+            getModifiedClasses(searchAdded,diffs,allModifiedClass);
+        } catch (IOException e) {
+            //IGNORO QUESTO CASO
+        }
+        return allModifiedClass;
+    }
+    private void getModifiedClasses(boolean searchAdded,List<DiffEntry> diffs,List<String> allModifiedClass){
+        if(searchAdded){
+            for (DiffEntry diff : diffs) {
+                String path = diff.getNewPath();
+                if (diff.getChangeType() == DiffEntry.ChangeType.ADD && path.contains(SUFFIX) && !path.contains(PREFIX)) {
+                    allModifiedClass.add(path);
+                }
+            }
+        }
+        else{
+            for (DiffEntry diff : diffs) {
+                String path = diff.getNewPath();
+                if (diff.getChangeType() == DiffEntry.ChangeType.MODIFY && path.contains(SUFFIX) && !path.contains(PREFIX)) {
+                    allModifiedClass.add(path);
+                }
+            }
+        }
     }
 
     public void getClassFilesOfCommit(Release release) throws IOException {
@@ -65,182 +235,79 @@ public class GitHubInfoRetrieve {
 
     }
 
-    private int getAddedLines(DiffFormatter diffFormatter, DiffEntry entry) throws IOException {
 
-        int addedLines = 0;
-        for(Edit edit : diffFormatter.toFileHeader(entry).toEditList()) {
-            addedLines += edit.getEndA() - edit.getBeginA();
-
-        }
-        return addedLines;
-
-    }
-
-    private int getDeletedLines(DiffFormatter diffFormatter, DiffEntry entry) throws IOException {
-
-        int deletedLines = 0;
-        for(Edit edit : diffFormatter.toFileHeader(entry).toEditList()) {
-            deletedLines += edit.getEndB() - edit.getBeginB();
-
-        }
-        return deletedLines;
-
-    }
-
-    public void computeAddedAndDeletedLinesList(Release release) throws IOException {
-
-        for(RevCommit commit : release.getAllReleaseCommits()) {
-            DiffFormatter diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE);
-
-            RevCommit parent;
-            try{
-                parent = commit.getParent(0);
+    /**
+     * Ottiene il contenuto di un file prima di un commit specifico
+     * @param relativePath Percorso del file
+     * @return Contenuto del file prima del commit
+     */
+    public String getFileContentBefore(String relativePath) {
+        try {
+            if (repo == null || relativePath == null) {
+                return "";
             }
-            catch(Exception e){
-                continue;
-            }
+            System.out.println("relativePath: " + relativePath+"\nrepo: "+repo+"\n\n");
 
-            diffFormatter.setRepository(this.repo);
-            diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
-
-            List<DiffEntry> diffs = diffFormatter.scan(parent.getTree(), commit.getTree());
-            for (DiffEntry entry : diffs) {
-                ClassFile file = release.getClassFileByPath(entry.getNewPath());
-                addDeletAddedChurn(file,diffFormatter,entry);
-            }
-        }
-    }
-
-    private void addDeletAddedChurn(ClassFile file,DiffFormatter diffFormatter,DiffEntry entry) throws IOException {
-        if (file != null) {
-
-            int deleted = getDeletedLines(diffFormatter, entry);
-            int added = getAddedLines(diffFormatter, entry);
-            file.setAddedLines(added);
-            file.setDeletedLines(deleted);
-            int churn = Math.abs(added - deleted);
-            file.setChurn(file.getChurn() + churn);
-            if(file.getMaxChurn() < churn){
-                file.setMaxChurn(churn);
-            }
-            if(file.getMaxLocAdded() < added){
-                file.setMaxLocAdded(added);
-            }
-        }
-    }
-
-    public List<String> getDifference(RevCommit commit,boolean searchAdded){
-        RevCommit parent;
-        try{
-            parent = commit.getParent(0);
-        }
-        catch(Exception e){
-            return Collections.emptyList();
-        }
-
-        List<String> allModifiedClass = new ArrayList<>();
-
-        try (DiffFormatter diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE)) {
-            diffFormatter.setRepository(repo);
-            diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
-
-            List<DiffEntry> diffs = diffFormatter.scan(parent.getTree(), commit.getTree());
-            getModifiedClasses(searchAdded,diffs,allModifiedClass);
-        } catch (IOException e) {
-            //IGNORO QUESTO CASO
-        }
-        return allModifiedClass;
-    }
-
-    private void getModifiedClasses(boolean searchAdded,List<DiffEntry> diffs,List<String> allModifiedClass){
-        if(searchAdded){
-            for (DiffEntry diff : diffs) {
-                String path = diff.getNewPath();
-                if (diff.getChangeType() == DiffEntry.ChangeType.ADD && path.contains(SUFFIX) && !path.contains(PREFIX)) {
-                    allModifiedClass.add(path);
+            // Ottieni il commit HEAD
+            ObjectId headId = repo.resolve("HEAD");
+            try (RevWalk revWalk = new RevWalk(repo)) {
+                RevCommit headCommit = revWalk.parseCommit(headId);
+                if (headCommit.getParentCount() == 0) {
+                    return ""; // Nessun commit genitore
                 }
+
+                RevCommit parentCommit = revWalk.parseCommit(headCommit.getParent(0).getId());
+                return getFileContentAtCommit(relativePath, parentCommit);
             }
-        }
-        else{
-            for (DiffEntry diff : diffs) {
-                String path = diff.getNewPath();
-                if (diff.getChangeType() == DiffEntry.ChangeType.MODIFY && path.contains(SUFFIX) && !path.contains(PREFIX)) {
-                    allModifiedClass.add(path);
-                }
-            }
+        } catch (Exception e) {
+            System.err.println("Errore nel recupero del contenuto del file precedente: " + e.getMessage());
+            return "exception occurred";
         }
     }
 
-    public List<RevCommit> getAllCommits() throws GitAPIException, IOException {
-        //lista di tutti i commit
-        String defaultBranch = repo.getBranch(); // es: "main" o "master"
-        String treeName = "refs/heads/" + defaultBranch;
-        Iterable<RevCommit> allCommits = git.log().add(repo.resolve(treeName)).call();
-        List<RevCommit> commitList = new ArrayList<>();
-        for (RevCommit revCommit:allCommits){
-            commitList.add(revCommit);
-        }
 
-        return commitList;
-    }
-
-    public void orderCommitsByReleaseDate(List<RevCommit> allCommits, List<Release> releasesList){
-
-        int numRelease = releasesList.size();
-
-
-        for (RevCommit revCommit: allCommits){
-            Date commitDate = revCommit.getCommitterIdent().getWhen();
-
-            for (int k = 0; k < numRelease; k++){
-
-                Release currentRelease = releasesList.get(k);
-                if(k == 0 && commitDate.before(currentRelease.getDate())){
-                    currentRelease.addCommitToReleaseList(revCommit);
-                    break;
-                }
-                if((k == numRelease-1 && commitDate.before(currentRelease.getDate())) || (commitDate.before(currentRelease.getDate()) &&
-                        commitDate.after(releasesList.get(k-1).getDate()))){
-                    currentRelease.addCommitToReleaseList(revCommit);
-                }
+    /**
+     * Ottiene il contenuto di un file nella versione corrente
+     * @param relativePath Percorso del file
+     * @return Contenuto del file nella versione corrente
+     */
+    public String getFileContentNow(String relativePath) {
+        try {
+            if (repo == null || relativePath == null) {
+                return "";
             }
-        }
-        deleteUselessRelease(releasesList);
 
-    }
-
-    private void deleteUselessRelease(List<Release> releasesList){
-        List<Release> toDelete = new ArrayList<>();
-        for (Release r:releasesList){
-            if (r.getAllReleaseCommits().isEmpty()){
-                toDelete.add(r);
+            // Ottieni il commit HEAD corrente
+            ObjectId headId = repo.resolve("HEAD");
+            try (RevWalk revWalk = new RevWalk(repo)) {
+                RevCommit headCommit = revWalk.parseCommit(headId);
+                return getFileContentAtCommit(relativePath, headCommit);
             }
-        }
-
-        for (Release release:toDelete){
-            releasesList.remove(release);
+        } catch (Exception e) {
+            System.err.println("Errore nel recupero del contenuto del file attuale: " + e.getMessage());
+            return "exception occurred";
         }
     }
 
-    public void setReleaseLastCommit(List<Release> allRelease){
-        for (Release release : allRelease) {
-
-            List<RevCommit> releaseCommits = release.getAllReleaseCommits();
-            RevCommit lastCommit = null;
-
-            for (RevCommit revCommit : releaseCommits) {
-
-                Date currentCommitDate = revCommit.getCommitterIdent().getWhen();
-                if (lastCommit == null) {
-                    lastCommit = revCommit;
-                    continue;
-                }
-                if (currentCommitDate.after(lastCommit.getCommitterIdent().getWhen())) {
-                    lastCommit = revCommit;
-                }
+    /**
+     * Ottiene il contenuto di un file a un commit specifico
+     * @param path Percorso del file
+     * @param commit Commit di riferimento
+     * @return Contenuto del file al commit specificato
+     */
+    private String getFileContentAtCommit(String path, RevCommit commit) throws IOException {
+        try (TreeWalk treeWalk = TreeWalk.forPath(repo, path, commit.getTree())) {
+            if (treeWalk == null) {
+                return "not founded val "; // File non trovato
             }
-            release.setLastCommitPreRelease(lastCommit);
 
+            ObjectId objectId = treeWalk.getObjectId(0);
+            ObjectLoader loader = repo.open(objectId);
+
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            loader.copyTo(output);
+
+            return output.toString(StandardCharsets.UTF_8.name());
         }
     }
 

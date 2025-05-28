@@ -8,91 +8,83 @@ import java.util.List;
 public class ClassFile {
     private String content;
     private String path;
-    private int lineCodeComment;
-    private int lineCodeNoComment;
-    private int ciclomaticComplexity;
-    private boolean isBuggy;
-    private int nr;
-    private int nAuth;
-    private int age;
-    private Date creationDate;
-    private int locAdded;
-    private int maxLocAdded;
+    private List<MethodInstance> methods;
+    private List<String> authors = new ArrayList<>();
+    private int nAuth;          // n of authors
+    private int age=-1;         // age of a class
+    private int nr;             // number of revisions at the single file
+    private Date creationDate=null;
+    private int nSnmells=0;
+    public ClassFile(){
 
-    private int churn;
-    private int maxChurn;
-    private double meanChurn;
-
-    private int addedLines;
-    private int deletedLines;
-    private List<String> authors;
-
-
-    public ClassFile(String content,String path){
-        this.path = path;
+        this.methods = new ArrayList<>();
+    }
+    public ClassFile(String content, String path) {
         this.content = content;
-        this.authors = new ArrayList<>();
-        this.isBuggy = false;
-        this.nr = 0;
-        this.addedLines = 0;
-        this.deletedLines = 0;
-        this.meanChurn = 0;
-        this.locAdded = 0;
-        this.maxLocAdded = 0;
-        this.age = -1;
-        this.creationDate = null;
+        this.path = path;
+        this.methods = new ArrayList<>();
     }
-    public void setMeanChurn(double meanChurn){
-        this.meanChurn = meanChurn;
-    }
-    public double getMeanChurn(){
-        return this.meanChurn;
-    }
-    public void setLocAdded(int number){
-        this.locAdded = number;
-    }
-    public int getLocAdded(){
-        return this.locAdded;
-    }
-    public void setChurn(int churn){
-        this.churn = churn;
-    }
-    public int getChurn(){
-        return this.churn;
+    public static  String extractClassName(String path) {
+        if (path == null) return null;
+
+        // Rimuovi l'estensione .java se presente
+        if (path.endsWith(".java")) {
+            path = path.substring(0, path.length() - 5);
+        }
+
+        // Prendi l'ultima parte del percorso dopo l'ultimo punto o slash
+        int lastDot = path.lastIndexOf('.');
+        int lastSlash = path.lastIndexOf('/');
+        int lastPos = Math.max(lastDot, lastSlash);
+
+        if (lastPos >= 0 && lastPos < path.length() - 1) {
+            return path.substring(lastPos + 1);
+        }
+
+        return path;
     }
 
-    public void setMaxLocAdded(int maxLocAdded){
-        this.maxLocAdded = maxLocAdded;
+
+
+
+    public void addMethod(MethodInstance method){
+        this.methods.add(method);
     }
-    public int getMaxLocAdded(){
-        return this.maxLocAdded;
+    public List<MethodInstance> getMethods() {
+        return methods;
     }
 
-    public void setMaxChurn(int maxChurn){
-        this.maxChurn = maxChurn;
-    }
-    public int getMaxChurn(){
-        return this.maxChurn;
+    public String getContent() {
+        return content;
     }
 
-    public void setAddedLines(int addedLines) {
-        this.addedLines += addedLines;
+    public String getPath() {
+        return this.path;
+    }
+    public void setPath(String path) {
+        this.path = path;
+    }
+    public void incrementNR(){
+
+        this.nr = this.nr + 1;
+    }
+    public int getNR(){
+        return this.nr;
     }
 
-    public int getAddedLines() {
-        return this.addedLines;
+    public void addAuthor(String name){
+        if(!this.authors.contains(name)){
+            authors.add(name);
+            this.nAuth = authors.size();
+        }
     }
 
-    public void setDeletedLines(int deletedLines) {
-        this.deletedLines += deletedLines;
+    public int getnAuth(){
+        return this.nAuth;
     }
 
-    public int getDeletedLines() {
-        return this.deletedLines;
-    }
-
-    public int getAge(){
-        return this.age;
+    public void setAge(int age){
+        this.age = age;
     }
 
     public void setCreationDate(Date date){
@@ -103,61 +95,16 @@ public class ClassFile {
         return this.creationDate;
     }
 
-    public void setAge(int age){
-        this.age = age;
+
+    public int getAge(){
+        return this.age;
     }
 
-    public void addAuthor(String name){
-        if(!this.authors.contains(name)){
-            authors.add(name);
-            this.nAuth = authors.size();
-        }
+    public int getnSnmells() {
+        return nSnmells;
     }
 
-    public int getnAuth() {
-        return this.nAuth;
-    }
-
-    public void incrementNR(){
-        this.nr = this.nr + 1;
-    }
-    public int getNR(){
-        return this.nr;
-    }
-    public int getCiclomaticComplexity(){
-        return this.ciclomaticComplexity;
-    }
-    public void setBuggy(boolean isBuggy){
-        this.isBuggy = isBuggy;
-    }
-    public boolean getBuggy(){
-        return this.isBuggy;
-    }
-    public void setCiclomaticComplexity(int num){
-        this.ciclomaticComplexity = num;
-    }
-
-    public int getLineCodeComment(){
-        return this.lineCodeComment;
-    }
-
-    public void setLineCodeComment(int lineCodeComment){
-        this.lineCodeComment = lineCodeComment;
-    }
-
-    public int getLineCodeNoComment(){
-        return this.lineCodeNoComment;
-    }
-
-    public void setLineCodeNoComment(int lineCodeNoComment){
-        this.lineCodeNoComment = lineCodeNoComment;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public String getPath(){
-        return this.path;
+    public void setnSnmells(int nSnmells) {
+        this.nSnmells = nSnmells;
     }
 }
