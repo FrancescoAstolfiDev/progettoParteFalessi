@@ -10,10 +10,12 @@ import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
 import project.models.MethodInstance;
@@ -24,6 +26,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,24 +35,29 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import project.models.Ticket;
+import project.utils.ConstantsWindowsFormat;
 
 public class GitHubInfoRetrieve {
 
     private Git git;
-    private FileRepository repo;
+    private FileRepository repo;;
     private static final String SUFFIX = ".java";
     private static final String PREFIX = "/test/";
     private String project;
 
     public GitHubInfoRetrieve(String project) throws IOException {
         this.project = project;
-        this.repo = new FileRepository("/Users/francescoastolfi/progetto-java/proggetti_clonati/" + project + "/.git");
-        this.git = new Git(repo);
-        this.project = project;
+        Path repoPath = ConstantsWindowsFormat.repoClonePath.resolve(project).resolve(".git");
+        this.repo = (FileRepository) new FileRepositoryBuilder()
+                .setGitDir(repoPath.toFile())
+                .build();
+        this.git = new Git(this.repo);
+        System.out.println(this.repo);
     }
 
     public String getPath() {
-        return "/Users/francescoastolfi/progetto-java/proggetti_clonati/" + this.project;
+        Path outPath=ConstantsWindowsFormat.repoClonePath.resolve(this.project);
+        return outPath.toString();
     }
 
 
@@ -104,15 +113,22 @@ public class GitHubInfoRetrieve {
 
 
     public List<RevCommit> getAllCommits() throws GitAPIException, IOException {
-        String defaultBranch = repo.getBranch(); // es: "main" o "master"
-        String treeName = "refs/heads/" + defaultBranch;
-        Iterable<RevCommit> allCommits = git.log().add(repo.resolve(treeName)).call();
+        String defaultBranch = repo.getBranch();
+        String treeName = "refs/heads/"+defaultBranch;
+        ObjectId treeObjectId = repo.resolve(treeName);
+
+        if (treeObjectId == null) {
+            throw new IOException("Impossibile risolvere il riferimento per " + treeName);
+        }
+
+        Iterable<RevCommit> allCommits = git.log().add(treeObjectId).call();
         List<RevCommit> commitList = new ArrayList<>();
         for (RevCommit revCommit : allCommits) {
             commitList.add(revCommit);
         }
         return commitList;
     }
+
 
     public void orderCommitsByReleaseDate(List<RevCommit> allCommits, List<Release> releasesList) {
         int numRelease = releasesList.size();

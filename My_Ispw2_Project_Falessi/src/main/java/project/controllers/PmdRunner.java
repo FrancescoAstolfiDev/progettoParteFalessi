@@ -10,6 +10,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import project.models.ClassFile;
 import project.models.Release;
+import project.utils.ConstantsWindowsFormat;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -27,14 +28,17 @@ import java.util.stream.Collectors;
 
 
 public class PmdRunner {
-    public static final String rulesSetPath = "/Users/francescoastolfi/progetto-java/falessi_fra/method_ck_definitive/My_Ispw2_Project_Falessi/config/pmd/custom_rules.xml";
+    public static final String rulesSetPath = ConstantsWindowsFormat.rulesSetPath.toString();
     /**
      * Esegue l'analisi PMD su un file o directory
      */
-    public static Report runPmdAnalysis(String sourceFilePath) throws IOException {
+    public static Report runPmdAnalysis(Path sourceFilePath) throws IOException {
         PMDConfiguration configuration = new PMDConfiguration();
-        configuration.setInputPaths(sourceFilePath);
-        configuration.setRuleSets(rulesSetPath);
+        List<String> ruleSets = new ArrayList<>();
+        ruleSets.add(rulesSetPath);
+        configuration.setInputFilePath(sourceFilePath);
+        configuration.setRuleSets(ruleSets);
+
         configuration.setIgnoreIncrementalAnalysis(true);
 
         RuleContext context = new RuleContext();
@@ -44,7 +48,7 @@ public class PmdRunner {
             renderer.setWriter(reportOutput);
             renderer.start();
 
-            File sourceFile = new File(sourceFilePath);
+            File sourceFile = sourceFilePath.toFile();
             try (InputStream inputStream = new FileInputStream(sourceFile)) {
                 DataSource dataSource = new FileDataSource(sourceFile);
                 List<DataSource> files = Collections.singletonList(dataSource);
@@ -141,7 +145,7 @@ public class PmdRunner {
             List<String> javaFiles = findJavaFiles(projectPath);
 
             for (String javaFile : javaFiles) {
-                Report report = runPmdAnalysis(javaFile);
+                Report report = runPmdAnalysis(Path.of(javaFile));
                 if (report == null) continue;
 
                 String className = normalizePathToModuleAndClass(javaFile) ;
@@ -198,7 +202,7 @@ public class PmdRunner {
                 return 0;
             }
 
-            Report report = runPmdAnalysis(javaFile);
+            Report report = runPmdAnalysis(Path.of(javaFile));
 
             Set<String> ruleNames = getRuleNamesFromXml(rulesSetPath);
 
