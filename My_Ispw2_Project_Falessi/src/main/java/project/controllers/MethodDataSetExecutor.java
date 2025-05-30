@@ -28,6 +28,7 @@ public class MethodDataSetExecutor {
     private String basepath="/Users/francescoastolfi/progetto-java/falessi_fra/method_ck_definitive/My_Ispw2_Project_Falessi/csv";
     private List<Release>lastReleaseList;
 
+
     public MethodDataSetExecutor(String name) throws IOException {
         this.currentProject = name;
         gitHubInfoRetrieve = new GitHubInfoRetrieve(this.currentProject);
@@ -131,7 +132,7 @@ public class MethodDataSetExecutor {
             Release release= halfReleaseList.get(i);
             writeReleaseTrainFile(release, releaseList);
         }
-        writeTestFiles(releaseList, halfReleaseList);
+
 
 
 
@@ -185,21 +186,7 @@ public class MethodDataSetExecutor {
         }
     }
 
-    private void writeTestFiles(List<Release> releaseList, List<Release> halfReleaseList) {
-        int len = halfReleaseList.size();
-        List<Ticket> ticketsForTest = releaseList.get(releaseList.size() - 1).getAllReleaseTicket();
-        adjustIvTickets(ticketsForTest, releaseList.get(releaseList.size()-1).getCurrentProportion(), releaseList);
 
-        for(int i = 1; i < len; i++) {
-            Release currRelease = releaseList.get(i);
-            String path = currentProject.toUpperCase() + "_Test_Release_" + currRelease.getName() + ".csv";
-            List<Release> incrementalReleaseList = new ArrayList<>();
-            incrementalReleaseList.add(currRelease);
-            out.println("this is ur path  "+path);
-            writeFile(path,incrementalReleaseList,currRelease,ticketsForTest);
-
-        }
-    }
 
     private void writeFile(String path, List<Release> incrementalReleaseList, Release currRelease, List<Ticket> tickets) {
         if (path == null || path.trim().isEmpty()) {
@@ -251,7 +238,7 @@ public class MethodDataSetExecutor {
                             boolean cond1 = iv.getId() <= release.getId();
                             boolean cond2 = fv.getId() > release.getId();
                             boolean cond3 = iv.getId() < fv.getId();
-                            System.out.println("condizioni: " + cond1 + " " + cond2 + " " + cond3);
+                            //System.out.println("condizioni: " + cond1 + " " + cond2 + " " + cond3);
 
 
                             if (cond1 && cond2 && cond3) {

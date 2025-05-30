@@ -14,6 +14,7 @@ import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RawTextComparator;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.DepthWalk;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -46,7 +47,7 @@ public class MetricsCalculator {
     private GitHubInfoRetrieve gitHubInfoRetrieve;
     private Map <String,ClassFile> lastClassFiles=new HashMap<>();
     private Map <String,ClassFile>fullClassFiles=new HashMap<>();
-
+    private Map <RevCommit,Map<String,MethodInstance>> resultCommitsMethods=new HashMap<>();
     private Map<String,MethodInstance> releaseMethods;
     private List<Ticket> releaseTickets;
     private Map<String,Release> releaseResults;
@@ -77,7 +78,7 @@ public class MetricsCalculator {
 
         // Numero ottimale di thread basato sui core disponibili
         int numThreads = Math.min(Runtime.getRuntime().availableProcessors(), 6);
-//        System.out.println("Numero di thread: " + numThreads);
+        System.out.println("Numero di thread: " + numThreads);
         ForkJoinPool customThreadPool = new ForkJoinPool(numThreads);
         System.out.println("number of commit to check"+releaseCommits.size());
         Map<String,RevCommit> commits_analized=new HashMap<>();
@@ -102,39 +103,47 @@ public class MetricsCalculator {
                     parallelCommits.parallelStream().forEach(commit -> {
                         // Directory unica per ogni commit usando l'hash del commit
                         String commitHash = commit.getId().getName();
-                        String commitTempDir = tempDirPath + release.getName() + "_" + commitHash;
-                        commits_analized.put(commitHash,commit);
-
-                        try {
-
-                            // Sincronizza l'accesso al repository Git
-                            synchronized (repoLock) {
-                                // Checkout del commit appartenente alla release
-                                checkoutRelease(commit);
-                                ensureTempDirectoryExists(commitTempDir);
-                                exportCodeToDirectory(commit, commitTempDir);
-
-                            }
-
-                            // Il calcolo delle metriche CK può avvenire in parallelo
-                            // (senza bisogno di sincronizzazione)
-                            countThread.getAndIncrement();
-                            int log=countThread.get();
-                            if( (log % 200) ==0){
-                                System.out.println("Thread " + countThread.get() + " in corso..."+ "analyzing commit " + commit.getId() + " ..." +"commit analyzed"+commits_analized.size());
-                            }
-
-                            Map<String, MethodInstance> commitMetrics = calculateCKMetrics(commitTempDir);
-
+                        if(resultCommitsMethods.containsKey(commit)){
+                            Map<String, MethodInstance> commitMetrics = resultCommitsMethods.get(commit);
                             // Aggiorna i risultati in modo thread-safe
                             releaseResults.putAll(commitMetrics);
+                            commits_analized.put(commitHash,commit);
+                        }else{
 
-                            // Pulisci la directory temporanea del commit
-                            cleanupTempDirectory(commitTempDir);
+                            String commitTempDir = tempDirPath + release.getName() + "_" + commitHash;
+                            commits_analized.put(commitHash,commit);
 
-                        } catch (Exception e) {
+                            try {
+
+                                // Sincronizza l'accesso al repository Git
+                                synchronized (repoLock) {
+                                    // Checkout del commit appartenente alla release
+                                    checkoutRelease(commit);
+                                    ensureTempDirectoryExists(commitTempDir);
+                                    exportCodeToDirectory(commit, commitTempDir);
+
+                                }
+
+                                // Il calcolo delle metriche CK può avvenire in parallelo
+                                // (senza bisogno di sincronizzazione)
+                                countThread.getAndIncrement();
+                                int log=countThread.get();
+                                if( (log % 2) ==0){
+                                    System.out.println("Thread " + countThread.get() + " in corso..."+ "analyzing commit " + commit.getId() + " ..." +"commit analyzed"+commits_analized.size());
+                                }
+
+                                Map<String, MethodInstance> commitMetrics = calculateCKMetrics(commitTempDir);
+                                resultCommitsMethods.put(commit,commitMetrics);
+                                // Aggiorna i risultati in modo thread-safe
+                                releaseResults.putAll(commitMetrics);
+
+                                // Pulisci la directory temporanea del commit
+                                cleanupTempDirectory(commitTempDir);
+
+                            } catch (Exception e) {
 //                            System.err.println("Errore durante l'elaborazione del commit " + commitHash + ": " + e.getMessage());
 //                            e.printStackTrace();
+                            }
                         }
                     })
             ).get(); // Attendi il completamento
@@ -660,8 +669,8 @@ public class MetricsCalculator {
 //        System.out.println("Classi da modificare: " + allPaths.size());
 
         for (String path : allPaths) {
-            ClassFile currentFile = lastClassFiles.get(path);
-            //ClassFile currentFile = actRelease.getClassFileByPath(path);
+            //ClassFile currentFile = lastClassFiles.get(path);
+            ClassFile currentFile = actRelease.getClassFileByPath(path);
 
             if (currentFile == null) continue;
             buggyClasses.add(currentFile);
