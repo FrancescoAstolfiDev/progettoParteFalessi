@@ -113,22 +113,18 @@ public class GitHubInfoRetrieve {
 
 
     public List<RevCommit> getAllCommits() throws GitAPIException, IOException {
-        String defaultBranch = repo.getBranch();
-        String treeName = "refs/heads/"+defaultBranch;
-        ObjectId treeObjectId = repo.resolve(treeName);
-
-        if (treeObjectId == null) {
-            throw new IOException("Impossibile risolvere il riferimento per " + treeName);
+        ObjectId head = repo.resolve("HEAD");
+        if (head == null) {
+            throw new IOException("Impossibile risolvere HEAD");
         }
 
-        Iterable<RevCommit> allCommits = git.log().add(treeObjectId).call();
+        Iterable<RevCommit> allCommits = git.log().add(head).call();
         List<RevCommit> commitList = new ArrayList<>();
         for (RevCommit revCommit : allCommits) {
             commitList.add(revCommit);
         }
         return commitList;
     }
-
 
     public void orderCommitsByReleaseDate(List<RevCommit> allCommits, List<Release> releasesList) {
         int numRelease = releasesList.size();

@@ -7,6 +7,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.mauricioaniche.ck.CK;
 import com.github.mauricioaniche.ck.CKMethodResult;
+import org.checkerframework.checker.units.qual.C;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -36,6 +37,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.apache.commons.io.FileUtils.deleteDirectory;
 import static project.models.MethodInstance.ckSignature;
 import project.utils.ConstantSize;
+import weka.core.pmml.Constant;
+
 public class MetricsCalculator {
 
 
@@ -44,7 +47,7 @@ public class MetricsCalculator {
     private final Path tempDirPath = Paths.get(System.getProperty("java.io.tmpdir"), "ck_analysis");
     private Release actRelease;
     private GitHubInfoRetrieve gitHubInfoRetrieve;
-
+    private int max_last_classes;
 
 
     private Map <RevCommit,Map<String,MethodInstance>> resultCommitsMethods=new HashMap<>();
@@ -52,7 +55,6 @@ public class MetricsCalculator {
 
 
     private Map <String,ClassFile> lastClassFiles=new HashMap<>();
-    private LinkedList<Map<String, ClassFile>> resultsInstances = new LinkedList<>();
 
 
     public MetricsCalculator(GitHubInfoRetrieve gitHubInfoRetrieve) throws IOException {
@@ -66,8 +68,7 @@ public class MetricsCalculator {
     public Map<String, MethodInstance> calculateReleaseMetrics(List<RevCommit> commits, Release release, List<Ticket> releaseTickets) throws IOException, GitAPIException {
         // Utilizziamo ConcurrentHashMap per la thread-safety
         try{
-
-
+        lastClassFiles.clear();
         ConcurrentMap<String, MethodInstance> releaseResults = new ConcurrentHashMap<>();
         List<RevCommit> passingList = filterCommitsByRelease(commits, release);
         int startIndex = Math.max(0, passingList.size()-ConstantSize.NUM_COMMITS);
@@ -99,6 +100,9 @@ public class MetricsCalculator {
                     if (resultCommitsMethods.containsKey(commit)) {
                         Map<String, MethodInstance> commitMetrics = resultCommitsMethods.get(commit);
                         // Aggiorna i risultati in modo thread-safe
+                        for(MethodInstance   result : commitMetrics.values()){
+                            result.setRelease(actRelease);
+                        }
                         releaseResults.putAll(commitMetrics);
                         commits_analized.put(commitHash, commit);
                     } else {
@@ -142,9 +146,14 @@ public class MetricsCalculator {
 
 
             // processa l'instanziazione delle classi in modo sequenziale
-            if (!releaseCommits.isEmpty() && releaseTickets.size() > 0 ) {
+            if (!releaseCommits.isEmpty()) {
+                if(releaseTickets.isEmpty()){
+                    return new HashMap<>(releaseResults);
+                }
+                max_last_classes=actRelease.getReleaseAllClass().size()/ConstantSize.MAX_BUGGY_PERCETAGE;
+                max_last_classes=Math.max(max_last_classes,1);
                 int lastIndex=releaseCommits.size() ;
-                while(lastClassFiles.size()<ConstantSize.SIZE_WINDOW && lastIndex>0){
+                while(lastClassFiles.size()<max_last_classes && lastIndex>0){
                     long modified = 0;
                     Path commitTempDir = null;
                     String commitHash = "";
@@ -176,7 +185,7 @@ public class MetricsCalculator {
 
         System.out.println("Assegnazione buggyness " +lastClassFiles.size());
       //  restoreFromBackup();
-        assignBuggyness();
+        assignBuggyness(ConstantSize.use_last_class);
         System.out.println("Fine assegnazione buggyness  " + release.getName());
         return new HashMap<>(releaseResults);
     }catch (Exception e ){
@@ -532,8 +541,6 @@ public class MetricsCalculator {
      * Fill the last class files list
      */
     private void lastClassesEvaluation(Path sourcePath)  {
-
-
         Map<String,ClassFile> innerResults=new HashMap<>();
 
         // Istanzia CK per l'analisi del codice
@@ -544,47 +551,30 @@ public class MetricsCalculator {
                 // Nessun metodo nella classe -> ignora tranquillamente
                 return;
             }
-
-
             ClassFile filled_class;
             filled_class=actRelease.findClassFileByApproxName(classResult.getClassName());
             if (! innerResults.containsKey(filled_class.getPath())){
                 ClassFile actClass;
                 actClass=filled_class;
                 innerResults.put(actClass.getPath(),actClass);
-                addLastClassFiles(innerResults);
             }
-
-
-
-
-
         });
-
-
-
-    }
-
-
-
-    private void addLastClassFiles(Map<String,ClassFile> lastResults){
-        if (resultsInstances.size() >= ConstantSize.SIZE_WINDOW) {
-            resultsInstances.removeFirst();
+        if(innerResults.isEmpty()){
+            return ;
         }
-        resultsInstances.addLast(lastResults);
-
-        lastClassFiles.clear();
-        for (Map<String, ClassFile> map : resultsInstances) {
-            lastClassFiles.putAll(map);
+        for( ClassFile file: innerResults.values()){
+            if(file.getMethods().isEmpty() || lastClassFiles.containsKey(file.getPath())){
+                continue;
+            }
+            if(lastClassFiles.size()>max_last_classes){
+                return;
+            }
+            lastClassFiles.put(file.getPath(),file);
         }
     }
-
-
-
-
     List<ClassFile> buggyClasses = new ArrayList<>();
     //questo metodo scorre le release e assegna il valore buggyness delle classi
-    private void assignBuggyness(){
+    private void assignBuggyness(boolean use_last_classes){
 
         List<RevCommit> revCommitList = new ArrayList<>();
         for(Ticket ticket:releaseTickets){
@@ -608,11 +598,14 @@ public class MetricsCalculator {
             }
 
             if (!modifiedClasses.isEmpty()) {
-                updateBuggyness(modifiedClasses);
+                updateBuggyness(modifiedClasses,use_last_classes);
             }
 
         }
         System.out.println("Fine assegnazione buggyness alle classi");
+//        if(buggyClasses.size()>actRelease.getReleaseAllClass().size()/ConstantSize.MAX_BUGGY_PERCETAGE   && !use_last_classes)  {
+//            assignBuggyness(true);
+//        }
         System.out.println("Classi bugginese: "+buggyClasses.size());
 //        for(ClassFile file: buggyClasses){
 //            System.out.println(file.getPath());
@@ -621,13 +614,11 @@ public class MetricsCalculator {
 
     //questo metodo scorre tutti i file modificati da un commit correlato ad un ticket, quindi tali classi
     //si assumono buggy e quindi deve essere settato il parametro buggy a true
-    private void updateBuggyness(List<String> allPaths) {
+    private void updateBuggyness(List<String> allPaths,boolean  use_last_classes) {
 //        System.out.println("Classi da modificare: " + allPaths.sizeWindow());
 
         for (String path : allPaths) {
-            //ClassFile currentFile = lastClassFiles.get(path);
-            ClassFile currentFile = actRelease.getClassFileByPath(path);
-
+            ClassFile currentFile = use_last_classes?lastClassFiles.get(path):actRelease.getClassFileByPath(path);
             if (currentFile == null) continue;
             buggyClasses.add(currentFile);
             String oldContent = gitHubInfoRetrieve.getFileContentBefore(path); // da implementare
