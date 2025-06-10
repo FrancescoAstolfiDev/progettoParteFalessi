@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="53188476-e490-425c-aa2f-018e8a4f536a" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/My_Ispw2_Project_Falessi/csv/BOOKKEEPER_Train_Method_Release_4.2.2copy.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/My_Ispw2_Project_Falessi/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/My_Ispw2_Project_Falessi/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/My_Ispw2_Project_Falessi/src/main/java/project/controllers/GitHubInfoRetrieve.java" beforeDir="false" afterPath="$PROJECT_DIR$/My_Ispw2_Project_Falessi/src/main/java/project/controllers/GitHubInfoRetrieve.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/My_Ispw2_Project_Falessi/src/main/java/project/controllers/MethodDataSetExecutor.java" beforeDir="false" afterPath="$PROJECT_DIR$/My_Ispw2_Project_Falessi/src/main/java/project/controllers/MethodDataSetExecutor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/My_Ispw2_Project_Falessi/target/classes/project/DatasetCreationMain.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/My_Ispw2_Project_Falessi/target/classes/project/EvaluationMain.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/My_Ispw2_Project_Falessi/target/classes/project/controllers/CSVtoARFFConverter.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/My_Ispw2_Project_Falessi/target/classes/project/controllers/EvaluationFlow.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/My_Ispw2_Project_Falessi/target/classes/project/controllers/GitHubInfoRetrieve.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/My_Ispw2_Project_Falessi/target/classes/project/controllers/JiraInfoRetrieve.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/My_Ispw2_Project_Falessi/target/classes/project/models/ClassFile.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/My_Ispw2_Project_Falessi/target/classes/project/models/Release.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/My_Ispw2_Project_Falessi/target/classes/project/models/ResultsHolder.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/My_Ispw2_Project_Falessi/target/classes/project/models/Ticket.class" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/My_Ispw2_Project_Falessi/src/main/java/project/DatasetCreationMain.java" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="ProjectId" id="2xk2Fwj8S2CyULxJGsxN3WDbxyV" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/.." />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.3448276" />
+  </component>
+  <component name="RunManager">
+    <configuration name="DatasetCreationMain" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="project.DatasetCreationMain" />
+      <module name="progettoParteFalessi" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="project.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.DatasetCreationMain" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="53188476-e490-425c-aa2f-018e8a4f536a" name="Changes" comment="" />
+      <created>1748467652481</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1748467652481</updated>
+      <workItem from="1748467654456" duration="208000" />
+      <workItem from="1748467900341" duration="2084000" />
+      <workItem from="1748596261880" duration="96000" />
+      <workItem from="1748596380687" duration="980000" />
+      <workItem from="1748597395104" duration="228000" />
+      <workItem from="1748632039091" duration="89000" />
+      <workItem from="1748632229772" duration="1403000" />
+      <workItem from="1748633998861" duration="70000" />
+      <workItem from="1748639088852" duration="44000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+</project>
