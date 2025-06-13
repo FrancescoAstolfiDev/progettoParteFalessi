@@ -63,7 +63,6 @@ public class MetricsCalculator {
         this.git = new Git(repository);
         this.gitHubInfoRetrieve=gitHubInfoRetrieve;
         Files.createDirectories(Paths.get(String.valueOf(tempDirPath)));
-
     }
     public Map<String, MethodInstance> calculateReleaseMetrics(List<RevCommit> commits, Release release, List<Ticket> releaseTickets) throws IOException, GitAPIException {
         // Utilizziamo ConcurrentHashMap per la thread-safety
