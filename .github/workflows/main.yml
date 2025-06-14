@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: 17
-          distribution: 'zulu'  # Puoi usare anche 'temurin', 'corretto', ecc.
+          distribution: 'zulu'
 
       - name: Cache SonarQube packages
         uses: actions/cache@v4
@@ -38,10 +38,11 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
+
       - name: Build and analyze with SonarQube
+        working-directory: ./My_Ispw2_Project_Falessi
         continue-on-error: false
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
              -Dsonar.projectKey=francescoastolfidev_progettoParteFalessi
-
