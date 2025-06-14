@@ -90,9 +90,7 @@
         <dependency>
             <groupId>com.github.mauricioaniche</groupId>
             <artifactId>ck</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/libs/ck-0.7.1.jar</systemPath>
+            <version>0.7.1</version>
         </dependency>
 
 
