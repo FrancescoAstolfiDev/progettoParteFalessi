@@ -40,7 +40,7 @@ import project.utils.ConstantsWindowsFormat;
 public class GitHubInfoRetrieve {
 
     private Git git;
-    private FileRepository repo;;
+    private FileRepository repo;
     private static final String SUFFIX = ".java";
     private static final String PREFIX = "/test/";
     private String project;

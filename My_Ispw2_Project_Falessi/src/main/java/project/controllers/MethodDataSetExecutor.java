@@ -53,8 +53,8 @@ public class MethodDataSetExecutor {
         gitHubInfoRetrieve.orderCommitsByReleaseDate(allCommits, releaseList);
         gitHubInfoRetrieve.setReleaseLastCommit(releaseList);
 
-//        // Fase 3: Limitazione all'insieme di release analizzabili (metà del totale)
-//        List<Release> analyzableReleases = releaseList.subList(0, releaseList.size() / 2);
+        // Fase 3: Limitazione all'insieme di release analizzabili (metà del totale)
+       //List<Release> analyzableReleases = releaseList.subList(0, releaseList.size() / 2);
 
         // Fase 4: Recupero dei ticket e associazione commit-ticket
         List<Ticket> allTickets = jiraInfoRetrieve.retrieveTickets(releaseList);
@@ -123,7 +123,31 @@ public class MethodDataSetExecutor {
             }
         }
 
-        this.metricsCalculator= new MetricsCalculator(this.gitHubInfoRetrieve);
+        // Get the list of commit hashes needed for this analysis
+        Set<String> neededCommits = new HashSet<>();
+        for (Release release : halfReleaseList) {
+            for (RevCommit commit : release.getAllReleaseCommits()) {
+                neededCommits.add(commit.getId().getName());
+            }
+        }
+
+        System.out.println("Identified " + neededCommits.size() + " commits needed for analysis");
+
+        // Check which commits are already in the cache
+        Set<String> availableCommits = Caching.getAvailableCommits();
+        Set<String> commitsToLoad = new HashSet<>();
+
+        for (String commitHash : neededCommits) {
+            if (availableCommits.contains(commitHash)) {
+                commitsToLoad.add(commitHash);
+            }
+        }
+
+        System.out.println("Found " + commitsToLoad.size() + " of " + neededCommits.size() + 
+                          " needed commits in cache");
+
+        // Initialize the metrics calculator with only the needed commits and the current project name
+        this.metricsCalculator = new MetricsCalculator(this.gitHubInfoRetrieve, commitsToLoad, this.currentProject);
         metricsCalculator.calculateAll(halfReleaseList);
 
 
@@ -403,4 +427,3 @@ public class MethodDataSetExecutor {
 
 
 }
-

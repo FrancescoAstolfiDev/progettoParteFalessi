@@ -20,6 +20,9 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import project.models.ClassFile;
 import project.models.MethodInstance;
 import project.models.Release;
@@ -37,6 +40,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.apache.commons.io.FileUtils.deleteDirectory;
 import static project.models.MethodInstance.ckSignature;
 import project.utils.ConstantSize;
+import project.utils.ConstantsWindowsFormat;
 import weka.core.pmml.Constant;
 
 public class MetricsCalculator {
@@ -48,22 +52,83 @@ public class MetricsCalculator {
     private Release actRelease;
     private GitHubInfoRetrieve gitHubInfoRetrieve;
     private int max_last_classes;
+    private String projectName;
 
 
-    private Map <RevCommit,Map<String,MethodInstance>> resultCommitsMethods=new HashMap<>();
+    private Map <String,Map<String,MethodInstance>> resultCommitsMethods=new HashMap<>();
     private List<Ticket> releaseTickets;
-
+    private final Path cacheDirPath = ConstantsWindowsFormat.cachePath;
 
     private Map <String,ClassFile> lastClassFiles=new HashMap<>();
 
 
     public MetricsCalculator(GitHubInfoRetrieve gitHubInfoRetrieve) throws IOException {
+        this(gitHubInfoRetrieve, "default");
+    }
+
+    /**
+     * Constructor that takes a GitHubInfoRetrieve object and a project name
+     */
+    public MetricsCalculator(GitHubInfoRetrieve gitHubInfoRetrieve, String projectName) throws IOException {
         File repoDir = new File(gitHubInfoRetrieve.getPath());
         this.repository = Git.open(repoDir).getRepository();
         this.git = new Git(repository);
-        this.gitHubInfoRetrieve=gitHubInfoRetrieve;
+        this.gitHubInfoRetrieve = gitHubInfoRetrieve;
+        this.projectName = projectName;
         Files.createDirectories(Paths.get(String.valueOf(tempDirPath)));
+        Files.createDirectories(cacheDirPath);
+
+        // Load the commit cache using the optimized method
+        Caching.loadCommitCache(resultCommitsMethods, projectName);
     }
+
+    /**
+     * Constructor that allows loading only specific commits from the cache
+     */
+    public MetricsCalculator(GitHubInfoRetrieve gitHubInfoRetrieve, Set<String> commitHashes) throws IOException {
+        this(gitHubInfoRetrieve, commitHashes, "default");
+    }
+
+    /**
+     * Constructor that allows loading only specific commits from the cache for a specific project
+     */
+    public MetricsCalculator(GitHubInfoRetrieve gitHubInfoRetrieve, Set<String> commitHashes, String projectName) throws IOException {
+        File repoDir = new File(gitHubInfoRetrieve.getPath());
+        this.repository = Git.open(repoDir).getRepository();
+        this.git = new Git(repository);
+        this.gitHubInfoRetrieve = gitHubInfoRetrieve;
+        this.projectName = projectName;
+        Files.createDirectories(Paths.get(String.valueOf(tempDirPath)));
+        Files.createDirectories(cacheDirPath);
+
+        // Load only the specified commits from the cache
+        if (commitHashes != null && !commitHashes.isEmpty()) {
+            System.out.println("Selectively loading " + commitHashes.size() + " commits from cache for project " + projectName);
+            Caching.loadCommitCache(resultCommitsMethods, commitHashes, projectName);
+        } else {
+            // If no specific commits are requested, load all commits
+            Caching.loadCommitCache(resultCommitsMethods, projectName);
+        }
+    }
+
+    /**
+     * Clears the commit cache by deleting the cache file and resetting the resultCommitsMethods map
+     */
+    private void clearCache() {
+        try {
+            Path cacheFilePath = cacheDirPath.resolve(projectName.toLowerCase() + "_commit_cache.json");
+            if (Files.exists(cacheFilePath)) {
+                Files.delete(cacheFilePath);
+                System.out.println("Commit cache cleared for project " + projectName + ": " + cacheFilePath);
+            }
+            // Reset the resultCommitsMethods map
+            resultCommitsMethods.clear();
+        } catch (IOException e) {
+            System.err.println("Error clearing commit cache for project " + projectName + ": " + e.getMessage());
+        }
+    }
+
+
     public Map<String, MethodInstance> calculateReleaseMetrics(List<RevCommit> commits, Release release, List<Ticket> releaseTickets) throws IOException, GitAPIException {
         // Utilizziamo ConcurrentHashMap per la thread-safety
         try{
@@ -71,7 +136,9 @@ public class MetricsCalculator {
         ConcurrentMap<String, MethodInstance> releaseResults = new ConcurrentHashMap<>();
         List<RevCommit> passingList = filterCommitsByRelease(commits, release);
         int startIndex = Math.max(0, passingList.size()-ConstantSize.NUM_COMMITS);
+
         List<RevCommit>releaseCommits = commits.subList(startIndex, passingList.size());
+
         System.out.println((" \n\n inizio calcolo metriche per la release " + release.getName()));
 
         this.actRelease = release;
@@ -92,30 +159,47 @@ public class MetricsCalculator {
             // Elabora i commit in parallelo (escluso l'ultimo)
             sortCommits(releaseCommits);
 
-            customThreadPool.submit(() ->
-                releaseCommits.parallelStream().forEach(commit -> {
-                    // Directory unica per ogni commit usando l'hash del commit
-                    String commitHash = commit.getId().getName();
-                    if (resultCommitsMethods.containsKey(commit)) {
-                        Map<String, MethodInstance> commitMetrics = resultCommitsMethods.get(commit);
-                        // Aggiorna i risultati in modo thread-safe
-                        for(MethodInstance   result : commitMetrics.values()){
-                            result.setRelease(actRelease);
-                        }
-                        releaseResults.putAll(commitMetrics);
-                        commits_analized.put(commitHash, commit);
-                    } else {
+            // First, identify which commits need to be processed and which are already in cache
+            Set<String> commitHashesToProcess = new HashSet<>();
+            Map<String, RevCommit> commitsByHash = new HashMap<>();
+
+            for (RevCommit commit : releaseCommits) {
+                String commitHash = commit.getId().getName();
+                commitsByHash.put(commitHash, commit);
+
+                if (!resultCommitsMethods.containsKey(commitHash)) {
+                    commitHashesToProcess.add(commitHash);
+                } else {
+                    // This commit is already in cache, use it directly
+                    Map<String, MethodInstance> commitMetrics = resultCommitsMethods.get(commitHash);
+                    // Update the release for each method
+                    for (MethodInstance result : commitMetrics.values()) {
+                        result.setRelease(actRelease);
+                    }
+                    releaseResults.putAll(commitMetrics);
+                    commits_analized.put(commitHash, commit);
+                    System.out.println("Using cached results for commit " + commitHash);
+                }
+            }
+
+            System.out.println("Found " + (releaseCommits.size() - commitHashesToProcess.size()) + 
+                              " commits in cache, need to process " + commitHashesToProcess.size() + 
+                              " commits");
+
+            // Process only the commits that aren't in the cache
+            if (!commitHashesToProcess.isEmpty()) {
+                customThreadPool.submit(() ->
+                    commitHashesToProcess.parallelStream().forEach(commitHash -> {
+                        RevCommit commit = commitsByHash.get(commitHash);
                         Path commitTempDir = tempDirPath.resolve(release.getName() + "_" + commitHash);
                         commits_analized.put(commitHash, commit);
                         try {
-
                             // Sincronizza l'accesso al repository Git
                             synchronized (repoLock) {
                                 // Checkout del commit appartenente alla release
                                 checkoutRelease(commit);
                                 ensureTempDirectoryExists(commitTempDir);
                                 exportCodeToDirectory(commit, commitTempDir);
-
                             }
 
                             // Il calcolo delle metriche CK può avvenire in parallelo
@@ -123,11 +207,18 @@ public class MetricsCalculator {
                             countThread.getAndIncrement();
                             int log = countThread.get();
                             if ((log % 2) == 0) {
-                                System.out.println("Thread " + countThread.get() + " in corso..." + "analyzing commit " + commit.getId() + " ..." + "commit analyzed" + commits_analized.size());
+                                System.out.println("Thread " + countThread.get() + " in corso..." + 
+                                                  "analyzing commit " + commit.getId() + " ..." + 
+                                                  "commit analyzed " + commits_analized.size() + 
+                                                  " (" + (releaseCommits.size() - commitHashesToProcess.size()) + 
+                                                  " from cache, " + commitHashesToProcess.size() + " to process)");
+                            }
+                            if ((log % 20) == 0) {
+                                Caching.saveCommitCache(resultCommitsMethods, projectName);
                             }
 
                             Map<String, MethodInstance> commitMetrics = calculateCKMetrics(commitTempDir);
-                            resultCommitsMethods.put(commit, commitMetrics);
+                            resultCommitsMethods.put(commitHash, commitMetrics);
                             // Aggiorna i risultati in modo thread-safe
                             releaseResults.putAll(commitMetrics);
 
@@ -135,13 +226,12 @@ public class MetricsCalculator {
                             cleanupTempDirectory(commitTempDir);
 
                         } catch (Exception e) {
-//                            System.err.println("Errore durante l'elaborazione del commit " + commitHash + ": " + e.getMessage());
                            e.printStackTrace();
                            cleanupTempDirectory(commitTempDir);
                         }
-                    }
-                })
-            ).get(); // Attendi il completamento
+                    })
+                ).get(); // Attendi il completamento
+            }
 
 
             // processa l'instanziazione delle classi in modo sequenziale
@@ -186,6 +276,10 @@ public class MetricsCalculator {
       //  restoreFromBackup();
         assignBuggyness(ConstantSize.use_last_class);
         System.out.println("Fine assegnazione buggyness  " + release.getName());
+
+        // Save the commit cache to disk
+        Caching.saveCommitCache(resultCommitsMethods, projectName);
+
         return new HashMap<>(releaseResults);
     }catch (Exception e ){
         //restoreFromBackup();
@@ -256,9 +350,6 @@ public class MetricsCalculator {
 
         }
         calculateAge(releaseList);
-
-
-
     }
 
     private void calculateAge(List<Release> releaseList){
