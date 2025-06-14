@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<pmd xmlns="http://pmd.sourceforge.net/report/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pmd.sourceforge.net/report/2.0.0 http://pmd.sourceforge.net/report_2_0_0.xsd" version="6.55.0" timestamp="2025-06-01T23:56:21.572">
+<pmd xmlns="http://pmd.sourceforge.net/report/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pmd.sourceforge.net/report/2.0.0 http://pmd.sourceforge.net/report_2_0_0.xsd" version="6.55.0" timestamp="2025-06-14T18:06:17.460">
 <file name="C:\isw2\progettoParteFalessi\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\DatasetCreationMain.java">
 <violation beginline="7" endline="18" begincolumn="34" endcolumn="1" rule="UseUtilityClass" ruleset="Design" package="project" class="DatasetCreationMain" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_design.html#useutilityclass" priority="3">
 All methods are static.  Consider using a utility class instead. Alternatively, you could add a private constructor or make the class abstract to silence this warning.
@@ -13,6 +13,17 @@ All methods are static.  Consider using a utility class instead. Alternatively, 
 <file name="C:\isw2\progettoParteFalessi\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\controllers\CSVtoARFFConverter.java">
 <violation beginline="10" endline="52" begincolumn="8" endcolumn="1" rule="ClassWithOnlyPrivateConstructorsShouldBeFinal" ruleset="Design" package="project.controllers" class="CSVtoARFFConverter" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_design.html#classwithonlyprivateconstructorsshouldbefinal" priority="1">
 A class which only has private constructors should be final
+</violation>
+</file>
+<file name="C:\isw2\progettoParteFalessi\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\controllers\Caching.java">
+<violation beginline="16" endline="352" begincolumn="22" endcolumn="1" rule="UseUtilityClass" ruleset="Design" package="project.controllers" class="Caching" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_design.html#useutilityclass" priority="3">
+All methods are static.  Consider using a utility class instead. Alternatively, you could add a private constructor or make the class abstract to silence this warning.
+</violation>
+<violation beginline="29" endline="29" begincolumn="37" endcolumn="61" rule="UseLocaleWithCaseConversions" ruleset="Error Prone" package="project.controllers" class="Caching" method="getCacheFilePath" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#uselocalewithcaseconversions" priority="3">
+When doing a String.toLowerCase()/toUpperCase() call, use a Locale
+</violation>
+<violation beginline="83" endline="83" begincolumn="21" endcolumn="32" rule="UnusedLocalVariable" ruleset="Best Practices" package="project.controllers" class="Caching" method="saveCommitCache" variable="methodsAdded" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedlocalvariable" priority="3">
+Avoid unused local variables such as 'methodsAdded'.
 </violation>
 </file>
 <file name="C:\isw2\progettoParteFalessi\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\controllers\EvaluationFlow.java">
@@ -54,22 +65,19 @@ Unused import 'java.util.stream.Collectors'
 <violation beginline="37" endline="37" begincolumn="1" endcolumn="29" rule="UnnecessaryImport" ruleset="Code Style" package="project.controllers" class="GitHubInfoRetrieve" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessaryimport" priority="4">
 Unused import 'project.models.Ticket'
 </violation>
-<violation beginline="43" endline="43" begincolumn="33" endcolumn="33" rule="UnnecessarySemicolon" ruleset="Code Style" package="project.controllers" class="GitHubInfoRetrieve" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessarysemicolon" priority="3">
-Unnecessary semicolon
-</violation>
 <violation beginline="66" endline="66" begincolumn="18" endcolumn="25" rule="CloseResource" ruleset="Error Prone" package="project.controllers" class="GitHubInfoRetrieve" method="getMethodInstancesOfCommit" variable="treeWalk" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#closeresource" priority="3">
 Ensure that resources like this FileRepository object are closed after use
 </violation>
-<violation beginline="143" endline="143" begincolumn="22" endcolumn="87" rule="UselessParentheses" ruleset="Code Style" package="project.controllers" class="GitHubInfoRetrieve" method="orderCommitsByReleaseDate" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#uselessparentheses" priority="4">
+<violation beginline="139" endline="139" begincolumn="22" endcolumn="87" rule="UselessParentheses" ruleset="Code Style" package="project.controllers" class="GitHubInfoRetrieve" method="orderCommitsByReleaseDate" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#uselessparentheses" priority="4">
 Useless parentheses.
 </violation>
-<violation beginline="144" endline="144" begincolumn="26" endcolumn="123" rule="UselessParentheses" ruleset="Code Style" package="project.controllers" class="GitHubInfoRetrieve" method="orderCommitsByReleaseDate" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#uselessparentheses" priority="4">
+<violation beginline="140" endline="140" begincolumn="26" endcolumn="123" rule="UselessParentheses" ruleset="Code Style" package="project.controllers" class="GitHubInfoRetrieve" method="orderCommitsByReleaseDate" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#uselessparentheses" priority="4">
 Useless parentheses.
 </violation>
-<violation beginline="200" endline="202" begincolumn="11" endcolumn="9" rule="EmptyCatchBlock" ruleset="Error Prone" package="project.controllers" class="GitHubInfoRetrieve" method="getDifference" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#emptycatchblock" priority="3">
+<violation beginline="196" endline="198" begincolumn="11" endcolumn="9" rule="EmptyCatchBlock" ruleset="Error Prone" package="project.controllers" class="GitHubInfoRetrieve" method="getDifference" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#emptycatchblock" priority="3">
 Avoid empty catch blocks
 </violation>
-<violation beginline="226" endline="226" begincolumn="18" endcolumn="25" rule="CloseResource" ruleset="Error Prone" package="project.controllers" class="GitHubInfoRetrieve" method="getClassFilesOfCommit" variable="treeWalk" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#closeresource" priority="3">
+<violation beginline="222" endline="222" begincolumn="18" endcolumn="25" rule="CloseResource" ruleset="Error Prone" package="project.controllers" class="GitHubInfoRetrieve" method="getClassFilesOfCommit" variable="treeWalk" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#closeresource" priority="3">
 Ensure that resources like this FileRepository object are closed after use
 </violation>
 </file>
@@ -142,200 +150,114 @@ Substitute calls to size() == 0 (or size() != 0, size() &gt; 0, size() &lt; 1) w
 <violation beginline="120" endline="120" begincolumn="17" endcolumn="36" rule="UseCollectionIsEmpty" ruleset="Best Practices" package="project.controllers" class="MethodDataSetExecutor" method="executeFlow" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#usecollectionisempty" priority="3">
 Substitute calls to size() == 0 (or size() != 0, size() &gt; 0, size() &lt; 1) with calls to isEmpty()
 </violation>
-<violation beginline="154" endline="154" begincolumn="23" endcolumn="50" rule="UseLocaleWithCaseConversions" ruleset="Error Prone" package="project.controllers" class="MethodDataSetExecutor" method="writeReleaseTrainFile" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#uselocalewithcaseconversions" priority="3">
+<violation beginline="178" endline="178" begincolumn="23" endcolumn="50" rule="UseLocaleWithCaseConversions" ruleset="Error Prone" package="project.controllers" class="MethodDataSetExecutor" method="writeReleaseTrainFile" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#uselocalewithcaseconversions" priority="3">
 When doing a String.toLowerCase()/toUpperCase() call, use a Locale
 </violation>
-<violation beginline="223" endline="223" begincolumn="53" endcolumn="61" rule="ControlStatementBraces" ruleset="Code Style" package="project.controllers" class="MethodDataSetExecutor" method="writeFile" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#controlstatementbraces" priority="3">
+<violation beginline="247" endline="247" begincolumn="53" endcolumn="61" rule="ControlStatementBraces" ruleset="Code Style" package="project.controllers" class="MethodDataSetExecutor" method="writeFile" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#controlstatementbraces" priority="3">
 This statement should have braces
 </violation>
-<violation beginline="223" endline="223" begincolumn="29" endcolumn="50" rule="CompareObjectsWithEquals" ruleset="Error Prone" package="project.controllers" class="MethodDataSetExecutor" method="writeFile" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#compareobjectswithequals" priority="3">
+<violation beginline="247" endline="247" begincolumn="29" endcolumn="50" rule="CompareObjectsWithEquals" ruleset="Error Prone" package="project.controllers" class="MethodDataSetExecutor" method="writeFile" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#compareobjectswithequals" priority="3">
 Use equals() to compare object references.
 </violation>
-<violation beginline="294" endline="296" begincolumn="19" endcolumn="17" rule="IdenticalCatchBranches" ruleset="Code Style" package="project.controllers" class="MethodDataSetExecutor" method="writeFile" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#identicalcatchbranches" priority="3">
+<violation beginline="318" endline="320" begincolumn="19" endcolumn="17" rule="IdenticalCatchBranches" ruleset="Code Style" package="project.controllers" class="MethodDataSetExecutor" method="writeFile" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#identicalcatchbranches" priority="3">
 'catch' branch identical to 'GitAPIException' branch
 </violation>
-<violation beginline="301" endline="303" begincolumn="11" endcolumn="9" rule="EmptyControlStatement" ruleset="Code Style" package="project.controllers" class="MethodDataSetExecutor" method="writeFile" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#emptycontrolstatement" priority="3">
+<violation beginline="325" endline="327" begincolumn="11" endcolumn="9" rule="EmptyControlStatement" ruleset="Code Style" package="project.controllers" class="MethodDataSetExecutor" method="writeFile" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#emptycontrolstatement" priority="3">
 Empty finally clause
 </violation>
-<violation beginline="310" endline="310" begincolumn="28" endcolumn="37" rule="ControlStatementBraces" ruleset="Code Style" package="project.controllers" class="MethodDataSetExecutor" method="escapeCsv" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#controlstatementbraces" priority="3">
+<violation beginline="334" endline="334" begincolumn="28" endcolumn="37" rule="ControlStatementBraces" ruleset="Code Style" package="project.controllers" class="MethodDataSetExecutor" method="escapeCsv" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#controlstatementbraces" priority="3">
 This statement should have braces
 </violation>
-<violation beginline="319" endline="319" begincolumn="18" endcolumn="53" rule="UnusedPrivateMethod" ruleset="Best Practices" package="project.controllers" class="MethodDataSetExecutor" method="sortCommits" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedprivatemethod" priority="3">
+<violation beginline="343" endline="343" begincolumn="18" endcolumn="53" rule="UnusedPrivateMethod" ruleset="Best Practices" package="project.controllers" class="MethodDataSetExecutor" method="sortCommits" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedprivatemethod" priority="3">
 Avoid unused private methods such as 'sortCommits(List)'.
 </violation>
-<violation beginline="364" endline="364" begincolumn="20" endcolumn="40" rule="UnusedPrivateMethod" ruleset="Best Practices" package="project.controllers" class="MethodDataSetExecutor" method="coldStartProportion" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedprivatemethod" priority="3">
+<violation beginline="388" endline="388" begincolumn="20" endcolumn="40" rule="UnusedPrivateMethod" ruleset="Best Practices" package="project.controllers" class="MethodDataSetExecutor" method="coldStartProportion" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedprivatemethod" priority="3">
 Avoid unused private methods such as 'coldStartProportion()'.
 </violation>
-<violation beginline="366" endline="366" begincolumn="25" endcolumn="57" rule="UseLocaleWithCaseConversions" ruleset="Error Prone" package="project.controllers" class="MethodDataSetExecutor" method="coldStartProportion" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#uselocalewithcaseconversions" priority="3">
+<violation beginline="390" endline="390" begincolumn="25" endcolumn="57" rule="UseLocaleWithCaseConversions" ruleset="Error Prone" package="project.controllers" class="MethodDataSetExecutor" method="coldStartProportion" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#uselocalewithcaseconversions" priority="3">
 When doing a String.toLowerCase()/toUpperCase() call, use a Locale
 </violation>
 </file>
 <file name="C:\isw2\progettoParteFalessi\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\controllers\MetricsCalculator.java">
-<violation beginline="51" endline="51" begincolumn="35" endcolumn="48" rule="UnusedPrivateField" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" variable="fullClassFiles" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedprivatefield" priority="3">
-Avoid unused private fields such as 'fullClassFiles'.
+<violation beginline="22" endline="22" begincolumn="1" endcolumn="26" rule="UnnecessaryImport" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessaryimport" priority="4">
+Unused import 'org.json.JSONArray'
 </violation>
-<violation beginline="53" endline="53" begincolumn="40" endcolumn="53" rule="UnusedPrivateField" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" variable="releaseMethods" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedprivatefield" priority="3">
-Avoid unused private fields such as 'releaseMethods'.
+<violation beginline="23" endline="23" begincolumn="1" endcolumn="30" rule="UnnecessaryImport" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessaryimport" priority="4">
+Unused import 'org.json.JSONException'
 </violation>
-<violation beginline="58" endline="58" begincolumn="13" endcolumn="46" rule="LooseCoupling" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#loosecoupling" priority="3">
-Avoid using implementation types like 'LinkedList'; use the interface instead
+<violation beginline="24" endline="24" begincolumn="1" endcolumn="27" rule="UnnecessaryImport" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessaryimport" priority="4">
+Unused import 'org.json.JSONObject'
 </violation>
-<violation beginline="76" endline="76" begincolumn="13" endcolumn="22" rule="UnusedLocalVariable" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="calculateReleaseMetrics" variable="startIndex" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedlocalvariable" priority="3">
-Avoid unused local variables such as 'startIndex'.
+<violation beginline="42" endline="42" begincolumn="1" endcolumn="31" rule="UnnecessaryImport" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessaryimport" priority="4">
+Unused import 'weka.core.pmml.Constant'
 </violation>
-<violation beginline="78" endline="78" begincolumn="29" endcolumn="95" rule="UselessParentheses" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="calculateReleaseMetrics" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#uselessparentheses" priority="4">
+<violation beginline="115" endline="115" begincolumn="18" endcolumn="29" rule="UnusedPrivateMethod" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="clearCache" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedprivatemethod" priority="3">
+Avoid unused private methods such as 'clearCache()'.
+</violation>
+<violation beginline="117" endline="117" begincolumn="55" endcolumn="79" rule="UseLocaleWithCaseConversions" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator" method="clearCache" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#uselocalewithcaseconversions" priority="3">
+When doing a String.toLowerCase()/toUpperCase() call, use a Locale
+</violation>
+<violation beginline="140" endline="140" begincolumn="29" endcolumn="95" rule="UselessParentheses" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="calculateReleaseMetrics" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#uselessparentheses" priority="4">
 Useless parentheses.
 </violation>
-<violation beginline="92" endline="92" begincolumn="22" endcolumn="37" rule="CloseResource" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator" method="calculateReleaseMetrics" variable="customThreadPool" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#closeresource" priority="3">
+<violation beginline="148" endline="148" begincolumn="22" endcolumn="37" rule="CloseResource" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator" method="calculateReleaseMetrics" variable="customThreadPool" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#closeresource" priority="3">
 Ensure that resources like this ForkJoinPool object are closed after use
 </violation>
-<violation beginline="94" endline="94" begincolumn="32" endcolumn="47" rule="LocalVariableNamingConventions" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="calculateReleaseMetrics" variable="commits_analized" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#localvariablenamingconventions" priority="1">
+<violation beginline="150" endline="150" begincolumn="32" endcolumn="47" rule="LocalVariableNamingConventions" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="calculateReleaseMetrics" variable="commits_analized" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#localvariablenamingconventions" priority="1">
 The local variable name 'commits_analized' doesn't match '[a-z][a-zA-Z0-9]*'
 </violation>
-<violation beginline="131" endline="131" begincolumn="34" endcolumn="40" rule="UselessParentheses" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="calculateReleaseMetrics" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#uselessparentheses" priority="4">
+<violation beginline="207" endline="207" begincolumn="34" endcolumn="40" rule="UselessParentheses" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="calculateReleaseMetrics" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#uselessparentheses" priority="4">
 Useless parentheses.
 </violation>
-<violation beginline="153" endline="153" begincolumn="46" endcolumn="64" rule="UseCollectionIsEmpty" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="calculateReleaseMetrics" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#usecollectionisempty" priority="3">
-Substitute calls to size() == 0 (or size() != 0, size() &gt; 0, size() &lt; 1) with calls to isEmpty()
+<violation beginline="214" endline="214" begincolumn="34" endcolumn="41" rule="UselessParentheses" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="calculateReleaseMetrics" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#uselessparentheses" priority="4">
+Useless parentheses.
 </violation>
-<violation beginline="213" endline="213" begincolumn="13" endcolumn="23" rule="UnnecessaryLocalBeforeReturn" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="ensureTempDirectoryExists" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessarylocalbeforereturn" priority="3">
+<violation beginline="305" endline="305" begincolumn="13" endcolumn="23" rule="UnnecessaryLocalBeforeReturn" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="ensureTempDirectoryExists" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessarylocalbeforereturn" priority="3">
 Consider simply returning the value vs storing it in local variable 'dir'
 </violation>
-<violation beginline="398" endline="398" begincolumn="18" endcolumn="36" rule="UnusedPrivateMethod" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="restoreFromBackup" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedprivatemethod" priority="3">
-Avoid unused private methods such as 'restoreFromBackup()'.
-</violation>
-<violation beginline="490" endline="492" begincolumn="23" endcolumn="21" rule="EmptyCatchBlock" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator" method="backupRepository" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#emptycatchblock" priority="3">
-Avoid empty catch blocks
-</violation>
-<violation beginline="501" endline="501" begincolumn="17" endcolumn="23" rule="CloseResource" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator" method="exportCodeToDirectory" variable="revWalk" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#closeresource" priority="3">
+<violation beginline="490" endline="490" begincolumn="17" endcolumn="23" rule="CloseResource" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator" method="exportCodeToDirectory" variable="revWalk" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#closeresource" priority="3">
 Ensure that resources like this Repository object are closed after use
 </violation>
-<violation beginline="504" endline="504" begincolumn="23" endcolumn="24" rule="CloseResource" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator" method="exportCodeToDirectory" variable="df" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#closeresource" priority="3">
+<violation beginline="493" endline="493" begincolumn="23" endcolumn="24" rule="CloseResource" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator" method="exportCodeToDirectory" variable="df" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#closeresource" priority="3">
 Ensure that resources like this DisabledOutputStream object are closed after use
 </violation>
-<violation beginline="510" endline="510" begincolumn="17" endcolumn="29" rule="UnusedLocalVariable" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="exportCodeToDirectory" variable="filesExported" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedlocalvariable" priority="3">
+<violation beginline="499" endline="499" begincolumn="17" endcolumn="29" rule="UnusedLocalVariable" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="exportCodeToDirectory" variable="filesExported" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedlocalvariable" priority="3">
 Avoid unused local variables such as 'filesExported'.
 </violation>
-<violation beginline="513" endline="513" begincolumn="71" endcolumn="79" rule="ControlStatementBraces" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="exportCodeToDirectory" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#controlstatementbraces" priority="3">
+<violation beginline="502" endline="502" begincolumn="71" endcolumn="79" rule="ControlStatementBraces" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="exportCodeToDirectory" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#controlstatementbraces" priority="3">
 This statement should have braces
 </violation>
-<violation beginline="517" endline="517" begincolumn="26" endcolumn="33" rule="UnusedLocalVariable" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="exportCodeToDirectory" variable="objectId" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedlocalvariable" priority="3">
+<violation beginline="506" endline="506" begincolumn="26" endcolumn="33" rule="UnusedLocalVariable" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="exportCodeToDirectory" variable="objectId" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedlocalvariable" priority="3">
 Avoid unused local variables such as 'objectId'.
 </violation>
-<violation beginline="541" endline="543" begincolumn="16" endcolumn="9" rule="EmptyControlStatement" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="exportCodeToDirectory" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#emptycontrolstatement" priority="3">
+<violation beginline="530" endline="532" begincolumn="16" endcolumn="9" rule="EmptyControlStatement" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="exportCodeToDirectory" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#emptycontrolstatement" priority="3">
 Empty else statement
 </violation>
-<violation beginline="548" endline="548" begincolumn="28" endcolumn="45" rule="UseLocaleWithCaseConversions" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator" method="isTestFile" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#uselocalewithcaseconversions" priority="3">
+<violation beginline="537" endline="537" begincolumn="28" endcolumn="45" rule="UseLocaleWithCaseConversions" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator" method="isTestFile" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#uselocalewithcaseconversions" priority="3">
 When doing a String.toLowerCase()/toUpperCase() call, use a Locale
 </violation>
-<violation beginline="573" endline="573" begincolumn="20" endcolumn="28" rule="UnusedLocalVariable" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="calculateCKMetrics" variable="pathClass" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedlocalvariable" priority="3">
+<violation beginline="562" endline="562" begincolumn="20" endcolumn="28" rule="UnusedLocalVariable" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="calculateCKMetrics" variable="pathClass" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedlocalvariable" priority="3">
 Avoid unused local variables such as 'pathClass'.
 </violation>
-<violation beginline="589" endline="589" begincolumn="31" endcolumn="42" rule="LocalVariableNamingConventions" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="calculateCKMetrics" variable="filled_class" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#localvariablenamingconventions" priority="1">
+<violation beginline="578" endline="578" begincolumn="31" endcolumn="42" rule="LocalVariableNamingConventions" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="calculateCKMetrics" variable="filled_class" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#localvariablenamingconventions" priority="1">
 The local variable name 'filled_class' doesn't match '[a-z][a-zA-Z0-9]*'
 </violation>
-<violation beginline="627" endline="630" begincolumn="19" endcolumn="17" rule="EmptyCatchBlock" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator" method="calculateCKMetrics" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#emptycatchblock" priority="3">
+<violation beginline="616" endline="619" begincolumn="19" endcolumn="17" rule="EmptyCatchBlock" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator" method="calculateCKMetrics" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#emptycatchblock" priority="3">
 Avoid empty catch blocks
 </violation>
-<violation beginline="657" endline="657" begincolumn="23" endcolumn="34" rule="LocalVariableNamingConventions" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="lastClassesEvaluation" variable="filled_class" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#localvariablenamingconventions" priority="1">
+<violation beginline="642" endline="642" begincolumn="23" endcolumn="34" rule="LocalVariableNamingConventions" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="lastClassesEvaluation" variable="filled_class" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#localvariablenamingconventions" priority="1">
 The local variable name 'filled_class' doesn't match '[a-z][a-zA-Z0-9]*'
 </violation>
-<violation beginline="739" endline="739" begincolumn="38" endcolumn="46" rule="ControlStatementBraces" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="updateBuggyness" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#controlstatementbraces" priority="3">
+<violation beginline="665" endline="665" begincolumn="42" endcolumn="57" rule="FormalParameterNamingConventions" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="assignBuggyness" variable="use_last_classes" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#formalparameternamingconventions" priority="1">
+The method parameter name 'use_last_classes' doesn't match '[a-z][a-zA-Z0-9]*'
+</violation>
+<violation beginline="705" endline="705" begincolumn="65" endcolumn="80" rule="FormalParameterNamingConventions" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="updateBuggyness" variable="use_last_classes" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#formalparameternamingconventions" priority="1">
+The method parameter name 'use_last_classes' doesn't match '[a-z][a-zA-Z0-9]*'
+</violation>
+<violation beginline="710" endline="710" begincolumn="38" endcolumn="46" rule="ControlStatementBraces" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="updateBuggyness" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#controlstatementbraces" priority="3">
 This statement should have braces
 </violation>
-<violation beginline="767" endline="767" begincolumn="33" endcolumn="74" rule="UnusedPrivateMethod" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="extractMethodSignatures" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedprivatemethod" priority="3">
-Avoid unused private methods such as 'extractMethodSignatures(String)'.
-</violation>
-<violation beginline="809" endline="811" begincolumn="15" endcolumn="13" rule="EmptyCatchBlock" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator" method="extractMethodBodiesByName" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#emptycatchblock" priority="3">
-Avoid empty catch blocks
-</violation>
-</file>
-<file name="C:\isw2\progettoParteFalessi\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\controllers\MetricsCalculator1.java">
-<violation beginline="49" endline="49" begincolumn="35" endcolumn="48" rule="UnusedPrivateField" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator1" variable="fullClassFiles" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedprivatefield" priority="3">
-Avoid unused private fields such as 'fullClassFiles'.
-</violation>
-<violation beginline="51" endline="51" begincolumn="40" endcolumn="53" rule="UnusedPrivateField" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator1" variable="releaseMethods" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedprivatefield" priority="3">
-Avoid unused private fields such as 'releaseMethods'.
-</violation>
-<violation beginline="51" endline="51" begincolumn="13" endcolumn="54" rule="SingularField" ruleset="Design" package="project.controllers" class="MetricsCalculator1" variable="VariableDeclaratorId" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_design.html#singularfield" priority="3">
-Perhaps 'releaseMethods' could be replaced by a local variable.
-</violation>
-<violation beginline="53" endline="53" begincolumn="33" endcolumn="46" rule="UnusedPrivateField" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator1" variable="releaseResults" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedprivatefield" priority="3">
-Avoid unused private fields such as 'releaseResults'.
-</violation>
-<violation beginline="56" endline="56" begincolumn="13" endcolumn="46" rule="LooseCoupling" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator1" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#loosecoupling" priority="3">
-Avoid using implementation types like 'LinkedList'; use the interface instead
-</violation>
-<violation beginline="76" endline="76" begincolumn="33" endcolumn="99" rule="UselessParentheses" ruleset="Code Style" package="project.controllers" class="MetricsCalculator1" method="calculateReleaseMetrics" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#uselessparentheses" priority="4">
-Useless parentheses.
-</violation>
-<violation beginline="90" endline="90" begincolumn="26" endcolumn="41" rule="CloseResource" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator1" method="calculateReleaseMetrics" variable="customThreadPool" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#closeresource" priority="3">
-Ensure that resources like this ForkJoinPool object are closed after use
-</violation>
-<violation beginline="92" endline="92" begincolumn="36" endcolumn="51" rule="LocalVariableNamingConventions" ruleset="Code Style" package="project.controllers" class="MetricsCalculator1" method="calculateReleaseMetrics" variable="commits_analized" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#localvariablenamingconventions" priority="1">
-The local variable name 'commits_analized' doesn't match '[a-z][a-zA-Z0-9]*'
-</violation>
-<violation beginline="129" endline="129" begincolumn="50" endcolumn="56" rule="UselessParentheses" ruleset="Code Style" package="project.controllers" class="MetricsCalculator1" method="calculateReleaseMetrics" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#uselessparentheses" priority="4">
-Useless parentheses.
-</violation>
-<violation beginline="141" endline="144" begincolumn="43" endcolumn="41" rule="EmptyCatchBlock" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator1" method="calculateReleaseMetrics" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#emptycatchblock" priority="3">
-Avoid empty catch blocks
-</violation>
-<violation beginline="210" endline="210" begincolumn="13" endcolumn="23" rule="UnnecessaryLocalBeforeReturn" ruleset="Code Style" package="project.controllers" class="MetricsCalculator1" method="ensureTempDirectoryExists" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessarylocalbeforereturn" priority="3">
-Consider simply returning the value vs storing it in local variable 'dir'
-</violation>
-<violation beginline="382" endline="382" begincolumn="18" endcolumn="36" rule="UnusedPrivateMethod" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator1" method="restoreFromBackup" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedprivatemethod" priority="3">
-Avoid unused private methods such as 'restoreFromBackup()'.
-</violation>
-<violation beginline="393" endline="393" begincolumn="9" endcolumn="17" rule="DoNotCallGarbageCollectionExplicitly" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator1" method="restoreFromBackup" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#donotcallgarbagecollectionexplicitly" priority="2">
-Do not explicitly trigger a garbage collection.
-</violation>
-<violation beginline="417" endline="417" begincolumn="13" endcolumn="75" rule="UseLocaleWithCaseConversions" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator1" method="restoreFromBackup" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#uselocalewithcaseconversions" priority="3">
-When doing a String.toLowerCase()/toUpperCase() call, use a Locale
-</violation>
-<violation beginline="510" endline="512" begincolumn="23" endcolumn="21" rule="EmptyCatchBlock" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator1" method="backupRepository" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#emptycatchblock" priority="3">
-Avoid empty catch blocks
-</violation>
-<violation beginline="521" endline="521" begincolumn="17" endcolumn="23" rule="CloseResource" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator1" method="exportCodeToDirectory" variable="revWalk" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#closeresource" priority="3">
-Ensure that resources like this Repository object are closed after use
-</violation>
-<violation beginline="524" endline="524" begincolumn="23" endcolumn="24" rule="CloseResource" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator1" method="exportCodeToDirectory" variable="df" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#closeresource" priority="3">
-Ensure that resources like this DisabledOutputStream object are closed after use
-</violation>
-<violation beginline="530" endline="530" begincolumn="17" endcolumn="29" rule="UnusedLocalVariable" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator1" method="exportCodeToDirectory" variable="filesExported" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedlocalvariable" priority="3">
-Avoid unused local variables such as 'filesExported'.
-</violation>
-<violation beginline="533" endline="533" begincolumn="71" endcolumn="79" rule="ControlStatementBraces" ruleset="Code Style" package="project.controllers" class="MetricsCalculator1" method="exportCodeToDirectory" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#controlstatementbraces" priority="3">
-This statement should have braces
-</violation>
-<violation beginline="537" endline="537" begincolumn="26" endcolumn="33" rule="UnusedLocalVariable" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator1" method="exportCodeToDirectory" variable="objectId" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedlocalvariable" priority="3">
-Avoid unused local variables such as 'objectId'.
-</violation>
-<violation beginline="561" endline="563" begincolumn="16" endcolumn="9" rule="EmptyControlStatement" ruleset="Code Style" package="project.controllers" class="MetricsCalculator1" method="exportCodeToDirectory" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#emptycontrolstatement" priority="3">
-Empty else statement
-</violation>
-<violation beginline="568" endline="568" begincolumn="28" endcolumn="45" rule="UseLocaleWithCaseConversions" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator1" method="isTestFile" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#uselocalewithcaseconversions" priority="3">
-When doing a String.toLowerCase()/toUpperCase() call, use a Locale
-</violation>
-<violation beginline="593" endline="593" begincolumn="20" endcolumn="28" rule="UnusedLocalVariable" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator1" method="calculateCKMetrics" variable="pathClass" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedlocalvariable" priority="3">
-Avoid unused local variables such as 'pathClass'.
-</violation>
-<violation beginline="609" endline="609" begincolumn="31" endcolumn="42" rule="LocalVariableNamingConventions" ruleset="Code Style" package="project.controllers" class="MetricsCalculator1" method="calculateCKMetrics" variable="filled_class" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#localvariablenamingconventions" priority="1">
-The local variable name 'filled_class' doesn't match '[a-z][a-zA-Z0-9]*'
-</violation>
-<violation beginline="647" endline="650" begincolumn="19" endcolumn="17" rule="EmptyCatchBlock" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator1" method="calculateCKMetrics" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#emptycatchblock" priority="3">
-Avoid empty catch blocks
-</violation>
-<violation beginline="677" endline="677" begincolumn="23" endcolumn="34" rule="LocalVariableNamingConventions" ruleset="Code Style" package="project.controllers" class="MetricsCalculator1" method="lastClassesEvaluation" variable="filled_class" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#localvariablenamingconventions" priority="1">
-The local variable name 'filled_class' doesn't match '[a-z][a-zA-Z0-9]*'
-</violation>
-<violation beginline="759" endline="759" begincolumn="38" endcolumn="46" rule="ControlStatementBraces" ruleset="Code Style" package="project.controllers" class="MetricsCalculator1" method="updateBuggyness" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#controlstatementbraces" priority="3">
-This statement should have braces
-</violation>
-<violation beginline="787" endline="787" begincolumn="33" endcolumn="74" rule="UnusedPrivateMethod" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator1" method="extractMethodSignatures" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedprivatemethod" priority="3">
-Avoid unused private methods such as 'extractMethodSignatures(String)'.
-</violation>
-<violation beginline="829" endline="831" begincolumn="15" endcolumn="13" rule="EmptyCatchBlock" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator1" method="extractMethodBodiesByName" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#emptycatchblock" priority="3">
+<violation beginline="769" endline="771" begincolumn="15" endcolumn="13" rule="EmptyCatchBlock" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator" method="extractMethodBodiesByName" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#emptycatchblock" priority="3">
 Avoid empty catch blocks
 </violation>
 </file>

@@ -14,9 +14,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <pmd.version>3.15.0</pmd.version>
         <checkstyle.version>3.3.0</checkstyle.version>
+        <!-- Path to the CK metrics library JAR file -->
+        <ck.jar.path>${project.basedir}/libs/ck-0.7.1.jar</ck.jar.path>
         <!--Sonar Cube-->
         <sonar.organization>francescoastolfidev</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.java.libraries>${ck.jar.path}</sonar.java.libraries>
+        <sonar.java.binaries>${project.build.directory}/classes</sonar.java.binaries>
     </properties>
 
 
@@ -87,10 +91,11 @@
             <artifactId>commons-cli</artifactId>
             <version>1.5.0</version>
         </dependency>
+        <!-- CK metrics library -->
         <dependency>
             <groupId>com.github.mauricioaniche</groupId>
             <artifactId>ck</artifactId>
-            <version>0.7.1</version>
+            <version>0.7.0</version>
         </dependency>
 
 
@@ -169,6 +174,30 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M7</version>
+            </plugin>
+
+            <!-- Install local JAR for CK metrics -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>install-ck-jar</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <file>${project.basedir}/libs/ck-0.7.1.jar</file>
+                            <groupId>com.github.mauricioaniche</groupId>
+                            <artifactId>ck</artifactId>
+                            <version>0.7.1</version>
+                            <packaging>jar</packaging>
+                            <generatePom>true</generatePom>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
