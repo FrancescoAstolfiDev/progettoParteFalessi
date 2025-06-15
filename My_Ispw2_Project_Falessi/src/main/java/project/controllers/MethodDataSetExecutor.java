@@ -19,8 +19,7 @@ import java.util.logging.Logger;
 import static java.lang.System.out;
 
 public class MethodDataSetExecutor {
-
-    private static final Logger LOGGER = Logger.getLogger(JiraInfoRetrieve.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(MethodDataSetExecutor.class.getName());
     private String currentProject;
     private GitHubInfoRetrieve gitHubInfoRetrieve;
     private MetricsCalculator metricsCalculator;

@@ -21,7 +21,7 @@ public class Caching {
 
     /**
      * Gets the cache file path for a specific project
-     * 
+     *
      * @param projectName The name of the project
      * @return The path to the cache file for the project
      */
@@ -31,7 +31,7 @@ public class Caching {
 
     /**
      * Saves the commit cache to disk with optimized performance
-     * 
+     *
      * @param resultCommitsMethods Map of commit hashes to method instances
      * @param projectName The name of the project
      */
@@ -132,20 +132,21 @@ public class Caching {
             }
 
             long endTime = System.currentTimeMillis();
-            System.out.println("Commit cache for project " + projectName + " saved to " + cacheFilePath + 
-                              " with " + cacheJson.length() + " commits and " + 
-                              totalMethods + " methods in " + 
-                              (endTime - startTime) + "ms");
+            System.out.println("Commit cache for project " + projectName + " saved to " + cacheFilePath +
+                    " with " + cacheJson.length() + " commits and " +
+                    totalMethods + " methods in " +
+                    (endTime - startTime) + "ms");
 
         } catch (IOException | JSONException e) {
             System.err.println("Error saving commit cache for project " + projectName + ": " + e.getMessage());
             e.printStackTrace();
         }
+
     }
 
     /**
      * Backward compatibility method for saving commit cache without project name
-     * 
+     *
      * @param resultCommitsMethods Map of commit hashes to method instances
      */
     public static void saveCommitCache(Map<String, Map<String, MethodInstance>> resultCommitsMethods) {
@@ -155,7 +156,7 @@ public class Caching {
 
     /**
      * Loads the commit cache from disk with optimized performance
-     * 
+     *
      * @param resultCommitsMethods Map to store the loaded commits
      * @param projectName The name of the project
      */
@@ -166,7 +167,7 @@ public class Caching {
 
     /**
      * Backward compatibility method for loading commit cache without project name
-     * 
+     *
      * @param resultCommitsMethods Map to store the loaded commits
      */
     public static void loadCommitCache(Map<String, Map<String, MethodInstance>> resultCommitsMethods) {
@@ -176,7 +177,7 @@ public class Caching {
 
     /**
      * Loads specific commits from the cache
-     * 
+     *
      * @param resultCommitsMethods Map to store the loaded commits
      * @param commitHashes Set of commit hashes to load, or null to load all commits
      * @param projectName The name of the project
@@ -263,13 +264,13 @@ public class Caching {
                 }
 
                 long endTime = System.currentTimeMillis();
-                String filterMsg = commitHashes != null ? 
-                    " (filtered " + skippedCommits + " commits)" : "";
+                String filterMsg = commitHashes != null ?
+                        " (filtered " + skippedCommits + " commits)" : "";
 
-                System.out.println("Loaded commit cache for project " + projectName + " from " + cacheFilePath + 
-                                  " with " + commitCount + " commits" + filterMsg + " and " + 
-                                  methodCount + " methods in " + 
-                                  (endTime - startTime) + "ms");
+                System.out.println("Loaded commit cache for project " + projectName + " from " + cacheFilePath +
+                        " with " + commitCount + " commits" + filterMsg + " and " +
+                        methodCount + " methods in " +
+                        (endTime - startTime) + "ms");
             }
         } catch (IOException | JSONException e) {
             System.err.println("Error loading commit cache for project " + projectName + ": " + e.getMessage());
@@ -279,7 +280,7 @@ public class Caching {
 
     /**
      * Backward compatibility method for loading specific commits from the cache without project name
-     * 
+     *
      * @param resultCommitsMethods Map to store the loaded commits
      * @param commitHashes Set of commit hashes to load, or null to load all commits
      */
@@ -290,7 +291,7 @@ public class Caching {
 
     /**
      * Gets a set of commit hashes available in the cache without loading their data
-     * 
+     *
      * @param projectName The name of the project
      * @return Set of commit hashes available in the cache, or empty set if cache doesn't exist
      */
@@ -329,8 +330,8 @@ public class Caching {
                 }
 
                 long endTime = System.currentTimeMillis();
-                System.out.println("Found " + availableCommits.size() + " commits in cache for project " + projectName + " in " + 
-                                  (endTime - startTime) + "ms");
+                System.out.println("Found " + availableCommits.size() + " commits in cache for project " + projectName + " in " +
+                        (endTime - startTime) + "ms");
             }
         } catch (IOException | JSONException e) {
             System.err.println("Error checking available commits in cache for project " + projectName + ": " + e.getMessage());
@@ -342,7 +343,7 @@ public class Caching {
 
     /**
      * Backward compatibility method for getting available commits without project name
-     * 
+     *
      * @return Set of commit hashes available in the cache, or empty set if cache doesn't exist
      */
     public static Set<String> getAvailableCommits() {

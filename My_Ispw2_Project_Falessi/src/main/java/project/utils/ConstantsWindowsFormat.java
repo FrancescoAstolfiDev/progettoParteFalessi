@@ -4,6 +4,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class ConstantsWindowsFormat {
+    ConstantsWindowsFormat(){
+
+    }
     // depends on the base of the project
     public static final Path basePath= Paths.get("C:\\isw2\\progettoParteFalessi\\progettoParteFalessi\\My_Ispw2_Project_Falessi");
     public static final Path csvPath= basePath.resolve("csv");
@@ -11,5 +14,7 @@ public class ConstantsWindowsFormat {
     public static final Path cachePath =basePath.resolve("cache");
     // depends where are the clone
     public static final Path repoClonePath=Paths.get("C:\\isw2\\progetti_clonati\\");
+
+
 
 }

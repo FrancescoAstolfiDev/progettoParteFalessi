@@ -8,16 +8,10 @@ import net.sourceforge.pmd.util.datasource.FileDataSource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import project.models.ClassFile;
-import project.models.Release;
 import project.utils.ConstantsWindowsFormat;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,14 +22,14 @@ import java.util.stream.Collectors;
 
 
 public class PmdRunner {
-    public static final String rulesSetPath = ConstantsWindowsFormat.rulesSetPath.toString();
+    static final String RULES_SET_PATH_STRING = ConstantsWindowsFormat.rulesSetPath.toString();
     /**
      * Esegue l'analisi PMD su un file o directory
      */
     public static Report runPmdAnalysis(Path sourceFilePath) throws IOException {
         PMDConfiguration configuration = new PMDConfiguration();
         List<String> ruleSets = new ArrayList<>();
-        ruleSets.add(rulesSetPath);
+        ruleSets.add(RULES_SET_PATH_STRING);
         configuration.setInputFilePath(sourceFilePath);
         configuration.setRuleSets(ruleSets);
 
@@ -61,7 +55,7 @@ public class PmdRunner {
             renderer.end();
             renderer.flush();
             renderer.getWriter().close();
-            System.gc();  // Forza garbage collection per chiudere file e loader non referenziati
+
 
 
             return context.getReport();
@@ -157,7 +151,7 @@ public class PmdRunner {
                 // Inizializza le metriche per questa classe
                 // Inizializza le metriche per questa classe
                 Map<String, Integer> metrics = new HashMap<>();
-                Set<String> rulesNames = getRuleNamesFromXml(rulesSetPath);
+                Set<String> rulesNames = getRuleNamesFromXml(RULES_SET_PATH_STRING);
                 for (String rule : rulesNames) {
                     metrics.put(rule, 0);
                 }
@@ -204,7 +198,7 @@ public class PmdRunner {
 
             Report report = runPmdAnalysis(Path.of(javaFile));
 
-            Set<String> ruleNames = getRuleNamesFromXml(rulesSetPath);
+            Set<String> ruleNames = getRuleNamesFromXml(RULES_SET_PATH_STRING);
 
             // Inizializza le metriche per questa classe
             Map<String, Integer> metrics = new HashMap<>();

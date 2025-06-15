@@ -22,9 +22,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import project.models.Ticket;
 
-import weka.core.Instances;
-import weka.core.converters.CSVLoader;
-import weka.core.converters.ArffSaver;
 
 
 public class JiraInfoRetrieve {

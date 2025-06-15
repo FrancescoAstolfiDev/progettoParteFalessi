@@ -7,21 +7,22 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.mauricioaniche.ck.CK;
 import com.github.mauricioaniche.ck.CKMethodResult;
+import org.checkerframework.checker.units.qual.C;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RawTextComparator;
+import org.eclipse.jgit.errors.CorruptObjectException;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.slf4j.LoggerFactory;
 import project.models.ClassFile;
 import project.models.MethodInstance;
 import project.models.Release;
@@ -36,14 +37,17 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import static project.models.MethodInstance.ckSignature;
 import project.utils.ConstantSize;
 import project.utils.ConstantsWindowsFormat;
-import weka.core.pmml.Constant;
+import static org.apache.commons.io.FileUtils.deleteDirectory;
+
+import org.slf4j.Logger;
 
 public class MetricsCalculator {
 
-
+    private final Logger LOGGER = LoggerFactory.getLogger(MetricsCalculator.class);
     private Git git;
     private Repository repository;
     private final Path tempDirPath = Paths.get(System.getProperty("java.io.tmpdir"), "ck_analysis");
@@ -51,7 +55,8 @@ public class MetricsCalculator {
     private GitHubInfoRetrieve gitHubInfoRetrieve;
     private int max_last_classes;
     private String projectName;
-
+    private String originalRepoPath;
+    private String backupRepoPath;
 
     private Map <String,Map<String,MethodInstance>> resultCommitsMethods=new HashMap<>();
     private List<Ticket> releaseTickets;
@@ -101,7 +106,7 @@ public class MetricsCalculator {
 
         // Load only the specified commits from the cache
         if (commitHashes != null && !commitHashes.isEmpty()) {
-            System.out.println("Selectively loading " + commitHashes.size() + " commits from cache for project " + projectName);
+            LOGGER.info("Selectively loading " + commitHashes.size() + " commits from cache for project " + projectName);
             Caching.loadCommitCache(resultCommitsMethods, commitHashes, projectName);
         } else {
             // If no specific commits are requested, load all commits
@@ -109,46 +114,31 @@ public class MetricsCalculator {
         }
     }
 
-    /**
-     * Clears the commit cache by deleting the cache file and resetting the resultCommitsMethods map
-     */
-    private void clearCache() {
-        try {
-            Path cacheFilePath = cacheDirPath.resolve(projectName.toLowerCase() + "_commit_cache.json");
-            if (Files.exists(cacheFilePath)) {
-                Files.delete(cacheFilePath);
-                System.out.println("Commit cache cleared for project " + projectName + ": " + cacheFilePath);
-            }
-            // Reset the resultCommitsMethods map
-            resultCommitsMethods.clear();
-        } catch (IOException e) {
-            System.err.println("Error clearing commit cache for project " + projectName + ": " + e.getMessage());
-        }
-    }
 
 
     public Map<String, MethodInstance> calculateReleaseMetrics(List<RevCommit> commits, Release release, List<Ticket> releaseTickets) throws IOException, GitAPIException {
         // Utilizziamo ConcurrentHashMap per la thread-safety
-        try{
-        lastClassFiles.clear();
-        ConcurrentMap<String, MethodInstance> releaseResults = new ConcurrentHashMap<>();
-        List<RevCommit> passingList = filterCommitsByRelease(commits, release);
-        int startIndex = Math.max(0, passingList.size()-ConstantSize.NUM_COMMITS);
+            lastClassFiles.clear();
+            ConcurrentMap<String, MethodInstance> releaseResults = new ConcurrentHashMap<>();
+            List<RevCommit> passingList = filterCommitsByRelease(commits, release);
+            int startIndex = Math.max(0, passingList.size()-ConstantSize.NUM_COMMITS);
+            List<RevCommit>releaseCommits = commits.subList(startIndex, passingList.size());
+            LOGGER.info((" \n\n inizio calcolo metriche per la release " + release.getName()));
+            this.actRelease = release;
+            this.releaseTickets = releaseTickets;
+            File gitDir = repository.getDirectory();
+            originalRepoPath = gitDir.getParentFile().getAbsolutePath();
+            // Crea un percorso per il backup
+            backupRepoPath = originalRepoPath + "_backup_" + System.currentTimeMillis();
+            backupRepository();
+            // Numero ottimale di thread basato sui core disponibili
+            int numThreads = Math.min(Runtime.getRuntime().availableProcessors(), ConstantSize.num_threads);
+            LOGGER.info("Numero di thread: ", numThreads);
+            ForkJoinPool customThreadPool = new ForkJoinPool(numThreads);
 
-        List<RevCommit>releaseCommits = commits.subList(startIndex, passingList.size());
-
-        System.out.println((" \n\n inizio calcolo metriche per la release " + release.getName()));
-
-        this.actRelease = release;
-        this.releaseTickets = releaseTickets;
-
-        // Numero ottimale di thread basato sui core disponibili
-        int numThreads = Math.min(Runtime.getRuntime().availableProcessors(), 6);
-        System.out.println("Numero di thread: " + numThreads);
-        ForkJoinPool customThreadPool = new ForkJoinPool(numThreads);
-        System.out.println("number of commit to check" + releaseCommits.size());
-        Map<String, RevCommit> commits_analized = new HashMap<>();
-        try {
+            try {
+            LOGGER.info("number of commit to check: {}", releaseCommits.size());
+            Map<String, RevCommit> commits_analized = new HashMap<>();
             // Crea un lock per sincronizzare l'accesso al repository
             Object repoLock = new Object();
 
@@ -176,22 +166,20 @@ public class MetricsCalculator {
                     }
                     releaseResults.putAll(commitMetrics);
                     commits_analized.put(commitHash, commit);
-                    System.out.println("Using cached results for commit " + commitHash);
                 }
             }
 
-            System.out.println("Found " + (releaseCommits.size() - commitHashesToProcess.size()) + 
-                              " commits in cache, need to process " + commitHashesToProcess.size() + 
-                              " commits");
+            LOGGER.info("Found {} commits in cache, need to process {} commits",
+                    (releaseCommits.size() - commitHashesToProcess.size()),
+                    commitHashesToProcess.size());
 
             // Process only the commits that aren't in the cache
             if (!commitHashesToProcess.isEmpty()) {
                 customThreadPool.submit(() ->
-                    commitHashesToProcess.parallelStream().forEach(commitHash -> {
-                        RevCommit commit = commitsByHash.get(commitHash);
-                        Path commitTempDir = tempDirPath.resolve(release.getName() + "_" + commitHash);
-                        commits_analized.put(commitHash, commit);
-                        try {
+                        commitHashesToProcess.parallelStream().forEach(commitHash -> {
+                            RevCommit commit = commitsByHash.get(commitHash);
+                            Path commitTempDir = tempDirPath.resolve(release.getName() + "_" + commitHash);
+                            commits_analized.put(commitHash, commit);
                             // Sincronizza l'accesso al repository Git
                             synchronized (repoLock) {
                                 // Checkout del commit appartenente alla release
@@ -204,14 +192,20 @@ public class MetricsCalculator {
                             // (senza bisogno di sincronizzazione)
                             countThread.getAndIncrement();
                             int log = countThread.get();
-                            if ((log % 2) == 0) {
-                                System.out.println("Thread " + countThread.get() + " in corso..." + 
-                                                  "analyzing commit " + commit.getId() + " ..." + 
-                                                  "commit analyzed " + commits_analized.size() + 
-                                                  " (" + (releaseCommits.size() - commitHashesToProcess.size()) + 
-                                                  " from cache, " + commitHashesToProcess.size() + " to process)");
+                            if ((log % ConstantSize.frequency_log) == 0) {
+                                int totalCommits = commitHashesToProcess.size();
+                                int processedCommits = commits_analized.size();
+                                int fromCache = releaseCommits.size() - totalCommits; // commits già in cache
+
+                                LOGGER.info("\n\n  Thread {} in corso... analyzing commit {} ... commit analyzed {} ({} from cache, {} to process) \n\n",
+                                        countThread.get(),
+                                        commit.getId(),
+                                        processedCommits,
+                                        fromCache,
+                                        totalCommits);
+
                             }
-                            if ((log % 20) == 0) {
+                            if ((log % ConstantSize.frequency_write_cache) == 0) {
                                 Caching.saveCommitCache(resultCommitsMethods, projectName);
                             }
 
@@ -223,11 +217,7 @@ public class MetricsCalculator {
                             // Pulisci la directory temporanea del commit
                             cleanupTempDirectory(commitTempDir);
 
-                        } catch (Exception e) {
-                           e.printStackTrace();
-                           cleanupTempDirectory(commitTempDir);
-                        }
-                    })
+                        })
                 ).get(); // Attendi il completamento
             }
 
@@ -235,6 +225,7 @@ public class MetricsCalculator {
             // processa l'instanziazione delle classi in modo sequenziale
             if (!releaseCommits.isEmpty()) {
                 if(releaseTickets.isEmpty()){
+                    restoreFromBackup();
                     return new HashMap<>(releaseResults);
                 }
                 max_last_classes=actRelease.getReleaseAllClass().size()/ConstantSize.MAX_BUGGY_PERCETAGE;
@@ -257,33 +248,23 @@ public class MetricsCalculator {
                     lastClassesEvaluation(commitTempDir);
                     cleanupTempDirectory(commitTempDir);
                 }
-
-
             }
 
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException("Errore durante l'elaborazione parallela", e);
-        } finally {
+
+
+            LOGGER.info("Assegnazione buggyness " +lastClassFiles.size());
+            assignBuggyness(ConstantSize.use_last_class);
+
+
+            // Save the commit cache to disk
+            Caching.saveCommitCache(resultCommitsMethods, projectName);
+            return new HashMap<>(releaseResults);
+        }catch (Exception e ){
+            return new HashMap<>();
+        }finally {
             customThreadPool.shutdown();
+            restoreFromBackup();
         }
-
-//        System.out.println("Fine calcolo metriche per la release " + release.getName());
-
-
-        System.out.println("Assegnazione buggyness " +lastClassFiles.size());
-      //  restoreFromBackup();
-        assignBuggyness(ConstantSize.use_last_class);
-        System.out.println("Fine assegnazione buggyness  " + release.getName());
-
-        // Save the commit cache to disk
-        Caching.saveCommitCache(resultCommitsMethods, projectName);
-
-        return new HashMap<>(releaseResults);
-    }catch (Exception e ){
-        //restoreFromBackup();
-        System.err.println("Errore durante l'assegnazione dei buggyness: " + e.getMessage());
-        return new HashMap<>();
-    }
     }
     // Metodo di supporto per pulire le directory temporanee
     private void cleanupTempDirectory(Path dirPath) {
@@ -295,7 +276,7 @@ public class MetricsCalculator {
                         .forEach(File::delete);
             }
         } catch (IOException e) {
-            System.err.println("Impossibile pulire la directory temporanea " + dirPath + ": " + e.getMessage());
+            LOGGER.error("Impossibile pulire la directory temporanea " + dirPath + ": " + e.getMessage());
         }
     }
     private File ensureTempDirectoryExists(Path path) {
@@ -307,6 +288,100 @@ public class MetricsCalculator {
             throw new RuntimeException("Impossibile creare la directory temporanea: " + path, e);
         }
     }
+    /**
+     * Crea una copia completa di backup del repository
+     */
+    private void backupRepository() throws IOException {
+       LOGGER.info("Creazione backup completo del repository in: {} ", backupRepoPath);
+
+        // Crea la directory di backup
+        File backupDir = new File(backupRepoPath);
+        if (!backupDir.exists() && !backupDir.mkdirs()) {
+            throw new IOException("Impossibile creare la directory di backup: " + backupRepoPath);
+        }
+
+        // Copia tutti i file, inclusa l'intera directory .git
+        Path sourceDir = Paths.get(originalRepoPath);
+        Files.walk(sourceDir)
+            .forEach(source -> {
+                try {
+                    Path relativePath = sourceDir.relativize(source);
+                    Path destination = Paths.get(backupRepoPath, relativePath.toString());
+
+                    // Se è una directory, creala
+                    if (Files.isDirectory(source)) {
+                        if (!Files.exists(destination)) {
+                            Files.createDirectories(destination);
+                        }
+                        return;
+                    }
+
+                    // Assicurati che la directory di destinazione esista
+                    Files.createDirectories(destination.getParent());
+
+                    // Copia il file
+                    Files.copy(source, destination);
+                } catch (IOException e) {
+                    LOGGER.error("Errore durante il backup del file: {}, errore :{} ", source,  e.getMessage());
+                }
+            });
+    }
+    /**
+     * Ripristina il repository dallo stato di backup
+     */
+    private void restoreFromBackup() throws IOException {
+        if (backupRepoPath == null || originalRepoPath == null) {
+            LOGGER.error("Nessun backup disponibile per il ripristino");
+            return;
+        }
+
+        // Chiudi il repository attuale per liberare tutte le risorse
+        if (git != null) {
+            git.close();
+        }
+
+        // Elimina la directory corrente del repository
+        deleteDirectory(new File(originalRepoPath));
+
+        // Ricrea la directory originale
+        File originalDir = new File(originalRepoPath);
+        if (!originalDir.exists() && !originalDir.mkdirs()) {
+            throw new IOException("Impossibile ricreare la directory originale: " + originalRepoPath);
+        }
+
+        // Copia tutti i file dal backup
+        Path backupDir = Paths.get(backupRepoPath);
+        Files.walk(backupDir)
+                .forEach(source -> {
+                    try {
+                        Path relativePath = backupDir.relativize(source);
+                        Path destination = Paths.get(originalRepoPath, relativePath.toString());
+
+                        // Se è una directory, creala
+                        if (Files.isDirectory(source)) {
+                            if (!Files.exists(destination)) {
+                                Files.createDirectories(destination);
+                            }
+                            return;
+                        }
+
+                        // Assicurati che la directory di destinazione esista
+                        Files.createDirectories(destination.getParent());
+
+                        // Copia il file
+                        Files.copy(source, destination);
+                    } catch (IOException e) {
+                       LOGGER.error("Errore durante il ripristino del file: {} errore: {}", source,  e.getMessage());
+                    }
+                });
+
+        // Riapri il repository
+        git = Git.open(new File(originalRepoPath));
+        repository = git.getRepository();
+        deleteDirectory(new File(backupRepoPath));
+    }
+
+
 
 
 
@@ -454,28 +529,11 @@ public class MetricsCalculator {
 
 
 
-    private void checkoutRelease(RevCommit commit) throws GitAPIException, IOException {
-        String targetCommit = commit.getId().getName();
-        String currentCommit = repository.resolve("HEAD").getName();
-
-        if (!currentCommit.equals(targetCommit)) {
-            // Verifica e rimuovi eventuali file di lock
-            File indexLock = new File(repository.getDirectory(), "index.lock");
-            if (indexLock.exists()) {
-                if (!indexLock.delete()) {
-                    throw new IOException("Impossibile rimuovere il file index.lock");
-                }
-            }
-
-            // Reset hard per pulire lo stato
-            git.reset().setMode(ResetCommand.ResetType.HARD).call();
-
-            // Usa setForced() invece di setForce()
-            git.checkout()
-                    .setName(targetCommit)
-                    .setForced(true)
-                    .call();
-
+    private void checkoutRelease(RevCommit commit) {
+        try {
+            git.checkout().setName(commit.getName()).call();
+        } catch (GitAPIException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -486,51 +544,55 @@ public class MetricsCalculator {
 
 
 
-    private long exportCodeToDirectory(RevCommit commit, Path targetDir) throws IOException {
-        RevWalk revWalk = new RevWalk(repository);
-        RevCommit parent = commit.getParentCount() > 0 ? revWalk.parseCommit(commit.getParent(0).getId()) : null;
+    private long exportCodeToDirectory(RevCommit commit, Path targetDir) {
+        try{
+            RevWalk revWalk = new RevWalk(repository);
+            RevCommit parent = commit.getParentCount() > 0 ? revWalk.parseCommit(commit.getParent(0).getId()) : null;
 
-        DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE);
-        df.setRepository(repository);
-        df.setDiffComparator(RawTextComparator.DEFAULT);
-        df.setDetectRenames(true);
+            DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE);
+            df.setRepository(repository);
+            df.setDiffComparator(RawTextComparator.DEFAULT);
+            df.setDetectRenames(true);
 
-        List<DiffEntry> diffs = df.scan(parent == null ? null : parent.getTree(), commit.getTree());
-        boolean filesExported = false;
+            List<DiffEntry> diffs = df.scan(parent == null ? null : parent.getTree(), commit.getTree());
+            boolean filesExported = false;
 
-        for (DiffEntry entry : diffs) {
-            if (entry.getChangeType() == DiffEntry.ChangeType.DELETE) continue; // Ignora file rimossi
+            for (DiffEntry entry : diffs) {
+                if (entry.getChangeType() == DiffEntry.ChangeType.DELETE) continue; // Ignora file rimossi
 
-            String path = entry.getNewPath();
-            if (path.endsWith(".java") && ! isTestFile(path)) {
-                ObjectId objectId = commit.getTree().getId();
+                String path = entry.getNewPath();
+                if (path.endsWith(".java") && ! isTestFile(path)) {
+                    ObjectId objectId = commit.getTree().getId();
 
-                try (TreeWalk treeWalk = TreeWalk.forPath(repository, path, commit.getTree())) {
-                    if (treeWalk != null) {
-                        byte[] content = repository.open(treeWalk.getObjectId(0)).getBytes();
+                    try (TreeWalk treeWalk = TreeWalk.forPath(repository, path, commit.getTree())) {
+                        if (treeWalk != null) {
+                            byte[] content = repository.open(treeWalk.getObjectId(0)).getBytes();
 
-                        Path targetFilePath = targetDir.resolve(path);
-                        Files.createDirectories(targetFilePath.getParent());
-                        Files.write(targetFilePath, content);
-                        filesExported = true;
+                            Path targetFilePath = targetDir.resolve(path);
+                            Files.createDirectories(targetFilePath.getParent());
+                            Files.write(targetFilePath, content);
+                            filesExported = true;
+                        }
                     }
                 }
             }
+
+            // Stampiamo quanti file sono stati effettivamente esportati
+            // Verifichiamo prima che la directory esista
+
+            long  count = 0;
+            if (Files.exists(targetDir)) {
+                count = Files.walk(targetDir)
+                        .filter(p -> p.toString().endsWith(".java"))
+                        .count();
+
+            }
+            return count;
+        } catch (Exception e) {
+           LOGGER.error("Errore durante l'esportazione dei file del commit: {} ", commit.getName(), e);
+           return 0;
         }
 
-        // Stampiamo quanti file sono stati effettivamente esportati
-        // Verifichiamo prima che la directory esista
-
-        long  count = 0;
-        if (Files.exists(targetDir)) {
-            count = Files.walk(targetDir)
-                    .filter(p -> p.toString().endsWith(".java"))
-                    .count();
-//            System.out.println("File .java modificati esportati in " + targetDir + ": " + count);
-        } else {
-//            System.out.println("Nessun file .java esportato in " + targetDir);
-        }
-        return count;
     }
 
     private boolean isTestFile(String path) {
@@ -539,7 +601,7 @@ public class MetricsCalculator {
     }
 
 
-    private Map<String, MethodInstance> calculateCKMetrics(Path sourcePath) throws IOException {
+    private Map<String, MethodInstance> calculateCKMetrics(Path sourcePath){
 
         // Crea una mappa per contenere i risultati dei metodi analizzati
 
@@ -614,7 +676,7 @@ public class MetricsCalculator {
                     methodInstanceResults.put(MethodInstance.createMethodKey(methodInstance),methodInstance);
 
                 } catch (Exception e) {
-//                    System.out.println(e);
+                    LOGGER.error("Errore durante l'analisi del metodo: {} ", method.getQualifiedMethodName(), e);
 
                 }
             }
@@ -662,16 +724,15 @@ public class MetricsCalculator {
     }
     List<ClassFile> buggyClasses = new ArrayList<>();
     //questo metodo scorre le release e assegna il valore buggyness delle classi
-    private void assignBuggyness(boolean use_last_classes){
-
+    private void assignBuggyness(boolean useLastClasses){
+        if(useLastClasses){
+            LOGGER.info(" ATTIVATA ASSEGNAZIONE BUGGYNESS CON LE ULTIME CLASSI ");
+        }
         List<RevCommit> revCommitList = new ArrayList<>();
         for(Ticket ticket:releaseTickets){
-//            System.out.println("Assegnando buggyness al ticket " + ticket.getKey());
+
             List<RevCommit> ticketCommits = ticket.getAssociatedCommits();
-            for (RevCommit commit : ticketCommits) {
-//                System.out.println("Assegnando buggyness al commit " + commit.getName());
-                revCommitList.add(commit);
-            }
+            revCommitList.addAll(ticketCommits);
 
         }
         sortCommits(revCommitList);
@@ -681,30 +742,23 @@ public class MetricsCalculator {
             RevCommit commit = revCommitList.get(i);
             List<String> modifiedClasses = gitHubInfoRetrieve.getDifference(commit,false);
 
-            for (String className : modifiedClasses) {
-                System.out.println(" - " + className);
-            }
+
 
             if (!modifiedClasses.isEmpty()) {
-                updateBuggyness(modifiedClasses,use_last_classes);
+                updateBuggyness(modifiedClasses,useLastClasses);
             }
 
         }
-        System.out.println("Fine assegnazione buggyness alle classi");
-//        if(buggyClasses.size()>actRelease.getReleaseAllClass().size()/ConstantSize.MAX_BUGGY_PERCETAGE   && !use_last_classes)  {
-//            assignBuggyness(true);
-//        }
-        System.out.println("Classi bugginese: "+buggyClasses.size());
-//        for(ClassFile file: buggyClasses){
-//            System.out.println(file.getPath());
-//        }
+        LOGGER.info("Fine assegnazione buggyness alle classi");
+        if(buggyClasses.size()>actRelease.getReleaseAllClass().size()/ConstantSize.MAX_BUGGY_PERCETAGE   && !useLastClasses)  {
+            assignBuggyness(true);
+        }
+       LOGGER.info("Classi bugginese: "+buggyClasses.size());
     }
 
     //questo metodo scorre tutti i file modificati da un commit correlato ad un ticket, quindi tali classi
     //si assumono buggy e quindi deve essere settato il parametro buggy a true
     private void updateBuggyness(List<String> allPaths,boolean  use_last_classes) {
-//        System.out.println("Classi da modificare: " + allPaths.sizeWindow());
-
         for (String path : allPaths) {
             ClassFile currentFile = use_last_classes?lastClassFiles.get(path):actRelease.getClassFileByPath(path);
             if (currentFile == null) continue;
@@ -736,20 +790,11 @@ public class MetricsCalculator {
         }
     }
 
-    private static Map<String, String> extractMethodBodiesByName(String source) {
+    private  Map<String, String> extractMethodBodiesByName(String source) {
         Map<String, String> methodMap = new HashMap<>();
-
         if (source == null || source.trim().isEmpty()) {
-//            System.out.println("Sorgente vuota o nulla, impossibile estrarre i metodi");
             return methodMap;
         }
-
-        // Optional: se il contenuto sembra troppo corto o non valido, evita il parsing
-//        if (!source.contains("class") && !source.contains("interface") && !source.contains("enum")) {
-//            System.out.println("Il contenuto non sembra un file Java completo, salto il parsing.");
-//            return methodMap;
-//        }
-
         try {
             CompilationUnit cu = StaticJavaParser.parse(source);
 
@@ -759,19 +804,15 @@ public class MetricsCalculator {
                 methodMap.put(name, body);
             });
         } catch (ParseProblemException e) {
-            System.out.println("Errore di parsing del codice sorgente: " + e.getMessage());
-            System.out.println("Il codice sorgente contiene sintassi Java non valida e verrà ignorato");
             try {
                 String errorFilePath = System.getProperty("java.io.tmpdir") + "/parsing_error_" +
                         System.currentTimeMillis() + ".txt";
                 Files.writeString(Paths.get(errorFilePath), source);
-//                System.out.println("Codice problematico salvato in: " + errorFilePath);
             } catch (IOException ioe) {
-                // Ignora errori durante il salvataggio
+                LOGGER.error("errore durante  il tentativo di recupero l'estrazione dei metodi: {} errore generato {}", e.getClass().getName(),  e.getMessage());
             }
         } catch (Exception e) {
-           System.out.println("Errore durante l'estrazione dei metodi: " + e.getClass().getName());
-           System.out.println("Messaggio: " + e.getMessage());
+            LOGGER.error("errore durante l'estrazione dei metodi: {} errore generato {}", e.getClass().getName(),  e.getMessage());
         }
 
         return methodMap;
