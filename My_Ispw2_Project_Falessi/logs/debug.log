@@ -1,0 +1,437 @@
+2025-06-17 13:05:28 INFO  CK:57 - Found 0 java files
+2025-06-17 13:05:28 INFO  CK:83 - Found 0 src dirs
+2025-06-17 13:05:28 DEBUG CK:96 - Max partition size: 400, total partitions=0
+2025-06-17 13:05:28 INFO  CK:112 - Finished parsing
+2025-06-17 13:05:30 INFO  CK:57 - Found 2 java files
+2025-06-17 13:05:30 INFO  CK:83 - Found 0 src dirs
+2025-06-17 13:05:30 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 13:05:30 DEBUG CK:99 - Next partition
+2025-06-17 13:05:31 INFO  CK:57 - Found 0 java files
+2025-06-17 13:05:31 INFO  CK:83 - Found 0 src dirs
+2025-06-17 13:05:31 DEBUG CK:96 - Max partition size: 400, total partitions=0
+2025-06-17 13:05:31 INFO  CK:112 - Finished parsing
+2025-06-17 13:05:31 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_1862e2bad507949caed81cecb9155360b9731220\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\AsmAdaptor.java
+2025-06-17 13:05:32 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_1862e2bad507949caed81cecb9155360b9731220\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\AsmAdaptor.java, className=org.apache.openjpa.enhance.AsmAdaptor$Anonymous1]
+2025-06-17 13:05:32 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_1862e2bad507949caed81cecb9155360b9731220\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\AsmAdaptor.java, className=org.apache.openjpa.enhance.AsmAdaptor$BCClassWriter]
+2025-06-17 13:05:32 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_1862e2bad507949caed81cecb9155360b9731220\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\AsmAdaptor.java, className=org.apache.openjpa.enhance.AsmAdaptor$EnhancedStatusException]
+2025-06-17 13:05:32 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_1862e2bad507949caed81cecb9155360b9731220\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\AsmAdaptor.java, className=org.apache.openjpa.enhance.AsmAdaptor]
+2025-06-17 13:05:32 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_1862e2bad507949caed81cecb9155360b9731220\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCClassFileTransformer.java
+2025-06-17 13:05:32 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_1862e2bad507949caed81cecb9155360b9731220\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCClassFileTransformer.java, className=org.apache.openjpa.enhance.PCClassFileTransformer]
+2025-06-17 13:05:32 INFO  CK:112 - Finished parsing
+2025-06-17 13:05:39 INFO  CK:57 - Found 6 java files
+2025-06-17 13:05:39 INFO  CK:83 - Found 0 src dirs
+2025-06-17 13:05:39 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 13:05:39 DEBUG CK:99 - Next partition
+2025-06-17 13:05:40 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_6eeb025cf3e771da8461633813e1926d912d2aab\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java
+2025-06-17 13:05:40 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_6eeb025cf3e771da8461633813e1926d912d2aab\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer$Flags]
+2025-06-17 13:05:40 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_6eeb025cf3e771da8461633813e1926d912d2aab\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer$AuxiliaryEnhancer]
+2025-06-17 13:05:40 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_6eeb025cf3e771da8461633813e1926d912d2aab\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer]
+2025-06-17 13:05:41 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_6eeb025cf3e771da8461633813e1926d912d2aab\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\SerpPrivacyHelper.java
+2025-06-17 13:05:41 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_6eeb025cf3e771da8461633813e1926d912d2aab\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\SerpPrivacyHelper.java, className=org.apache.openjpa.enhance.SerpPrivacyHelper]
+2025-06-17 13:05:41 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_6eeb025cf3e771da8461633813e1926d912d2aab\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\SerpPrivacyHelper.java, className=org.apache.openjpa.enhance.SerpPrivacyHelper$Anonymous1]
+2025-06-17 13:05:41 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_6eeb025cf3e771da8461633813e1926d912d2aab\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\SerpPrivacyHelper.java, className=org.apache.openjpa.enhance.SerpPrivacyHelper$Anonymous2]
+2025-06-17 13:05:41 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_6eeb025cf3e771da8461633813e1926d912d2aab\openjpa-kernel\src\main\java\org\apache\openjpa\meta\InterfaceImplGenerator.java
+2025-06-17 13:05:41 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_6eeb025cf3e771da8461633813e1926d912d2aab\openjpa-kernel\src\main\java\org\apache\openjpa\meta\InterfaceImplGenerator.java, className=org.apache.openjpa.meta.InterfaceImplGenerator]
+2025-06-17 13:05:41 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_6eeb025cf3e771da8461633813e1926d912d2aab\openjpa-kernel\src\main\java\org\apache\openjpa\util\asm\AsmHelper.java
+2025-06-17 13:05:41 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_6eeb025cf3e771da8461633813e1926d912d2aab\openjpa-kernel\src\main\java\org\apache\openjpa\util\asm\AsmHelper.java, className=org.apache.openjpa.util.asm.AsmHelper]
+2025-06-17 13:05:41 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_6eeb025cf3e771da8461633813e1926d912d2aab\openjpa-kernel\src\main\java\org\apache\openjpa\util\asm\EnhancementClassLoader.java
+2025-06-17 13:05:41 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_6eeb025cf3e771da8461633813e1926d912d2aab\openjpa-kernel\src\main\java\org\apache\openjpa\util\asm\EnhancementClassLoader.java, className=org.apache.openjpa.util.asm.EnhancementClassLoader]
+2025-06-17 13:05:41 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_6eeb025cf3e771da8461633813e1926d912d2aab\openjpa-kernel\src\main\java\org\apache\openjpa\util\asm\EnhancementProject.java
+2025-06-17 13:05:41 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_6eeb025cf3e771da8461633813e1926d912d2aab\openjpa-kernel\src\main\java\org\apache\openjpa\util\asm\EnhancementProject.java, className=org.apache.openjpa.util.asm.EnhancementProject]
+2025-06-17 13:05:41 INFO  CK:112 - Finished parsing
+2025-06-17 13:05:47 INFO  CK:57 - Found 0 java files
+2025-06-17 13:05:47 INFO  CK:83 - Found 0 src dirs
+2025-06-17 13:05:47 DEBUG CK:96 - Max partition size: 400, total partitions=0
+2025-06-17 13:05:47 INFO  CK:112 - Finished parsing
+2025-06-17 13:05:47 INFO  CK:57 - Found 0 java files
+2025-06-17 13:05:47 INFO  CK:83 - Found 0 src dirs
+2025-06-17 13:05:47 DEBUG CK:96 - Max partition size: 400, total partitions=0
+2025-06-17 13:05:47 INFO  CK:112 - Finished parsing
+2025-06-17 13:05:54 INFO  CK:57 - Found 3 java files
+2025-06-17 13:05:54 INFO  CK:83 - Found 0 src dirs
+2025-06-17 13:05:54 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 13:05:54 DEBUG CK:99 - Next partition
+2025-06-17 13:05:54 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_c16c8348a0d7a3da6da3a2c2774631a5359e6241\openjpa-lib\src\main\java\org\apache\openjpa\lib\meta\XMLVersionParser.java
+2025-06-17 13:05:54 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_c16c8348a0d7a3da6da3a2c2774631a5359e6241\openjpa-lib\src\main\java\org\apache\openjpa\lib\meta\XMLVersionParser.java, className=org.apache.openjpa.lib.meta.XMLVersionParser]
+2025-06-17 13:05:54 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_c16c8348a0d7a3da6da3a2c2774631a5359e6241\openjpa-persistence\src\main\java\org\apache\openjpa\persistence\PersistenceProductDerivation.java
+2025-06-17 13:05:54 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_c16c8348a0d7a3da6da3a2c2774631a5359e6241\openjpa-persistence\src\main\java\org\apache\openjpa\persistence\PersistenceProductDerivation.java, className=org.apache.openjpa.persistence.PersistenceProductDerivation$ConfigurationProviderImpl]
+2025-06-17 13:05:54 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_c16c8348a0d7a3da6da3a2c2774631a5359e6241\openjpa-persistence\src\main\java\org\apache\openjpa\persistence\PersistenceProductDerivation.java, className=org.apache.openjpa.persistence.PersistenceProductDerivation$PUNameCollision]
+2025-06-17 13:05:54 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_c16c8348a0d7a3da6da3a2c2774631a5359e6241\openjpa-persistence\src\main\java\org\apache\openjpa\persistence\PersistenceProductDerivation.java, className=org.apache.openjpa.persistence.PersistenceProductDerivation$ConfigurationParser]
+2025-06-17 13:05:54 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_c16c8348a0d7a3da6da3a2c2774631a5359e6241\openjpa-persistence\src\main\java\org\apache\openjpa\persistence\PersistenceProductDerivation.java, className=org.apache.openjpa.persistence.PersistenceProductDerivation]
+2025-06-17 13:05:55 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_c16c8348a0d7a3da6da3a2c2774631a5359e6241\openjpa-persistence\src\main\java\org\apache\openjpa\persistence\XMLPersistenceMetaDataParser.java
+2025-06-17 13:05:55 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_c16c8348a0d7a3da6da3a2c2774631a5359e6241\openjpa-persistence\src\main\java\org\apache\openjpa\persistence\XMLPersistenceMetaDataParser.java, className=org.apache.openjpa.persistence.XMLPersistenceMetaDataParser$localDBIdentifiers]
+2025-06-17 13:05:55 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_c16c8348a0d7a3da6da3a2c2774631a5359e6241\openjpa-persistence\src\main\java\org\apache\openjpa\persistence\XMLPersistenceMetaDataParser.java, className=org.apache.openjpa.persistence.XMLPersistenceMetaDataParser]
+2025-06-17 13:05:56 INFO  CK:112 - Finished parsing
+2025-06-17 13:06:02 INFO  CK:57 - Found 0 java files
+2025-06-17 13:06:02 INFO  CK:83 - Found 0 src dirs
+2025-06-17 13:06:02 DEBUG CK:96 - Max partition size: 400, total partitions=0
+2025-06-17 13:06:02 INFO  CK:112 - Finished parsing
+2025-06-17 13:06:04 INFO  CK:57 - Found 2 java files
+2025-06-17 13:06:04 INFO  CK:83 - Found 0 src dirs
+2025-06-17 13:06:04 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 13:06:04 DEBUG CK:99 - Next partition
+2025-06-17 13:06:04 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_9c9138603dbd2bb32fd3931e98bba0d015ba01b6\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\schema\Constraint.java
+2025-06-17 13:06:04 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_9c9138603dbd2bb32fd3931e98bba0d015ba01b6\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\schema\Constraint.java, className=org.apache.openjpa.jdbc.schema.Constraint]
+2025-06-17 13:06:04 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_9c9138603dbd2bb32fd3931e98bba0d015ba01b6\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\schema\ForeignKey.java
+2025-06-17 13:06:04 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_9c9138603dbd2bb32fd3931e98bba0d015ba01b6\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\schema\ForeignKey.java, className=org.apache.openjpa.jdbc.schema.ForeignKey$FKMapKey]
+2025-06-17 13:06:04 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_9c9138603dbd2bb32fd3931e98bba0d015ba01b6\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\schema\ForeignKey.java, className=org.apache.openjpa.jdbc.schema.ForeignKey]
+2025-06-17 13:06:05 INFO  CK:112 - Finished parsing
+2025-06-17 13:06:12 INFO  CK:57 - Found 1 java files
+2025-06-17 13:06:12 INFO  CK:83 - Found 0 src dirs
+2025-06-17 13:06:12 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 13:06:12 DEBUG CK:99 - Next partition
+2025-06-17 13:06:12 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_972b5d0e62451b6b79ea82d4e7fd57c93f77835f\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java
+2025-06-17 13:06:12 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_972b5d0e62451b6b79ea82d4e7fd57c93f77835f\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer$Flags]
+2025-06-17 13:06:12 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_972b5d0e62451b6b79ea82d4e7fd57c93f77835f\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer$Anonymous1]
+2025-06-17 13:06:12 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_972b5d0e62451b6b79ea82d4e7fd57c93f77835f\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer$AuxiliaryEnhancer]
+2025-06-17 13:06:12 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_972b5d0e62451b6b79ea82d4e7fd57c93f77835f\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer]
+2025-06-17 13:06:13 INFO  CK:112 - Finished parsing
+2025-06-17 13:06:22 INFO  CK:57 - Found 0 java files
+2025-06-17 13:06:22 INFO  CK:83 - Found 0 src dirs
+2025-06-17 13:06:22 DEBUG CK:96 - Max partition size: 400, total partitions=0
+2025-06-17 13:06:22 INFO  CK:112 - Finished parsing
+2025-06-17 13:06:32 INFO  CK:57 - Found 2 java files
+2025-06-17 13:06:32 INFO  CK:83 - Found 0 src dirs
+2025-06-17 13:06:32 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 13:06:32 DEBUG CK:99 - Next partition
+2025-06-17 13:06:32 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_62b14584fbf6781164f5a01f8784cf79a0e493a6\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java
+2025-06-17 13:06:33 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_62b14584fbf6781164f5a01f8784cf79a0e493a6\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer$Anonymous1]
+2025-06-17 13:06:33 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_62b14584fbf6781164f5a01f8784cf79a0e493a6\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer$AuxiliaryEnhancer]
+2025-06-17 13:06:33 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_62b14584fbf6781164f5a01f8784cf79a0e493a6\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer]
+2025-06-17 13:06:33 INFO  CK:57 - Found 3 java files
+2025-06-17 13:06:33 INFO  CK:83 - Found 0 src dirs
+2025-06-17 13:06:33 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 13:06:33 DEBUG CK:99 - Next partition
+2025-06-17 13:06:33 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_bcb00d890976ac19e7969858aba3ed235ebcfea9\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\ManagedClassSubclasser.java
+2025-06-17 13:06:33 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_bcb00d890976ac19e7969858aba3ed235ebcfea9\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\ManagedClassSubclasser.java, className=org.apache.openjpa.enhance.ManagedClassSubclasser]
+2025-06-17 13:06:33 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_bcb00d890976ac19e7969858aba3ed235ebcfea9\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\ManagedClassSubclasser.java, className=org.apache.openjpa.enhance.ManagedClassSubclasser$Anonymous1]
+2025-06-17 13:06:33 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_bcb00d890976ac19e7969858aba3ed235ebcfea9\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java
+2025-06-17 13:06:33 INFO  CK:57 - Found 3 java files
+2025-06-17 13:06:33 INFO  CK:83 - Found 0 src dirs
+2025-06-17 13:06:33 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 13:06:33 DEBUG CK:99 - Next partition
+2025-06-17 13:06:34 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_62b14584fbf6781164f5a01f8784cf79a0e493a6\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer$Flags]
+2025-06-17 13:06:34 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_62b14584fbf6781164f5a01f8784cf79a0e493a6\openjpa-kernel\src\main\java\org\apache\openjpa\util\asm\AsmHelper.java
+2025-06-17 13:06:34 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_92bb3b055ae4f882b10a197b012c0a1a3449a4cf\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java
+2025-06-17 13:06:34 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_62b14584fbf6781164f5a01f8784cf79a0e493a6\openjpa-kernel\src\main\java\org\apache\openjpa\util\asm\AsmHelper.java, className=org.apache.openjpa.util.asm.AsmHelper]
+2025-06-17 13:06:34 INFO  CK:112 - Finished parsing
+2025-06-17 13:06:34 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_bcb00d890976ac19e7969858aba3ed235ebcfea9\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer$AuxiliaryEnhancer]
+2025-06-17 13:06:34 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_bcb00d890976ac19e7969858aba3ed235ebcfea9\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer]
+2025-06-17 13:06:34 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_92bb3b055ae4f882b10a197b012c0a1a3449a4cf\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer]
+2025-06-17 13:06:34 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_bcb00d890976ac19e7969858aba3ed235ebcfea9\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer$Flags]
+2025-06-17 13:06:34 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_bcb00d890976ac19e7969858aba3ed235ebcfea9\openjpa-kernel\src\main\java\org\apache\openjpa\util\asm\BytecodeWriter.java
+2025-06-17 13:06:34 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_bcb00d890976ac19e7969858aba3ed235ebcfea9\openjpa-kernel\src\main\java\org\apache\openjpa\util\asm\BytecodeWriter.java, className=org.apache.openjpa.util.asm.BytecodeWriter]
+2025-06-17 13:06:34 INFO  CK:112 - Finished parsing
+2025-06-17 13:06:35 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_92bb3b055ae4f882b10a197b012c0a1a3449a4cf\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer$Anonymous1]
+2025-06-17 13:06:35 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_92bb3b055ae4f882b10a197b012c0a1a3449a4cf\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer$Flags]
+2025-06-17 13:06:35 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_92bb3b055ae4f882b10a197b012c0a1a3449a4cf\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer$AuxiliaryEnhancer]
+2025-06-17 13:06:35 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_92bb3b055ae4f882b10a197b012c0a1a3449a4cf\openjpa-kernel\src\main\java\org\apache\openjpa\util\asm\AsmHelper.java
+2025-06-17 13:06:35 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_92bb3b055ae4f882b10a197b012c0a1a3449a4cf\openjpa-kernel\src\main\java\org\apache\openjpa\util\asm\AsmHelper.java, className=org.apache.openjpa.util.asm.AsmHelper]
+2025-06-17 13:06:35 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_92bb3b055ae4f882b10a197b012c0a1a3449a4cf\openjpa-tools\openjpa-fetch-statistics\src\main\java\org\apache\openjpa\enhance\stats\FetchStatisticsAuxEnhancer.java
+2025-06-17 13:06:35 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_92bb3b055ae4f882b10a197b012c0a1a3449a4cf\openjpa-tools\openjpa-fetch-statistics\src\main\java\org\apache\openjpa\enhance\stats\FetchStatisticsAuxEnhancer.java, className=org.apache.openjpa.enhance.stats.FetchStatisticsAuxEnhancer]
+2025-06-17 13:06:35 INFO  CK:112 - Finished parsing
+2025-06-17 13:06:42 INFO  CK:57 - Found 0 java files
+2025-06-17 13:06:42 INFO  CK:83 - Found 0 src dirs
+2025-06-17 13:06:42 DEBUG CK:96 - Max partition size: 400, total partitions=0
+2025-06-17 13:06:42 INFO  CK:112 - Finished parsing
+2025-06-17 13:06:43 INFO  CK:57 - Found 1 java files
+2025-06-17 13:06:43 INFO  CK:83 - Found 0 src dirs
+2025-06-17 13:06:43 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 13:06:43 DEBUG CK:99 - Next partition
+2025-06-17 13:06:43 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_629ebaefce481863ec0a154b06ef8b5ccf41a620\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\sql\HerdDBDictionary.java
+2025-06-17 13:06:43 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_629ebaefce481863ec0a154b06ef8b5ccf41a620\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\sql\HerdDBDictionary.java, className=org.apache.openjpa.jdbc.sql.HerdDBDictionary]
+2025-06-17 13:06:43 INFO  CK:112 - Finished parsing
+2025-06-17 13:06:51 INFO  CK:57 - Found 1 java files
+2025-06-17 13:06:51 INFO  CK:83 - Found 0 src dirs
+2025-06-17 13:06:51 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 13:06:51 DEBUG CK:99 - Next partition
+2025-06-17 13:06:51 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_d7571386696353fd43e999d2a5a0b3f5631cc285\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java
+2025-06-17 13:06:52 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_d7571386696353fd43e999d2a5a0b3f5631cc285\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer$Anonymous1]
+2025-06-17 13:06:52 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_d7571386696353fd43e999d2a5a0b3f5631cc285\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer]
+2025-06-17 13:06:52 INFO  CK:57 - Found 1 java files
+2025-06-17 13:06:52 INFO  CK:83 - Found 0 src dirs
+2025-06-17 13:06:52 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 13:06:52 DEBUG CK:99 - Next partition
+2025-06-17 13:06:52 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_5e89853664d46ed7505efd37a3eddcc53d110e38\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java
+2025-06-17 13:06:52 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_5e89853664d46ed7505efd37a3eddcc53d110e38\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer$Anonymous1]
+2025-06-17 13:06:52 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_5e89853664d46ed7505efd37a3eddcc53d110e38\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer]
+2025-06-17 13:06:52 INFO  CK:57 - Found 1 java files
+2025-06-17 13:06:52 INFO  CK:83 - Found 0 src dirs
+2025-06-17 13:06:52 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 13:06:52 DEBUG CK:99 - Next partition
+2025-06-17 13:06:52 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_a8cb9d9d3d0ff07032a8d68b2712c2b46daa6d4b\openjpa-kernel\src\main\java\org\apache\openjpa\datacache\DataCachePCDataGenerator.java
+2025-06-17 13:06:52 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_a8cb9d9d3d0ff07032a8d68b2712c2b46daa6d4b\openjpa-kernel\src\main\java\org\apache\openjpa\datacache\DataCachePCDataGenerator.java, className=org.apache.openjpa.datacache.DataCachePCDataGenerator]
+2025-06-17 13:06:53 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_a8cb9d9d3d0ff07032a8d68b2712c2b46daa6d4b\openjpa-kernel\src\main\java\org\apache\openjpa\datacache\DataCachePCDataGenerator.java, className=org.apache.openjpa.datacache.DataCachePCDataGenerator$Timed]
+2025-06-17 13:06:53 INFO  CK:112 - Finished parsing
+2025-06-17 13:06:53 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_d7571386696353fd43e999d2a5a0b3f5631cc285\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer$AuxiliaryEnhancer]
+2025-06-17 13:06:53 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_d7571386696353fd43e999d2a5a0b3f5631cc285\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer$Flags]
+2025-06-17 13:06:53 INFO  CK:112 - Finished parsing
+2025-06-17 13:06:53 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_5e89853664d46ed7505efd37a3eddcc53d110e38\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer$AuxiliaryEnhancer]
+2025-06-17 13:06:53 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_5e89853664d46ed7505efd37a3eddcc53d110e38\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer$Flags]
+2025-06-17 13:06:53 INFO  CK:112 - Finished parsing
+2025-06-17 13:07:00 INFO  CK:57 - Found 1 java files
+2025-06-17 13:07:00 INFO  CK:83 - Found 0 src dirs
+2025-06-17 13:07:00 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 13:07:00 DEBUG CK:99 - Next partition
+2025-06-17 13:07:00 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_5b67ce51801cb646d772dadd03a623312603a0df\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java
+2025-06-17 13:07:00 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_5b67ce51801cb646d772dadd03a623312603a0df\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer$Flags]
+2025-06-17 13:07:00 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_5b67ce51801cb646d772dadd03a623312603a0df\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer$AuxiliaryEnhancer]
+2025-06-17 13:07:00 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_5b67ce51801cb646d772dadd03a623312603a0df\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer]
+2025-06-17 13:07:00 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\0.9.6_5b67ce51801cb646d772dadd03a623312603a0df\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer$Anonymous1]
+2025-06-17 13:07:00 INFO  CK:112 - Finished parsing
+2025-06-17 13:54:35 INFO  CK:57 - Found 3 java files
+2025-06-17 13:54:35 INFO  CK:83 - Found 0 src dirs
+2025-06-17 13:54:35 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 13:54:35 DEBUG CK:99 - Next partition
+2025-06-17 13:54:36 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_64db31069570bd99547f26c77d8f8174c8d7d0a1\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\conf\FetchModeValue.java
+2025-06-17 13:54:36 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_64db31069570bd99547f26c77d8f8174c8d7d0a1\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\conf\FetchModeValue.java, className=org.apache.openjpa.jdbc.conf.FetchModeValue]
+2025-06-17 13:54:37 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_64db31069570bd99547f26c77d8f8174c8d7d0a1\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\conf\JDBCConfigurationImpl.java
+2025-06-17 13:54:38 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_64db31069570bd99547f26c77d8f8174c8d7d0a1\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\conf\JDBCConfigurationImpl.java, className=org.apache.openjpa.jdbc.conf.JDBCConfigurationImpl]
+2025-06-17 13:54:39 INFO  CK:57 - Found 0 java files
+2025-06-17 13:54:39 INFO  CK:83 - Found 0 src dirs
+2025-06-17 13:54:39 DEBUG CK:96 - Max partition size: 400, total partitions=0
+2025-06-17 13:54:39 INFO  CK:112 - Finished parsing
+2025-06-17 13:54:42 INFO  CK:57 - Found 3 java files
+2025-06-17 13:54:42 INFO  CK:83 - Found 0 src dirs
+2025-06-17 13:54:42 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 13:54:42 DEBUG CK:99 - Next partition
+2025-06-17 14:05:15 INFO  CK:57 - Found 3 java files
+2025-06-17 14:05:15 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:05:15 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 14:05:15 DEBUG CK:99 - Next partition
+2025-06-17 14:05:16 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_64db31069570bd99547f26c77d8f8174c8d7d0a1\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\conf\FetchModeValue.java
+2025-06-17 14:13:43 INFO  CK:57 - Found 3 java files
+2025-06-17 14:13:43 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:13:43 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 14:13:43 DEBUG CK:99 - Next partition
+2025-06-17 14:13:44 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_64db31069570bd99547f26c77d8f8174c8d7d0a1\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\conf\FetchModeValue.java
+2025-06-17 14:13:44 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_64db31069570bd99547f26c77d8f8174c8d7d0a1\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\conf\FetchModeValue.java, className=org.apache.openjpa.jdbc.conf.FetchModeValue]
+2025-06-17 14:13:45 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_64db31069570bd99547f26c77d8f8174c8d7d0a1\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\conf\JDBCConfigurationImpl.java
+2025-06-17 14:13:45 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_64db31069570bd99547f26c77d8f8174c8d7d0a1\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\conf\JDBCConfigurationImpl.java, className=org.apache.openjpa.jdbc.conf.JDBCConfigurationImpl]
+2025-06-17 14:13:46 INFO  CK:57 - Found 1 java files
+2025-06-17 14:13:46 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:13:46 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 14:13:46 DEBUG CK:99 - Next partition
+2025-06-17 14:13:47 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_2c5377f687d087b94b56bfb5e3b2b5ba4fd3d684\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\QueryImpl.java
+2025-06-17 14:13:47 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_2c5377f687d087b94b56bfb5e3b2b5ba4fd3d684\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\QueryImpl.java, className=org.apache.openjpa.kernel.QueryImpl$MergedExecutor]
+2025-06-17 14:13:50 INFO  CK:57 - Found 1 java files
+2025-06-17 14:13:50 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:13:50 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 14:13:50 DEBUG CK:99 - Next partition
+2025-06-17 14:13:50 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_3b2f6a720dcf71073f25fde87f02c522c9eb8f80\openjpa-persistence\src\main\java\org\apache\openjpa\persistence\PersistenceMetaDataFactory.java
+2025-06-17 14:13:50 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_3b2f6a720dcf71073f25fde87f02c522c9eb8f80\openjpa-persistence\src\main\java\org\apache\openjpa\persistence\PersistenceMetaDataFactory.java, className=org.apache.openjpa.persistence.PersistenceMetaDataFactory]
+2025-06-17 14:13:52 INFO  CK:57 - Found 3 java files
+2025-06-17 14:13:52 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:13:52 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 14:13:52 DEBUG CK:99 - Next partition
+2025-06-17 14:13:53 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_f2a266c4c2dde0124814c16776f020c120a8ccf2\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\StateManagerImpl.java
+2025-06-17 14:13:53 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_f2a266c4c2dde0124814c16776f020c120a8ccf2\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\StateManagerImpl.java, className=org.apache.openjpa.kernel.StateManagerImpl]
+2025-06-17 14:13:57 INFO  CK:112 - Finished parsing
+2025-06-17 14:13:57 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_2c5377f687d087b94b56bfb5e3b2b5ba4fd3d684\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\QueryImpl.java, className=org.apache.openjpa.kernel.QueryImpl$RemoveOnCloseResultList]
+2025-06-17 14:13:58 INFO  CK:57 - Found 5 java files
+2025-06-17 14:13:58 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:13:58 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 14:13:58 DEBUG CK:99 - Next partition
+2025-06-17 14:13:58 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_d826caf71175811a23214b4e23545aee7625d7ed\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\AbstractBrokerFactory.java
+2025-06-17 14:13:58 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_d826caf71175811a23214b4e23545aee7625d7ed\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\AbstractBrokerFactory.java, className=org.apache.openjpa.kernel.AbstractBrokerFactory$RemoveTransactionSync]
+2025-06-17 14:13:59 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_d826caf71175811a23214b4e23545aee7625d7ed\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\AbstractBrokerFactory.java, className=org.apache.openjpa.kernel.AbstractBrokerFactory]
+2025-06-17 14:14:01 INFO  CK:57 - Found 1 java files
+2025-06-17 14:14:01 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:14:01 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 14:14:01 DEBUG CK:99 - Next partition
+2025-06-17 14:14:01 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_5ff49b37b9dc7ba70fb247e3ca1931f65a99c1c4\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\sql\HSQLDictionary.java
+2025-06-17 14:14:02 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_5ff49b37b9dc7ba70fb247e3ca1931f65a99c1c4\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\sql\HSQLDictionary.java, className=org.apache.openjpa.jdbc.sql.HSQLDictionary]
+2025-06-17 14:14:05 INFO  CK:57 - Found 6 java files
+2025-06-17 14:14:05 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:14:05 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 14:14:05 DEBUG CK:99 - Next partition
+2025-06-17 14:14:05 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_3b9fa1f25aa4e19b858e43e3ad8710e2b7dbdba4\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\conf\MappingRepositoryValue.java
+2025-06-17 14:14:05 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_3b9fa1f25aa4e19b858e43e3ad8710e2b7dbdba4\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\conf\MappingRepositoryValue.java, className=org.apache.openjpa.jdbc.conf.MappingRepositoryValue]
+2025-06-17 14:14:05 INFO  CK:112 - Finished parsing
+2025-06-17 14:14:05 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_3b9fa1f25aa4e19b858e43e3ad8710e2b7dbdba4\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\meta\MappingDefaultsImpl.java
+2025-06-17 14:14:05 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_3b9fa1f25aa4e19b858e43e3ad8710e2b7dbdba4\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\meta\MappingDefaultsImpl.java, className=org.apache.openjpa.jdbc.meta.MappingDefaultsImpl]
+2025-06-17 14:14:06 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_d826caf71175811a23214b4e23545aee7625d7ed\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\Broker.java
+2025-06-17 14:14:06 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_d826caf71175811a23214b4e23545aee7625d7ed\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\Broker.java, className=org.apache.openjpa.kernel.Broker]
+2025-06-17 14:14:07 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_64db31069570bd99547f26c77d8f8174c8d7d0a1\openjpa-kernel\src\main\java\org\apache\openjpa\conf\OpenJPAConfigurationImpl.java
+2025-06-17 14:14:08 INFO  CK:57 - Found 1 java files
+2025-06-17 14:14:08 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:14:08 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 14:14:08 DEBUG CK:99 - Next partition
+2025-06-17 14:14:08 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_64db31069570bd99547f26c77d8f8174c8d7d0a1\openjpa-kernel\src\main\java\org\apache\openjpa\conf\OpenJPAConfigurationImpl.java, className=org.apache.openjpa.conf.OpenJPAConfigurationImpl]
+2025-06-17 14:14:08 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_f104321da80a5a17170f910b2ecb63fa331aee26\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\StateManagerImpl.java
+2025-06-17 14:14:08 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_f104321da80a5a17170f910b2ecb63fa331aee26\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\StateManagerImpl.java, className=org.apache.openjpa.kernel.StateManagerImpl]
+2025-06-17 14:14:14 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_2c5377f687d087b94b56bfb5e3b2b5ba4fd3d684\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\QueryImpl.java, className=org.apache.openjpa.kernel.QueryImpl$Compilation]
+2025-06-17 14:14:14 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_2c5377f687d087b94b56bfb5e3b2b5ba4fd3d684\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\QueryImpl.java, className=org.apache.openjpa.kernel.QueryImpl$CompilationKey]
+2025-06-17 14:14:15 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_2c5377f687d087b94b56bfb5e3b2b5ba4fd3d684\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\QueryImpl.java, className=org.apache.openjpa.kernel.QueryImpl$PackingResultObjectProvider]
+2025-06-17 14:14:18 INFO  CK:57 - Found 2 java files
+2025-06-17 14:14:18 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:14:18 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 14:14:18 DEBUG CK:99 - Next partition
+2025-06-17 14:14:18 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_5bef32e5164bca30a252b9863e6fcc8f4051b00a\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\kernel\exps\PCPath.java
+2025-06-17 14:14:18 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_5bef32e5164bca30a252b9863e6fcc8f4051b00a\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\kernel\exps\PCPath.java, className=org.apache.openjpa.jdbc.kernel.exps.PCPath]
+2025-06-17 14:14:20 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_2c5377f687d087b94b56bfb5e3b2b5ba4fd3d684\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\QueryImpl.java, className=org.apache.openjpa.kernel.QueryImpl]
+2025-06-17 14:14:26 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_3b9fa1f25aa4e19b858e43e3ad8710e2b7dbdba4\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\meta\strats\SuperclassDiscriminatorStrategy.java
+2025-06-17 14:14:26 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_3b9fa1f25aa4e19b858e43e3ad8710e2b7dbdba4\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\meta\strats\SuperclassDiscriminatorStrategy.java, className=org.apache.openjpa.jdbc.meta.strats.SuperclassDiscriminatorStrategy]
+2025-06-17 14:14:27 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_3b9fa1f25aa4e19b858e43e3ad8710e2b7dbdba4\openjpa-kernel\src\main\java\org\apache\openjpa\conf\OpenJPAConfigurationImpl.java
+2025-06-17 14:14:27 INFO  CK:57 - Found 0 java files
+2025-06-17 14:14:27 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:14:27 DEBUG CK:96 - Max partition size: 400, total partitions=0
+2025-06-17 14:14:27 INFO  CK:112 - Finished parsing
+2025-06-17 14:14:27 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_3b9fa1f25aa4e19b858e43e3ad8710e2b7dbdba4\openjpa-kernel\src\main\java\org\apache\openjpa\conf\OpenJPAConfigurationImpl.java, className=org.apache.openjpa.conf.OpenJPAConfigurationImpl]
+2025-06-17 14:14:29 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_d826caf71175811a23214b4e23545aee7625d7ed\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\BrokerImpl.java
+2025-06-17 14:14:29 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_5bef32e5164bca30a252b9863e6fcc8f4051b00a\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\kernel\exps\PCPath.java, className=org.apache.openjpa.jdbc.kernel.exps.PCPath$Action]
+2025-06-17 14:14:30 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_5bef32e5164bca30a252b9863e6fcc8f4051b00a\openjpa-lib\src\main\java\org\apache\openjpa\lib\util\Localizer.java
+2025-06-17 14:14:30 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_5bef32e5164bca30a252b9863e6fcc8f4051b00a\openjpa-lib\src\main\java\org\apache\openjpa\lib\util\Localizer.java, className=org.apache.openjpa.lib.util.Localizer]
+2025-06-17 14:14:30 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_d826caf71175811a23214b4e23545aee7625d7ed\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\BrokerImpl.java, className=org.apache.openjpa.kernel.BrokerImpl$ManagedCache]
+2025-06-17 14:14:34 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_5bef32e5164bca30a252b9863e6fcc8f4051b00a\openjpa-lib\src\main\java\org\apache\openjpa\lib\util\Localizer.java, className=org.apache.openjpa.lib.util.Localizer$Message]
+2025-06-17 14:14:34 INFO  CK:57 - Found 0 java files
+2025-06-17 14:14:34 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:14:34 DEBUG CK:96 - Max partition size: 400, total partitions=0
+2025-06-17 14:14:34 INFO  CK:112 - Finished parsing
+2025-06-17 14:14:35 INFO  CK:112 - Finished parsing
+2025-06-17 14:14:37 INFO  CK:57 - Found 1 java files
+2025-06-17 14:14:37 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:14:37 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 14:14:37 DEBUG CK:99 - Next partition
+2025-06-17 14:14:37 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_60a1e54f07a491213603b7881d7ae8615556fd2a\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\DetachManager.java
+2025-06-17 14:14:37 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_60a1e54f07a491213603b7881d7ae8615556fd2a\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\DetachManager.java, className=org.apache.openjpa.kernel.DetachManager$DetachFieldManager]
+2025-06-17 14:14:38 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_60a1e54f07a491213603b7881d7ae8615556fd2a\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\DetachManager.java, className=org.apache.openjpa.kernel.DetachManager]
+2025-06-17 14:14:40 INFO  CK:57 - Found 1 java files
+2025-06-17 14:14:40 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:14:40 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 14:14:40 DEBUG CK:99 - Next partition
+2025-06-17 14:14:40 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_ed0d6b1fec099a0a8e1302c259b242e6cdf87596\openjpa-kernel\src\main\java\org\apache\openjpa\conf\Compatibility.java
+2025-06-17 14:14:40 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_ed0d6b1fec099a0a8e1302c259b242e6cdf87596\openjpa-kernel\src\main\java\org\apache\openjpa\conf\Compatibility.java, className=org.apache.openjpa.conf.Compatibility]
+2025-06-17 14:14:42 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_60a1e54f07a491213603b7881d7ae8615556fd2a\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\DetachManager.java, className=org.apache.openjpa.kernel.DetachManager$InstanceDetachFieldManager]
+2025-06-17 14:14:45 INFO  CK:112 - Finished parsing
+2025-06-17 14:14:46 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_d826caf71175811a23214b4e23545aee7625d7ed\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\BrokerImpl.java, className=org.apache.openjpa.kernel.BrokerImpl$ManagedObjectCollection$Anonymous1]
+2025-06-17 14:14:49 INFO  CK:112 - Finished parsing
+2025-06-17 14:14:49 INFO  CK:57 - Found 1 java files
+2025-06-17 14:14:49 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:14:49 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 14:14:49 DEBUG CK:99 - Next partition
+2025-06-17 14:14:50 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_7ded1815868d29a41f78c767e6234bbcf08a8532\openjpa-kernel\src\main\java\org\apache\openjpa\conf\OpenJPAConfigurationImpl.java
+2025-06-17 14:14:50 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_7ded1815868d29a41f78c767e6234bbcf08a8532\openjpa-kernel\src\main\java\org\apache\openjpa\conf\OpenJPAConfigurationImpl.java, className=org.apache.openjpa.conf.OpenJPAConfigurationImpl]
+2025-06-17 14:14:51 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_d826caf71175811a23214b4e23545aee7625d7ed\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\BrokerImpl.java, className=org.apache.openjpa.kernel.BrokerImpl$JCAHelper]
+2025-06-17 14:14:55 INFO  CK:57 - Found 0 java files
+2025-06-17 14:14:55 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:14:55 DEBUG CK:96 - Max partition size: 400, total partitions=0
+2025-06-17 14:14:55 INFO  CK:112 - Finished parsing
+2025-06-17 14:14:56 INFO  CK:57 - Found 0 java files
+2025-06-17 14:14:56 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:14:56 DEBUG CK:96 - Max partition size: 400, total partitions=0
+2025-06-17 14:14:56 INFO  CK:112 - Finished parsing
+2025-06-17 14:14:59 INFO  CK:57 - Found 5 java files
+2025-06-17 14:14:59 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:14:59 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 14:14:59 DEBUG CK:99 - Next partition
+2025-06-17 14:15:00 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_840644fcc5332740c9c5f466b968c1cd8afab6b3\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\sql\DBDictionary.java
+2025-06-17 14:15:00 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_840644fcc5332740c9c5f466b968c1cd8afab6b3\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\sql\DBDictionary.java, className=org.apache.openjpa.jdbc.sql.DBDictionary]
+2025-06-17 14:15:06 INFO  CK:57 - Found 1 java files
+2025-06-17 14:15:06 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:15:06 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 14:15:06 DEBUG CK:99 - Next partition
+2025-06-17 14:15:06 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_8c2c40dfe133a1493d5b0d5b8e26ce16eaf5b0d0\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java
+2025-06-17 14:15:06 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_8c2c40dfe133a1493d5b0d5b8e26ce16eaf5b0d0\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer$AuxiliaryEnhancer]
+2025-06-17 14:15:08 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_8c2c40dfe133a1493d5b0d5b8e26ce16eaf5b0d0\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer$Flags]
+2025-06-17 14:15:08 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_8c2c40dfe133a1493d5b0d5b8e26ce16eaf5b0d0\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer]
+2025-06-17 14:15:12 INFO  CK:57 - Found 0 java files
+2025-06-17 14:15:12 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:15:12 DEBUG CK:96 - Max partition size: 400, total partitions=0
+2025-06-17 14:15:12 INFO  CK:112 - Finished parsing
+2025-06-17 14:15:14 INFO  CK:112 - Finished parsing
+2025-06-17 14:15:24 INFO  CK:57 - Found 0 java files
+2025-06-17 14:15:24 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:15:24 DEBUG CK:96 - Max partition size: 400, total partitions=0
+2025-06-17 14:15:24 INFO  CK:112 - Finished parsing
+2025-06-17 14:15:25 INFO  CK:57 - Found 1 java files
+2025-06-17 14:15:25 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:15:25 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 14:15:25 DEBUG CK:99 - Next partition
+2025-06-17 14:15:25 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_132602e3d20efd612f21835bd48c2f9aebaa300f\openjpa-lib\src\main\java\org\apache\openjpa\lib\ant\AbstractTask.java
+2025-06-17 14:15:25 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_132602e3d20efd612f21835bd48c2f9aebaa300f\openjpa-lib\src\main\java\org\apache\openjpa\lib\ant\AbstractTask.java, className=org.apache.openjpa.lib.ant.AbstractTask]
+2025-06-17 14:15:26 INFO  CK:112 - Finished parsing
+2025-06-17 14:15:26 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_d826caf71175811a23214b4e23545aee7625d7ed\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\BrokerImpl.java, className=org.apache.openjpa.kernel.BrokerImpl$TransactionalCache]
+2025-06-17 14:15:28 INFO  CK:57 - Found 1 java files
+2025-06-17 14:15:28 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:15:28 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 14:15:28 DEBUG CK:99 - Next partition
+2025-06-17 14:15:29 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_8a9c647907d9cd3207f0cbac9bce9b4caab298ac\openjpa-kernel\src\main\java\org\apache\openjpa\meta\MetaDataRepository.java
+2025-06-17 14:15:29 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_8a9c647907d9cd3207f0cbac9bce9b4caab298ac\openjpa-kernel\src\main\java\org\apache\openjpa\meta\MetaDataRepository.java, className=org.apache.openjpa.meta.MetaDataRepository]
+2025-06-17 14:15:29 INFO  CK:112 - Finished parsing
+2025-06-17 14:15:29 INFO  CK:57 - Found 1 java files
+2025-06-17 14:15:29 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:15:29 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 14:15:29 DEBUG CK:99 - Next partition
+2025-06-17 14:15:29 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_868cc7bc4e27b145b561dcb1e9976497a080faa5\openjpa-persistence\src\main\java\org\apache\openjpa\persistence\XMLPersistenceMetaDataParser.java
+2025-06-17 14:15:30 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_868cc7bc4e27b145b561dcb1e9976497a080faa5\openjpa-persistence\src\main\java\org\apache\openjpa\persistence\XMLPersistenceMetaDataParser.java, className=org.apache.openjpa.persistence.XMLPersistenceMetaDataParser]
+2025-06-17 14:15:40 INFO  CK:57 - Found 3 java files
+2025-06-17 14:15:40 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:15:40 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 14:15:40 DEBUG CK:99 - Next partition
+2025-06-17 14:15:40 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_0e7feca04a29f354abc476d55252bab968a87f3f\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java
+2025-06-17 14:15:40 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_0e7feca04a29f354abc476d55252bab968a87f3f\openjpa-kernel\src\main\java\org\apache\openjpa\enhance\PCEnhancer.java, className=org.apache.openjpa.enhance.PCEnhancer]
+2025-06-17 14:15:46 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_3b9fa1f25aa4e19b858e43e3ad8710e2b7dbdba4\openjpa-kernel\src\main\java\org\apache\openjpa\conf\QueryCompilationCacheValue.java
+2025-06-17 14:15:46 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_3b9fa1f25aa4e19b858e43e3ad8710e2b7dbdba4\openjpa-kernel\src\main\java\org\apache\openjpa\conf\QueryCompilationCacheValue.java, className=org.apache.openjpa.conf.QueryCompilationCacheValue]
+2025-06-17 14:15:47 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_3b9fa1f25aa4e19b858e43e3ad8710e2b7dbdba4\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\QueryImpl.java
+2025-06-17 14:15:47 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_3b9fa1f25aa4e19b858e43e3ad8710e2b7dbdba4\openjpa-kernel\src\main\java\org\apache\openjpa\kernel\QueryImpl.java, className=org.apache.openjpa.kernel.QueryImpl$RemoveOnCloseResultList]
+2025-06-17 14:30:43 INFO  CK:57 - Found 951 java files
+2025-06-17 14:30:43 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:30:43 DEBUG CK:96 - Max partition size: 400, total partitions=3
+2025-06-17 14:30:43 DEBUG CK:99 - Next partition
+2025-06-17 14:30:45 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_640cddad04c525af1122fbf8d6e2fde8a13adfb8\openjpa-examples\src\main\java\hellojpa\Main.java
+2025-06-17 14:30:45 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_640cddad04c525af1122fbf8d6e2fde8a13adfb8\openjpa-examples\src\main\java\hellojpa\Main.java, className=hellojpa.Main]
+2025-06-17 14:30:46 INFO  CK:57 - Found 146 java files
+2025-06-17 14:30:46 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:30:46 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 14:30:46 DEBUG CK:99 - Next partition
+2025-06-17 14:30:46 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_b9183699ba5e4eb2335772077f2b0d8918767fb8\openjpa-lib\main\java\org\apache\openjpa\lib\ant\AbstractTask.java
+2025-06-17 14:30:46 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_b9183699ba5e4eb2335772077f2b0d8918767fb8\openjpa-lib\main\java\org\apache\openjpa\lib\ant\AbstractTask.java, className=org.apache.openjpa.lib.ant.AbstractTask]
+2025-06-17 14:30:47 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_640cddad04c525af1122fbf8d6e2fde8a13adfb8\openjpa-examples\src\main\java\hellojpa\Message.java
+2025-06-17 14:30:47 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_640cddad04c525af1122fbf8d6e2fde8a13adfb8\openjpa-examples\src\main\java\hellojpa\Message.java, className=hellojpa.Message]
+2025-06-17 14:30:48 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_640cddad04c525af1122fbf8d6e2fde8a13adfb8\openjpa-examples\src\main\java\relations\Deity.java
+2025-06-17 14:30:48 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_640cddad04c525af1122fbf8d6e2fde8a13adfb8\openjpa-examples\src\main\java\relations\Deity.java, className=relations.Deity]
+2025-06-17 14:30:49 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_b9183699ba5e4eb2335772077f2b0d8918767fb8\openjpa-lib\main\java\org\apache\openjpa\lib\conf\BooleanValue.java
+2025-06-17 14:30:50 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_b9183699ba5e4eb2335772077f2b0d8918767fb8\openjpa-lib\main\java\org\apache\openjpa\lib\conf\BooleanValue.java, className=org.apache.openjpa.lib.conf.BooleanValue]
+2025-06-17 14:30:51 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_b9183699ba5e4eb2335772077f2b0d8918767fb8\openjpa-lib\main\java\org\apache\openjpa\lib\conf\Configurable.java
+2025-06-17 14:30:51 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_b9183699ba5e4eb2335772077f2b0d8918767fb8\openjpa-lib\main\java\org\apache\openjpa\lib\conf\Configurable.java, className=org.apache.openjpa.lib.conf.Configurable]
+2025-06-17 14:30:51 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_640cddad04c525af1122fbf8d6e2fde8a13adfb8\openjpa-examples\src\main\java\relations\Deity.java, className=relations.Deity$Gender]
+2025-06-17 14:30:51 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_640cddad04c525af1122fbf8d6e2fde8a13adfb8\openjpa-examples\src\main\java\relations\Main.java
+2025-06-17 14:30:51 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_640cddad04c525af1122fbf8d6e2fde8a13adfb8\openjpa-examples\src\main\java\relations\Main.java, className=relations.Main]
+2025-06-17 14:30:51 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_b9183699ba5e4eb2335772077f2b0d8918767fb8\openjpa-lib\main\java\org\apache\openjpa\lib\conf\Configuration.java
+2025-06-17 14:30:51 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_b9183699ba5e4eb2335772077f2b0d8918767fb8\openjpa-lib\main\java\org\apache\openjpa\lib\conf\Configuration.java, className=org.apache.openjpa.lib.conf.Configuration]
+2025-06-17 14:30:51 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_640cddad04c525af1122fbf8d6e2fde8a13adfb8\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\ant\MappingToolTask.java
+2025-06-17 14:30:51 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_640cddad04c525af1122fbf8d6e2fde8a13adfb8\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\ant\MappingToolTask.java, className=org.apache.openjpa.jdbc.ant.MappingToolTask$Action]
+2025-06-17 14:30:51 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_640cddad04c525af1122fbf8d6e2fde8a13adfb8\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\ant\MappingToolTask.java, className=org.apache.openjpa.jdbc.ant.MappingToolTask]
+2025-06-17 14:30:52 INFO  CK:57 - Found 927 java files
+2025-06-17 14:30:52 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:30:52 DEBUG CK:96 - Max partition size: 400, total partitions=3
+2025-06-17 14:30:52 DEBUG CK:99 - Next partition
+2025-06-17 14:30:53 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_b108a39e7ec1719df17034f9f0083477be816951\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\ant\MappingToolTask.java
+2025-06-17 14:30:53 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_b108a39e7ec1719df17034f9f0083477be816951\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\ant\MappingToolTask.java, className=org.apache.openjpa.jdbc.ant.MappingToolTask]
+2025-06-17 14:30:56 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_b9183699ba5e4eb2335772077f2b0d8918767fb8\openjpa-lib\main\java\org\apache\openjpa\lib\conf\ConfigurationImpl.java
+2025-06-17 14:30:56 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_b9183699ba5e4eb2335772077f2b0d8918767fb8\openjpa-lib\main\java\org\apache\openjpa\lib\conf\ConfigurationImpl.java, className=org.apache.openjpa.lib.conf.ConfigurationImpl$PropertyList]
+2025-06-17 14:30:56 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_640cddad04c525af1122fbf8d6e2fde8a13adfb8\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\ant\MappingToolTask.java, className=org.apache.openjpa.jdbc.ant.MappingToolTask$SchemaAction]
+2025-06-17 14:30:56 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_640cddad04c525af1122fbf8d6e2fde8a13adfb8\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\ant\ReverseMappingToolTask.java
+2025-06-17 14:30:56 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_640cddad04c525af1122fbf8d6e2fde8a13adfb8\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\ant\ReverseMappingToolTask.java, className=org.apache.openjpa.jdbc.ant.ReverseMappingToolTask$Level]
+2025-06-17 14:30:56 INFO  CK:57 - Found 235 java files
+2025-06-17 14:30:56 INFO  CK:83 - Found 0 src dirs
+2025-06-17 14:30:56 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-17 14:30:56 DEBUG CK:99 - Next partition
+2025-06-17 14:30:57 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_b9183699ba5e4eb2335772077f2b0d8918767fb8\openjpa-lib\main\java\org\apache\openjpa\lib\conf\ConfigurationImpl.java, className=org.apache.openjpa.lib.conf.ConfigurationImpl]
+2025-06-17 14:30:57 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_640cddad04c525af1122fbf8d6e2fde8a13adfb8\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\ant\ReverseMappingToolTask.java, className=org.apache.openjpa.jdbc.ant.ReverseMappingToolTask]
+2025-06-17 14:30:57 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_46e7dbf647b3ae5653e242218f7723f0b0dd5e89\openjpa-lib\src\main\java\org\apache\openjpa\lib\ant\AbstractTask.java
+2025-06-17 14:30:57 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_46e7dbf647b3ae5653e242218f7723f0b0dd5e89\openjpa-lib\src\main\java\org\apache\openjpa\lib\ant\AbstractTask.java, className=org.apache.openjpa.lib.ant.AbstractTask]
+2025-06-17 14:30:58 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_b108a39e7ec1719df17034f9f0083477be816951\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\ant\MappingToolTask.java, className=org.apache.openjpa.jdbc.ant.MappingToolTask$SchemaAction]
+2025-06-17 14:30:59 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_b108a39e7ec1719df17034f9f0083477be816951\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\ant\MappingToolTask.java, className=org.apache.openjpa.jdbc.ant.MappingToolTask$Action]
+2025-06-17 14:30:59 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_b108a39e7ec1719df17034f9f0083477be816951\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\ant\ReverseMappingToolTask.java
+2025-06-17 14:30:59 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_b108a39e7ec1719df17034f9f0083477be816951\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\ant\ReverseMappingToolTask.java, className=org.apache.openjpa.jdbc.ant.ReverseMappingToolTask$Level]
+2025-06-17 14:30:59 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_b108a39e7ec1719df17034f9f0083477be816951\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\ant\ReverseMappingToolTask.java, className=org.apache.openjpa.jdbc.ant.ReverseMappingToolTask]
+2025-06-17 14:31:00 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_46e7dbf647b3ae5653e242218f7723f0b0dd5e89\openjpa-lib\src\main\java\org\apache\openjpa\lib\conf\BooleanValue.java
+2025-06-17 14:31:00 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_46e7dbf647b3ae5653e242218f7723f0b0dd5e89\openjpa-lib\src\main\java\org\apache\openjpa\lib\conf\BooleanValue.java, className=org.apache.openjpa.lib.conf.BooleanValue]
+2025-06-17 14:31:02 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_46e7dbf647b3ae5653e242218f7723f0b0dd5e89\openjpa-lib\src\main\java\org\apache\openjpa\lib\conf\Configurable.java
+2025-06-17 14:31:02 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_46e7dbf647b3ae5653e242218f7723f0b0dd5e89\openjpa-lib\src\main\java\org\apache\openjpa\lib\conf\Configurable.java, className=org.apache.openjpa.lib.conf.Configurable]
+2025-06-17 14:31:02 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_46e7dbf647b3ae5653e242218f7723f0b0dd5e89\openjpa-lib\src\main\java\org\apache\openjpa\lib\conf\Configuration.java
+2025-06-17 14:31:02 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_46e7dbf647b3ae5653e242218f7723f0b0dd5e89\openjpa-lib\src\main\java\org\apache\openjpa\lib\conf\Configuration.java, className=org.apache.openjpa.lib.conf.Configuration]
+2025-06-17 14:31:03 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_640cddad04c525af1122fbf8d6e2fde8a13adfb8\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\ant\SchemaToolTask.java
+2025-06-17 14:31:03 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\1.0.0_640cddad04c525af1122fbf8d6e2fde8a13adfb8\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\ant\SchemaToolTask.java, className=org.apache.openjpa.jdbc.ant.SchemaToolTask]

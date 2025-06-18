@@ -1,34 +1,10 @@
-
-# Maven target directory
-target/
-target/**
-
-# Cache files and directories
-.cache/
-*.cache
-.caches/
-
-# IDE specific files
-.idea/
-*.iml
-.settings/
-.classpath
-.project
-.vscode/
-
-# Compiled files
-*.class
-*.jar
-*.war
-
-# Log files
-*.log
-logs/
-
-# Build files
-build/
-out/
-
-# OS specific files
-.DS_Store
-Thumbs.db
+# Default ignored files
+/shelf/
+/workspace.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+# Environment-dependent path to Maven home directory
+/mavenHomeManager.xml
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
