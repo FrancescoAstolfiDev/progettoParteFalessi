@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pmd xmlns="http://pmd.sourceforge.net/report/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pmd.sourceforge.net/report/2.0.0 http://pmd.sourceforge.net/report_2_0_0.xsd" version="6.55.0" timestamp="2025-06-17T12:24:26.913">
+<file name="C:\isw2\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\DatasetCreationMain.java">
+<violation beginline="7" endline="18" begincolumn="34" endcolumn="1" rule="UseUtilityClass" ruleset="Design" package="project" class="DatasetCreationMain" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_design.html#useutilityclass" priority="3">
+All methods are static.  Consider using a utility class instead. Alternatively, you could add a private constructor or make the class abstract to silence this warning.
+</violation>
+</file>
+<file name="C:\isw2\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\EvaluationMain.java">
+<violation beginline="5" endline="13" begincolumn="29" endcolumn="1" rule="UseUtilityClass" ruleset="Design" package="project" class="EvaluationMain" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_design.html#useutilityclass" priority="3">
+All methods are static.  Consider using a utility class instead. Alternatively, you could add a private constructor or make the class abstract to silence this warning.
+</violation>
+</file>
+<file name="C:\isw2\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\controllers\CSVtoARFFConverter.java">
+<violation beginline="10" endline="52" begincolumn="8" endcolumn="1" rule="ClassWithOnlyPrivateConstructorsShouldBeFinal" ruleset="Design" package="project.controllers" class="CSVtoARFFConverter" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_design.html#classwithonlyprivateconstructorsshouldbefinal" priority="1">
+A class which only has private constructors should be final
+</violation>
+</file>
+<file name="C:\isw2\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\controllers\Caching.java">
+<violation beginline="16" endline="353" begincolumn="22" endcolumn="1" rule="UseUtilityClass" ruleset="Design" package="project.controllers" class="Caching" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_design.html#useutilityclass" priority="3">
+All methods are static.  Consider using a utility class instead. Alternatively, you could add a private constructor or make the class abstract to silence this warning.
+</violation>
+<violation beginline="29" endline="29" begincolumn="37" endcolumn="61" rule="UseLocaleWithCaseConversions" ruleset="Error Prone" package="project.controllers" class="Caching" method="getCacheFilePath" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#uselocalewithcaseconversions" priority="3">
+When doing a String.toLowerCase()/toUpperCase() call, use a Locale
+</violation>
+<violation beginline="83" endline="83" begincolumn="21" endcolumn="32" rule="UnusedLocalVariable" ruleset="Best Practices" package="project.controllers" class="Caching" method="saveCommitCache" variable="methodsAdded" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedlocalvariable" priority="3">
+Avoid unused local variables such as 'methodsAdded'.
+</violation>
+</file>
+<file name="C:\isw2\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\controllers\EvaluationFlow.java">
+<violation beginline="152" endline="152" begincolumn="9" endcolumn="35" rule="UnnecessaryFullyQualifiedName" ruleset="Code Style" package="project.controllers" class="EvaluationFlow" method="evalStandard" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessaryfullyqualifiedname" priority="4">
+Unnecessary use of fully qualified name 'weka.classifiers.Evaluation' due to existing import 'weka.classifiers.Evaluation'
+</violation>
+<violation beginline="152" endline="152" begincolumn="50" endcolumn="76" rule="UnnecessaryFullyQualifiedName" ruleset="Code Style" package="project.controllers" class="EvaluationFlow" method="evalStandard" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessaryfullyqualifiedname" priority="4">
+Unnecessary use of fully qualified name 'weka.classifiers.Evaluation' due to existing import 'weka.classifiers.Evaluation'
+</violation>
+<violation beginline="161" endline="161" begincolumn="9" endcolumn="35" rule="UnnecessaryFullyQualifiedName" ruleset="Code Style" package="project.controllers" class="EvaluationFlow" method="evalStandard" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessaryfullyqualifiedname" priority="4">
+Unnecessary use of fully qualified name 'weka.classifiers.Evaluation' due to existing import 'weka.classifiers.Evaluation'
+</violation>
+<violation beginline="170" endline="170" begincolumn="9" endcolumn="35" rule="UnnecessaryFullyQualifiedName" ruleset="Code Style" package="project.controllers" class="EvaluationFlow" method="evalStandard" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessaryfullyqualifiedname" priority="4">
+Unnecessary use of fully qualified name 'weka.classifiers.Evaluation' due to existing import 'weka.classifiers.Evaluation'
+</violation>
+<violation beginline="170" endline="170" begincolumn="50" endcolumn="76" rule="UnnecessaryFullyQualifiedName" ruleset="Code Style" package="project.controllers" class="EvaluationFlow" method="evalStandard" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessaryfullyqualifiedname" priority="4">
+Unnecessary use of fully qualified name 'weka.classifiers.Evaluation' due to existing import 'weka.classifiers.Evaluation'
+</violation>
+</file>
+<file name="C:\isw2\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\controllers\GitHubInfoRetrieve.java">
+<violation beginline="59" endline="59" begincolumn="43" endcolumn="66" rule="UnnecessaryFullyQualifiedName" ruleset="Code Style" package="project.controllers" class="GitHubInfoRetrieve" method="GitHubInfoRetrieve" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessaryfullyqualifiedname" priority="4">
+Unnecessary use of fully qualified name 'java.nio.file.Files.list' due to existing import 'java.nio.file.Files'
+</violation>
+<violation beginline="68" endline="68" begincolumn="21" endcolumn="44" rule="UnnecessaryFullyQualifiedName" ruleset="Code Style" package="project.controllers" class="GitHubInfoRetrieve" method="GitHubInfoRetrieve" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessaryfullyqualifiedname" priority="4">
+Unnecessary use of fully qualified name 'java.nio.file.Files.walk' due to existing import 'java.nio.file.Files'
+</violation>
+<violation beginline="70" endline="70" begincolumn="30" endcolumn="47" rule="UnnecessaryFullyQualifiedName" ruleset="Code Style" package="project.controllers" class="GitHubInfoRetrieve" method="GitHubInfoRetrieve" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessaryfullyqualifiedname" priority="4">
+Unnecessary use of fully qualified name 'java.nio.file.Path' due to existing import 'java.nio.file.Path'
+</violation>
+<violation beginline="76" endline="76" begincolumn="39" endcolumn="62" rule="UnnecessaryFullyQualifiedName" ruleset="Code Style" package="project.controllers" class="GitHubInfoRetrieve" method="GitHubInfoRetrieve" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessaryfullyqualifiedname" priority="4">
+Unnecessary use of fully qualified name 'java.nio.file.Files.list' due to existing import 'java.nio.file.Files'
+</violation>
+<violation beginline="84" endline="84" begincolumn="21" endcolumn="44" rule="UnnecessaryFullyQualifiedName" ruleset="Code Style" package="project.controllers" class="GitHubInfoRetrieve" method="GitHubInfoRetrieve" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessaryfullyqualifiedname" priority="4">
+Unnecessary use of fully qualified name 'java.nio.file.Files.move' due to existing import 'java.nio.file.Files'
+</violation>
+<violation beginline="85" endline="85" begincolumn="21" endcolumn="81" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="GitHubInfoRetrieve" method="GitHubInfoRetrieve" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="89" endline="89" begincolumn="17" endcolumn="40" rule="UnnecessaryFullyQualifiedName" ruleset="Code Style" package="project.controllers" class="GitHubInfoRetrieve" method="GitHubInfoRetrieve" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessaryfullyqualifiedname" priority="4">
+Unnecessary use of fully qualified name 'java.nio.file.Files.list' due to existing import 'java.nio.file.Files'
+</violation>
+<violation beginline="94" endline="94" begincolumn="29" endcolumn="52" rule="UnnecessaryFullyQualifiedName" ruleset="Code Style" package="project.controllers" class="GitHubInfoRetrieve" method="GitHubInfoRetrieve" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessaryfullyqualifiedname" priority="4">
+Unnecessary use of fully qualified name 'java.nio.file.Files.walk' due to existing import 'java.nio.file.Files'
+</violation>
+<violation beginline="96" endline="96" begincolumn="38" endcolumn="55" rule="UnnecessaryFullyQualifiedName" ruleset="Code Style" package="project.controllers" class="GitHubInfoRetrieve" method="GitHubInfoRetrieve" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessaryfullyqualifiedname" priority="4">
+Unnecessary use of fully qualified name 'java.nio.file.Path' due to existing import 'java.nio.file.Path'
+</violation>
+<violation beginline="98" endline="98" begincolumn="28" endcolumn="85" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="GitHubInfoRetrieve" method="GitHubInfoRetrieve" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="100" endline="100" begincolumn="29" endcolumn="96" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="GitHubInfoRetrieve" method="GitHubInfoRetrieve" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="118" endline="118" begincolumn="9" endcolumn="81" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="GitHubInfoRetrieve" method="getUpdatedRepo" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="124" endline="124" begincolumn="43" endcolumn="66" rule="UnnecessaryFullyQualifiedName" ruleset="Code Style" package="project.controllers" class="GitHubInfoRetrieve" method="getUpdatedRepo" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessaryfullyqualifiedname" priority="4">
+Unnecessary use of fully qualified name 'java.nio.file.Files.list' due to existing import 'java.nio.file.Files'
+</violation>
+<violation beginline="135" endline="135" begincolumn="39" endcolumn="62" rule="UnnecessaryFullyQualifiedName" ruleset="Code Style" package="project.controllers" class="GitHubInfoRetrieve" method="getUpdatedRepo" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessaryfullyqualifiedname" priority="4">
+Unnecessary use of fully qualified name 'java.nio.file.Files.list' due to existing import 'java.nio.file.Files'
+</violation>
+<violation beginline="142" endline="142" begincolumn="21" endcolumn="93" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="GitHubInfoRetrieve" method="getUpdatedRepo" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="158" endline="158" begincolumn="17" endcolumn="86" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="GitHubInfoRetrieve" method="getUpdatedRepo" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="163" endline="163" begincolumn="17" endcolumn="91" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="GitHubInfoRetrieve" method="getUpdatedRepo" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="173" endline="173" begincolumn="17" endcolumn="92" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="GitHubInfoRetrieve" method="getUpdatedRepo" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="175" endline="175" begincolumn="17" endcolumn="91" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="GitHubInfoRetrieve" method="getUpdatedRepo" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="192" endline="192" begincolumn="18" endcolumn="25" rule="CloseResource" ruleset="Error Prone" package="project.controllers" class="GitHubInfoRetrieve" method="getMethodInstancesOfCommit" variable="treeWalk" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#closeresource" priority="3">
+Ensure that resources like this FileRepository object are closed after use
+</violation>
+<violation beginline="265" endline="265" begincolumn="22" endcolumn="87" rule="UselessParentheses" ruleset="Code Style" package="project.controllers" class="GitHubInfoRetrieve" method="orderCommitsByReleaseDate" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#uselessparentheses" priority="4">
+Useless parentheses.
+</violation>
+<violation beginline="266" endline="266" begincolumn="26" endcolumn="123" rule="UselessParentheses" ruleset="Code Style" package="project.controllers" class="GitHubInfoRetrieve" method="orderCommitsByReleaseDate" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#uselessparentheses" priority="4">
+Useless parentheses.
+</violation>
+<violation beginline="322" endline="324" begincolumn="11" endcolumn="9" rule="EmptyCatchBlock" ruleset="Error Prone" package="project.controllers" class="GitHubInfoRetrieve" method="getDifference" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#emptycatchblock" priority="3">
+Avoid empty catch blocks
+</violation>
+<violation beginline="348" endline="348" begincolumn="18" endcolumn="25" rule="CloseResource" ruleset="Error Prone" package="project.controllers" class="GitHubInfoRetrieve" method="getClassFilesOfCommit" variable="treeWalk" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#closeresource" priority="3">
+Ensure that resources like this FileRepository object are closed after use
+</violation>
+<violation beginline="389" endline="389" begincolumn="12" endcolumn="102" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="GitHubInfoRetrieve" method="getFileContentBefore" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="409" endline="409" begincolumn="13" endcolumn="96" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="GitHubInfoRetrieve" method="getFileContentBefore" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="442" endline="442" begincolumn="13" endcolumn="95" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="GitHubInfoRetrieve" method="getFileContentNow" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="455" endline="455" begincolumn="9" endcolumn="96" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="GitHubInfoRetrieve" method="getFileContentAtCommit" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="469" endline="469" begincolumn="17" endcolumn="90" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="GitHubInfoRetrieve" method="getFileContentAtCommit" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="490" endline="490" begincolumn="14" endcolumn="82" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="GitHubInfoRetrieve" method="getFileContentAtCommit" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+</file>
+<file name="C:\isw2\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\controllers\JiraInfoRetrieve.java">
+<violation beginline="38" endline="38" begincolumn="24" endcolumn="45" rule="UseLocaleWithCaseConversions" ruleset="Error Prone" package="project.controllers" class="JiraInfoRetrieve" method="JiraInfoRetrieve" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#uselocalewithcaseconversions" priority="3">
+When doing a String.toLowerCase()/toUpperCase() call, use a Locale
+</violation>
+<violation beginline="82" endline="82" begincolumn="20" endcolumn="28" rule="UnusedLocalVariable" ruleset="Best Practices" package="project.controllers" class="JiraInfoRetrieve" method="getTickets" variable="issueType" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedlocalvariable" priority="3">
+Avoid unused local variables such as 'issueType'.
+</violation>
+<violation beginline="90" endline="90" begincolumn="71" endcolumn="79" rule="ControlStatementBraces" ruleset="Code Style" package="project.controllers" class="JiraInfoRetrieve" method="getTickets" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#controlstatementbraces" priority="3">
+This statement should have braces
+</violation>
+<violation beginline="130" endline="130" begincolumn="17" endcolumn="72" rule="UselessParentheses" ruleset="Code Style" package="project.controllers" class="JiraInfoRetrieve" method="validateAV" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#uselessparentheses" priority="4">
+Useless parentheses.
+</violation>
+<violation beginline="134" endline="134" begincolumn="29" endcolumn="40" rule="ControlStatementBraces" ruleset="Code Style" package="project.controllers" class="JiraInfoRetrieve" method="getReleaseFromDate" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#controlstatementbraces" priority="3">
+This statement should have braces
+</violation>
+<violation beginline="160" endline="161" begincolumn="17" endcolumn="53" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="JiraInfoRetrieve" method="getInfoFromJiraWithRetry" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="166" endline="167" begincolumn="17" endcolumn="60" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="JiraInfoRetrieve" method="getInfoFromJiraWithRetry" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="174" endline="174" begincolumn="25" endcolumn="78" rule="PreserveStackTrace" ruleset="Best Practices" package="project.controllers" class="JiraInfoRetrieve" method="getInfoFromJiraWithRetry" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#preservestacktrace" priority="3">
+New exception is thrown in catch block, original stack trace may be lost
+</violation>
+<violation beginline="195" endline="195" begincolumn="9" endcolumn="50" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="JiraInfoRetrieve" method="getInfoFromJira" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="218" endline="218" begincolumn="17" endcolumn="88" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="JiraInfoRetrieve" method="getInfoFromJira" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="258" endline="260" begincolumn="9" endcolumn="9" rule="ForLoopCanBeForeach" ruleset="Best Practices" package="project.controllers" class="JiraInfoRetrieve" method="sortReleaseList" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#forloopcanbeforeach" priority="3">
+This for loop can be replaced by a foreach loop
+</violation>
+</file>
+<file name="C:\isw2\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\controllers\MethodDataSetExecutor.java">
+<violation beginline="11" endline="11" begincolumn="1" endcolumn="36" rule="UnnecessaryImport" ruleset="Code Style" package="project.controllers" class="MethodDataSetExecutor" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessaryimport" priority="4">
+Unused import 'project.utils.RevCommitUtils'
+</violation>
+<violation beginline="29" endline="29" begincolumn="29" endcolumn="35" rule="UnusedPrivateField" ruleset="Best Practices" package="project.controllers" class="MethodDataSetExecutor" variable="commits" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedprivatefield" priority="3">
+Avoid unused private fields such as 'commits'.
+</violation>
+<violation beginline="29" endline="29" begincolumn="13" endcolumn="36" rule="SingularField" ruleset="Design" package="project.controllers" class="MethodDataSetExecutor" variable="VariableDeclaratorId" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_design.html#singularfield" priority="3">
+Perhaps 'commits' could be replaced by a local variable.
+</violation>
+<violation beginline="31" endline="31" begincolumn="26" endcolumn="40" rule="UnusedPrivateField" ruleset="Best Practices" package="project.controllers" class="MethodDataSetExecutor" variable="lastReleaseList" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedprivatefield" priority="3">
+Avoid unused private fields such as 'lastReleaseList'.
+</violation>
+<violation beginline="33" endline="33" begincolumn="26" endcolumn="49" rule="UnusedPrivateField" ruleset="Best Practices" package="project.controllers" class="MethodDataSetExecutor" variable="currentProcessingTickets" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedprivatefield" priority="3">
+Avoid unused private fields such as 'currentProcessingTickets'.
+</violation>
+<violation beginline="33" endline="33" begincolumn="13" endcolumn="50" rule="SingularField" ruleset="Design" package="project.controllers" class="MethodDataSetExecutor" variable="VariableDeclaratorId" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_design.html#singularfield" priority="3">
+Perhaps 'currentProcessingTickets' could be replaced by a local variable.
+</violation>
+<violation beginline="45" endline="45" begincolumn="27" endcolumn="54" rule="UseLocaleWithCaseConversions" ruleset="Error Prone" package="project.controllers" class="MethodDataSetExecutor" method="writeResultsToFile" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#uselocalewithcaseconversions" priority="3">
+When doing a String.toLowerCase()/toUpperCase() call, use a Locale
+</violation>
+<violation beginline="49" endline="49" begincolumn="17" endcolumn="68" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="MethodDataSetExecutor" method="writeResultsToFile" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="53" endline="53" begincolumn="27" endcolumn="54" rule="UseLocaleWithCaseConversions" ruleset="Error Prone" package="project.controllers" class="MethodDataSetExecutor" method="writeResultsToFile" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#uselocalewithcaseconversions" priority="3">
+When doing a String.toLowerCase()/toUpperCase() call, use a Locale
+</violation>
+<violation beginline="54" endline="54" begincolumn="17" endcolumn="65" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="MethodDataSetExecutor" method="writeResultsToFile" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="59" endline="59" begincolumn="13" endcolumn="69" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="MethodDataSetExecutor" method="writeResultsToFile" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="116" endline="116" begincolumn="17" endcolumn="99" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="MethodDataSetExecutor" method="writePartialResultsToFile" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="119" endline="119" begincolumn="13" endcolumn="85" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="MethodDataSetExecutor" method="writePartialResultsToFile" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="136" endline="136" begincolumn="9" endcolumn="68" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="MethodDataSetExecutor" method="executeFlow" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="139" endline="139" begincolumn="9" endcolumn="66" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="MethodDataSetExecutor" method="executeFlow" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="153" endline="153" begincolumn="9" endcolumn="66" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="MethodDataSetExecutor" method="executeFlow" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="165" endline="165" begincolumn="9" endcolumn="92" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="MethodDataSetExecutor" method="executeFlow" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="167" endline="168" begincolumn="13" endcolumn="55" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="MethodDataSetExecutor" method="executeFlow" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="292" endline="292" begincolumn="26" endcolumn="53" rule="UseLocaleWithCaseConversions" ruleset="Error Prone" package="project.controllers" class="MethodDataSetExecutor" method="writeFile" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#uselocalewithcaseconversions" priority="3">
+When doing a String.toLowerCase()/toUpperCase() call, use a Locale
+</violation>
+<violation beginline="302" endline="302" begincolumn="41" endcolumn="49" rule="ControlStatementBraces" ruleset="Code Style" package="project.controllers" class="MethodDataSetExecutor" method="writeFile" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#controlstatementbraces" priority="3">
+This statement should have braces
+</violation>
+<violation beginline="302" endline="302" begincolumn="17" endcolumn="38" rule="CompareObjectsWithEquals" ruleset="Error Prone" package="project.controllers" class="MethodDataSetExecutor" method="writeFile" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#compareobjectswithequals" priority="3">
+Use equals() to compare object references.
+</violation>
+<violation beginline="345" endline="345" begincolumn="28" endcolumn="37" rule="ControlStatementBraces" ruleset="Code Style" package="project.controllers" class="MethodDataSetExecutor" method="escapeCsv" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#controlstatementbraces" priority="3">
+This statement should have braces
+</violation>
+<violation beginline="394" endline="394" begincolumn="20" endcolumn="40" rule="UnusedPrivateMethod" ruleset="Best Practices" package="project.controllers" class="MethodDataSetExecutor" method="coldStartProportion" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedprivatemethod" priority="3">
+Avoid unused private methods such as 'coldStartProportion()'.
+</violation>
+<violation beginline="396" endline="396" begincolumn="25" endcolumn="57" rule="UseLocaleWithCaseConversions" ruleset="Error Prone" package="project.controllers" class="MethodDataSetExecutor" method="coldStartProportion" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#uselocalewithcaseconversions" priority="3">
+When doing a String.toLowerCase()/toUpperCase() call, use a Locale
+</violation>
+</file>
+<file name="C:\isw2\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\controllers\MetricsCalculator.java">
+<violation beginline="15" endline="15" begincolumn="1" endcolumn="40" rule="UnnecessaryImport" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessaryimport" priority="4">
+Unused import 'org.eclipse.jgit.lib.AnyObjectId'
+</violation>
+<violation beginline="44" endline="44" begincolumn="1" endcolumn="36" rule="UnnecessaryImport" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessaryimport" priority="4">
+Unused import 'project.utils.RevCommitUtils'
+</violation>
+<violation beginline="112" endline="112" begincolumn="13" endcolumn="120" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="MetricsCalculator" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="137" endline="137" begincolumn="13" endcolumn="94" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="calculateReleaseMetrics" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="137" endline="137" begincolumn="26" endcolumn="92" rule="UselessParentheses" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="calculateReleaseMetrics" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#uselessparentheses" priority="4">
+Useless parentheses.
+</violation>
+<violation beginline="148" endline="148" begincolumn="26" endcolumn="41" rule="CloseResource" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator" method="calculateReleaseMetrics" variable="customThreadPool" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#closeresource" priority="3">
+Ensure that resources like this ForkJoinPool object are closed after use
+</violation>
+<violation beginline="151" endline="151" begincolumn="17" endcolumn="83" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="calculateReleaseMetrics" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="152" endline="152" begincolumn="40" endcolumn="55" rule="LocalVariableNamingConventions" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="calculateReleaseMetrics" variable="commits_analized" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#localvariablenamingconventions" priority="1">
+The local variable name 'commits_analized' doesn't match '[a-z][a-zA-Z0-9]*'
+</violation>
+<violation beginline="177" endline="177" begincolumn="37" endcolumn="47" rule="LocalVariableNamingConventions" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="calculateReleaseMetrics" variable="cur_release" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#localvariablenamingconventions" priority="1">
+The local variable name 'cur_release' doesn't match '[a-z][a-zA-Z0-9]*'
+</violation>
+<violation beginline="190" endline="192" begincolumn="13" endcolumn="49" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="calculateReleaseMetrics" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="217" endline="217" begincolumn="34" endcolumn="65" rule="UselessParentheses" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="calculateReleaseMetrics" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#uselessparentheses" priority="4">
+Useless parentheses.
+</violation>
+<violation beginline="221" endline="225" begincolumn="33" endcolumn="53" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="calculateReleaseMetrics" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="227" endline="227" begincolumn="34" endcolumn="73" rule="UselessParentheses" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="calculateReleaseMetrics" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#uselessparentheses" priority="4">
+Useless parentheses.
+</violation>
+<violation beginline="291" endline="291" begincolumn="13" endcolumn="73" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="calculateReleaseMetrics" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="316" endline="316" begincolumn="13" endcolumn="105" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="cleanupTempDirectory" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="323" endline="323" begincolumn="13" endcolumn="23" rule="UnnecessaryLocalBeforeReturn" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="ensureTempDirectoryExists" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessarylocalbeforereturn" priority="3">
+Consider simply returning the value vs storing it in local variable 'dir'
+</violation>
+<violation beginline="417" endline="417" begincolumn="28" endcolumn="120" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="restoreFromBackup" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="608" endline="608" begincolumn="21" endcolumn="27" rule="CloseResource" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator" method="exportCodeToDirectory" variable="revWalk" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#closeresource" priority="3">
+Ensure that resources like this Repository object are closed after use
+</violation>
+<violation beginline="611" endline="611" begincolumn="27" endcolumn="28" rule="CloseResource" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator" method="exportCodeToDirectory" variable="df" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#closeresource" priority="3">
+Ensure that resources like this DisabledOutputStream object are closed after use
+</violation>
+<violation beginline="617" endline="617" begincolumn="21" endcolumn="33" rule="UnusedLocalVariable" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="exportCodeToDirectory" variable="filesExported" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedlocalvariable" priority="3">
+Avoid unused local variables such as 'filesExported'.
+</violation>
+<violation beginline="620" endline="620" begincolumn="75" endcolumn="83" rule="ControlStatementBraces" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="exportCodeToDirectory" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#controlstatementbraces" priority="3">
+This statement should have braces
+</violation>
+<violation beginline="624" endline="624" begincolumn="30" endcolumn="37" rule="UnusedLocalVariable" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="exportCodeToDirectory" variable="objectId" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedlocalvariable" priority="3">
+Avoid unused local variables such as 'objectId'.
+</violation>
+<violation beginline="652" endline="652" begincolumn="12" endcolumn="102" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="exportCodeToDirectory" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="659" endline="659" begincolumn="28" endcolumn="45" rule="UseLocaleWithCaseConversions" ruleset="Error Prone" package="project.controllers" class="MetricsCalculator" method="isTestFile" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#uselocalewithcaseconversions" priority="3">
+When doing a String.toLowerCase()/toUpperCase() call, use a Locale
+</violation>
+<violation beginline="684" endline="684" begincolumn="20" endcolumn="28" rule="UnusedLocalVariable" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="calculateCKMetrics" variable="pathClass" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedlocalvariable" priority="3">
+Avoid unused local variables such as 'pathClass'.
+</violation>
+<violation beginline="722" endline="722" begincolumn="31" endcolumn="42" rule="LocalVariableNamingConventions" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="calculateCKMetrics" variable="filled_class" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#localvariablenamingconventions" priority="1">
+The local variable name 'filled_class' doesn't match '[a-z][a-zA-Z0-9]*'
+</violation>
+<violation beginline="739" endline="739" begincolumn="21" endcolumn="112" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="calculateCKMetrics" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="764" endline="764" begincolumn="23" endcolumn="34" rule="LocalVariableNamingConventions" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="lastClassesEvaluation" variable="filled_class" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#localvariablenamingconventions" priority="1">
+The local variable name 'filled_class' doesn't match '[a-z][a-zA-Z0-9]*'
+</violation>
+<violation beginline="816" endline="816" begincolumn="8" endcolumn="60" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="assignBuggyness" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="821" endline="821" begincolumn="65" endcolumn="80" rule="FormalParameterNamingConventions" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="updateBuggyness" variable="use_last_classes" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#formalparameternamingconventions" priority="1">
+The method parameter name 'use_last_classes' doesn't match '[a-z][a-zA-Z0-9]*'
+</violation>
+<violation beginline="824" endline="824" begincolumn="38" endcolumn="46" rule="ControlStatementBraces" ruleset="Code Style" package="project.controllers" class="MetricsCalculator" method="updateBuggyness" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#controlstatementbraces" priority="3">
+This statement should have braces
+</violation>
+<violation beginline="872" endline="872" begincolumn="17" endcolumn="160" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="extractMethodBodiesByName" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+<violation beginline="875" endline="875" begincolumn="13" endcolumn="130" rule="GuardLogStatement" ruleset="Best Practices" package="project.controllers" class="MetricsCalculator" method="extractMethodBodiesByName" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#guardlogstatement" priority="2">
+Logger calls should be surrounded by log level guards.
+</violation>
+</file>
+<file name="C:\isw2\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\controllers\PmdRunner.java">
+<violation beginline="24" endline="343" begincolumn="24" endcolumn="1" rule="UseUtilityClass" ruleset="Design" package="project.controllers" class="PmdRunner" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_design.html#useutilityclass" priority="3">
+All methods are static.  Consider using a utility class instead. Alternatively, you could add a private constructor or make the class abstract to silence this warning.
+</violation>
+<violation beginline="47" endline="47" begincolumn="28" endcolumn="70" rule="CloseResource" ruleset="Error Prone" package="project.controllers" class="PmdRunner" method="runPmdAnalysis" variable="dataSource" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_errorprone.html#closeresource" priority="3">
+it is recommended to wrap resource in try-with-resource declaration directly
+</violation>
+<violation beginline="85" endline="85" begincolumn="9" endcolumn="29" rule="UnnecessaryLocalBeforeReturn" ruleset="Code Style" package="project.controllers" class="PmdRunner" method="extractClassNameOnly" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessarylocalbeforereturn" priority="3">
+Consider simply returning the value vs storing it in local variable 'classNameOnly'
+</violation>
+<violation beginline="113" endline="113" begincolumn="18" endcolumn="39" rule="LiteralsFirstInComparisons" ruleset="Best Practices" package="project.controllers" class="PmdRunner" method="normalizePathToModuleAndClass" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#literalsfirstincomparisons" priority="3">
+Position literals first in String comparisons
+</violation>
+<violation beginline="113" endline="113" begincolumn="45" endcolumn="69" rule="LiteralsFirstInComparisons" ruleset="Best Practices" package="project.controllers" class="PmdRunner" method="normalizePathToModuleAndClass" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#literalsfirstincomparisons" priority="3">
+Position literals first in String comparisons
+</violation>
+<violation beginline="113" endline="113" begincolumn="75" endcolumn="103" rule="LiteralsFirstInComparisons" ruleset="Best Practices" package="project.controllers" class="PmdRunner" method="normalizePathToModuleAndClass" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#literalsfirstincomparisons" priority="3">
+Position literals first in String comparisons
+</violation>
+<violation beginline="113" endline="113" begincolumn="109" endcolumn="133" rule="LiteralsFirstInComparisons" ruleset="Best Practices" package="project.controllers" class="PmdRunner" method="normalizePathToModuleAndClass" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#literalsfirstincomparisons" priority="3">
+Position literals first in String comparisons
+</violation>
+<violation beginline="143" endline="143" begincolumn="37" endcolumn="45" rule="ControlStatementBraces" ruleset="Code Style" package="project.controllers" class="PmdRunner" method="collectCodeSmellMetricsProject" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#controlstatementbraces" priority="3">
+This statement should have braces
+</violation>
+<violation beginline="174" endline="176" begincolumn="17" endcolumn="17" rule="EmptyControlStatement" ruleset="Code Style" package="project.controllers" class="PmdRunner" method="collectCodeSmellMetricsProject" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#emptycontrolstatement" priority="3">
+Empty if statement
+</violation>
+<violation beginline="227" endline="229" begincolumn="13" endcolumn="13" rule="EmptyControlStatement" ruleset="Code Style" package="project.controllers" class="PmdRunner" method="collectCodeSmellMetricsClass" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#emptycontrolstatement" priority="3">
+Empty if statement
+</violation>
+<violation beginline="302" endline="302" begincolumn="19" endcolumn="27" rule="LocalVariableNamingConventions" ruleset="Code Style" package="project.controllers" class="PmdRunner" method="findClassFile" variable="MAX_DEPTH" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#localvariablenamingconventions" priority="1">
+The final local variable name 'MAX_DEPTH' doesn't match '[a-z][a-zA-Z0-9]*'
+</violation>
+<violation beginline="317" endline="317" begincolumn="32" endcolumn="40" rule="ControlStatementBraces" ruleset="Code Style" package="project.controllers" class="PmdRunner" method="findClassFile" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#controlstatementbraces" priority="3">
+This statement should have braces
+</violation>
+</file>
+<file name="C:\isw2\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\models\ClassFile.java">
+<violation beginline="28" endline="28" begincolumn="27" endcolumn="38" rule="ControlStatementBraces" ruleset="Code Style" package="project.models" class="ClassFile" method="extractClassName" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#controlstatementbraces" priority="3">
+This statement should have braces
+</violation>
+</file>
+<file name="C:\isw2\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\models\MethodInstance.java">
+<violation beginline="3" endline="3" begincolumn="1" endcolumn="27" rule="UnnecessaryImport" ruleset="Code Style" package="project.models" class="MethodInstance" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessaryimport" priority="4">
+Unused import 'java.util.ArrayList'
+</violation>
+<violation beginline="4" endline="4" begincolumn="1" endcolumn="22" rule="UnnecessaryImport" ruleset="Code Style" package="project.models" class="MethodInstance" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessaryimport" priority="4">
+Unused import 'java.util.List'
+</violation>
+<violation beginline="37" endline="38" begincolumn="12" endcolumn="5" rule="UncommentedEmptyConstructor" ruleset="Documentation" package="project.models" class="MethodInstance" method="MethodInstance" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_documentation.html#uncommentedemptyconstructor" priority="3">
+Document empty constructor
+</violation>
+</file>
+<file name="C:\isw2\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\models\Release.java">
+<violation beginline="20" endline="20" begincolumn="26" endcolumn="40" rule="UnusedPrivateField" ruleset="Best Practices" package="project.models" class="Release" variable="releaseAllClass" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#unusedprivatefield" priority="3">
+Avoid unused private fields such as 'releaseAllClass'.
+</violation>
+<violation beginline="20" endline="20" begincolumn="10" endcolumn="41" rule="SingularField" ruleset="Design" package="project.models" class="Release" variable="VariableDeclaratorId" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_design.html#singularfield" priority="3">
+Perhaps 'releaseAllClass' could be replaced by a local variable.
+</violation>
+<violation beginline="174" endline="174" begincolumn="8" endcolumn="35" rule="LiteralsFirstInComparisons" ruleset="Best Practices" package="project.models" class="Release" method="normalizeToModuleAndClass" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_bestpractices.html#literalsfirstincomparisons" priority="3">
+Position literals first in String comparisons
+</violation>
+<violation beginline="183" endline="183" begincolumn="3" endcolumn="23" rule="UnnecessaryLocalBeforeReturn" ruleset="Code Style" package="project.models" class="Release" method="normalizeToModuleAndClass" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_codestyle.html#unnecessarylocalbeforereturn" priority="3">
+Consider simply returning the value vs storing it in local variable 'classNameOnly'
+</violation>
+</file>
+<file name="C:\isw2\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\utils\ConstantSize.java">
+<violation beginline="3" endline="20" begincolumn="8" endcolumn="1" rule="ClassWithOnlyPrivateConstructorsShouldBeFinal" ruleset="Design" package="project.utils" class="ConstantSize" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_design.html#classwithonlyprivateconstructorsshouldbefinal" priority="1">
+A class which only has private constructors should be final
+</violation>
+</file>
+<file name="C:\isw2\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\utils\ConstantsWindowsFormat.java">
+<violation beginline="7" endline="9" begincolumn="5" endcolumn="5" rule="UncommentedEmptyConstructor" ruleset="Documentation" package="project.utils" class="ConstantsWindowsFormat" method="ConstantsWindowsFormat" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_documentation.html#uncommentedemptyconstructor" priority="3">
+Document empty constructor
+</violation>
+</file>
+<file name="C:\isw2\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\utils\RevCommitExtension.java">
+<violation beginline="12" endline="84" begincolumn="8" endcolumn="1" rule="ClassWithOnlyPrivateConstructorsShouldBeFinal" ruleset="Design" package="project.utils" class="RevCommitExtension" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_design.html#classwithonlyprivateconstructorsshouldbefinal" priority="1">
+A class which only has private constructors should be final
+</violation>
+</file>
+<file name="C:\isw2\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\utils\RevCommitUtils.java">
+<violation beginline="11" endline="27" begincolumn="8" endcolumn="1" rule="ClassWithOnlyPrivateConstructorsShouldBeFinal" ruleset="Design" package="project.utils" class="RevCommitUtils" externalInfoUrl="https://pmd.github.io/pmd-6.55.0/pmd_rules_java_design.html#classwithonlyprivateconstructorsshouldbefinal" priority="1">
+A class which only has private constructors should be final
+</violation>
+</file>
+</pmd>
