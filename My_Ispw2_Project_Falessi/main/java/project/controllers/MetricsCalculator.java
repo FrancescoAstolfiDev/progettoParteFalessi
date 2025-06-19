@@ -11,10 +11,7 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.slf4j.LoggerFactory;
-import project.models.ClassFile;
-import project.models.MethodInstance;
-import project.models.Release;
-import project.models.Ticket;
+import project.models.*;
 
 
 import java.io.*;
@@ -24,6 +21,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static project.models.MethodInstance.ckSignature;
 import project.utils.ConstantSize;
@@ -98,7 +96,7 @@ public class MetricsCalculator {
         }
     }
 
-    void processCommits(ReleaseData releaseData) throws IOException, ExecutionException, InterruptedException {
+    void processCommits(ReleaseData releaseData , DataSetType dataSetType) throws IOException, ExecutionException, InterruptedException {
         System.out.println("processing the other commits ");
         // Crea un lock per sincronizzare l'accesso al repository
         Object threadLock = new Object();
@@ -153,6 +151,118 @@ public class MetricsCalculator {
                 // Contatore per gli errori in questo batch specifico
                 AtomicInteger currentBatchErrors = new AtomicInteger(0);
 
+                // Lista per tenere traccia dei commit ancora da processare
+                List<String> remainingCommits = new CopyOnWriteArrayList<>(batchCommits);
+
+                // Thread per monitorare l'attività dei thread e redistribuire il carico di lavoro
+                Thread monitorThread = new Thread(() -> {
+                    try {
+                        while (!remainingCommits.isEmpty() && !Thread.currentThread().isInterrupted()) {
+                            // Controlla il numero di thread attivi
+                            int activeThreads = customThreadPool.getActiveThreadCount();
+
+                            // Se c'è solo un thread attivo e ci sono ancora commit da processare
+                            if (activeThreads <= 1 && remainingCommits.size() > 1) {
+                                LOGGER.info("Solo {} thread attivo, redistribuzione del carico di lavoro per {} commit rimanenti", 
+                                        activeThreads, remainingCommits.size());
+
+                                // Interrompi l'elaborazione corrente
+                                customThreadPool.shutdownNow();
+
+                                // Crea un nuovo thread pool con il numero originale di thread
+                                ForkJoinPool newThreadPool = new ForkJoinPool(numThreads);
+
+                                try {
+                                    try {
+                                        // Redistribuisci il carico di lavoro tra i nuovi thread
+                                        newThreadPool.submit(() ->
+                                            remainingCommits.parallelStream().forEach(commitHash -> {
+                                                try {
+                                                    RevCommit commit = releaseData.commitsByHash.get(commitHash);
+                                                    Path commitTempDir = tempDirPath.resolve(releaseData.release.getName() + "_" + commitHash);
+                                                    releaseData.commitsAnalyzed.put(commitHash, commit);
+
+                                                    // Sincronizza l'accesso al repository Git
+                                                    synchronized (threadLock) {
+                                                        // Checkout del commit appartenente alla release
+                                                        repositoryManager.checkoutRelease(commit, commitTempDir);
+                                                    }
+
+                                                    countThread.getAndIncrement();
+
+                                                    Map<String, MethodInstance> commitMetrics = calculateCKMetrics(commitTempDir, releaseData.release);
+                                                    for (MethodInstance result : commitMetrics.values()) {
+                                                        Release curRelease = releaseData.mapCommitRelease.get(commit);
+                                                        if (curRelease != null) {
+                                                            result.setRelease(curRelease);
+                                                        } else {
+                                                            result.setRelease(releaseData.release);
+                                                        }
+                                                    }
+
+                                                    resultCommitsMethods.put(commitHash, commitMetrics);
+                                                    // Aggiorna i risultati in modo thread-safe
+                                                    releaseData.releaseResults.putAll(commitMetrics);
+
+                                                    synchronized (threadLock) {
+                                                        outData(countThread.get(), releaseData, dataSetType);
+                                                    }
+
+                                                    // Pulisci la directory temporanea del commit
+                                                    repositoryManager.cleanupTempDirectory(commitTempDir);
+
+                                                    // Rimuovi il commit dalla lista dei rimanenti
+                                                    remainingCommits.remove(commitHash);
+
+                                                    // Suggerisci al GC di liberare memoria non utilizzata
+                                                    if (countThread.get() % 10 == 0) {
+                                                        System.gc();
+                                                    }
+                                                } catch (OutOfMemoryError e) {
+                                                    LOGGER.error("Memoria insufficiente durante l'elaborazione del commit: {}", commitHash, e);
+                                                    // Incrementa i contatori di errore
+                                                    currentBatchErrors.incrementAndGet();
+                                                    batchErrorCount.incrementAndGet();
+                                                    // Tenta di liberare memoria
+                                                    System.gc();
+                                                } catch (Exception e) {
+                                                    LOGGER.error("Errore durante l'elaborazione del commit: {}", commitHash, e);
+                                                    // Incrementa i contatori di errore
+                                                    currentBatchErrors.incrementAndGet();
+                                                    batchErrorCount.incrementAndGet();
+                                                }
+                                            })
+                                        ).get(); // Attendi il completamento
+                                    } catch (ExecutionException e) {
+                                        LOGGER.error("Errore durante la redistribuzione del carico di lavoro: {}", e.getMessage(), e);
+                                        // Incrementa i contatori di errore
+                                        currentBatchErrors.incrementAndGet();
+                                        batchErrorCount.incrementAndGet();
+                                    } catch (InterruptedException e) {
+                                        Thread.currentThread().interrupt();
+                                        LOGGER.error("Interruzione durante la redistribuzione del carico di lavoro", e);
+                                    }
+                                } finally {
+                                    newThreadPool.shutdown();
+                                }
+
+                                // Interrompi il thread di monitoraggio
+                                Thread.currentThread().interrupt();
+                            }
+
+                            // Pausa prima del prossimo controllo
+                            Thread.sleep(5000); // Controlla ogni 5 secondi
+                        }
+                    } catch (InterruptedException e) {
+                        // Thread interrotto, termina
+                        Thread.currentThread().interrupt();
+                    }
+                });
+
+                // Avvia il thread di monitoraggio
+                monitorThread.setDaemon(true);
+                monitorThread.start();
+
                 try {
                     customThreadPool.submit(() ->
                             batchCommits.parallelStream().forEach(commitHash -> {
@@ -184,11 +294,14 @@ public class MetricsCalculator {
                                     releaseData.releaseResults.putAll(commitMetrics);
 
                                     synchronized (threadLock) {
-                                        outData(countThread.get(), releaseData);
+                                        outData(countThread.get(), releaseData, dataSetType);
                                     }
 
                                     // Pulisci la directory temporanea del commit
                                     repositoryManager.cleanupTempDirectory(commitTempDir);
+
+                                    // Rimuovi il commit dalla lista dei rimanenti
+                                    remainingCommits.remove(commitHash);
 
                                     // Suggerisci al GC di liberare memoria non utilizzata
                                     if (countThread.get() % 10 == 0) {
@@ -209,6 +322,9 @@ public class MetricsCalculator {
                                 }
                             })
                         ).get(); // Attendi il completamento
+
+                    // Interrompi il thread di monitoraggio
+                    monitorThread.interrupt();
                 } catch (Exception e) {
                     LOGGER.error("Errore durante l'elaborazione del batch: {}", e.getMessage(), e);
                     // Incrementa il contatore degli errori di batch
@@ -277,7 +393,7 @@ public class MetricsCalculator {
             // Rimuovi i commit già elaborati dalla lista da processare
             releaseData.commitHashesToProcess.removeAll(releaseData.commitsAnalyzed.keySet());
             // Richiama ricorsivamente il metodo per elaborare i commit rimanenti
-            processCommits(releaseData);
+            processCommits(releaseData,dataSetType);
             return;
         }
 
@@ -286,7 +402,7 @@ public class MetricsCalculator {
         repositoryManager.restoreFromBackup();
         assignBuggyness(releaseData);
         // Notify callback with full results
-        ClassWriter.writeResultsToFile(releaseData.release, projectName, releaseData.releaseResults, true);
+        ClassWriter.writeResultsToFile(releaseData.release, projectName, releaseData.releaseResults, dataSetType);
     }
 
     // Contatore per tenere traccia degli errori significativi
@@ -390,7 +506,7 @@ public class MetricsCalculator {
         return handleProcessingError(releaseData, false);
     }
 
-    private void outData(int log, ReleaseData releaseData) {
+    private void outData(int log, ReleaseData releaseData , DataSetType dataSetType) {
         if ((log % ConstantSize.FREQUENCY_LOG) == 0) {
             int totalCommits = releaseData.releaseCommits.size() - releaseData.commitsAnalyzed.size();
             int processedCommits = releaseData.commitsAnalyzed.size();
@@ -403,17 +519,17 @@ public class MetricsCalculator {
         if ((log % ConstantSize.FREQUENCY_WRITE_CACHE) == 0) {
             Caching.saveCommitCache(resultCommitsMethods, projectName);
         }
-        if ((log % ConstantSize.FREQUENCY_WRITE_CSV) == 0) {
+        if ((log % ConstantSize.FREQUENCY_WRITE_CSV) == 0 && dataSetType== DataSetType.TRAINING) {
             // Calculate buggyness for partial results
             assignBuggyness(releaseData);
             // Notify callback with partial results
-            ClassWriter.writeResultsToFile(releaseData.release,projectName, releaseData.releaseResults,false);
+            ClassWriter.writeResultsToFile(releaseData.release,projectName, releaseData.releaseResults,DataSetType.PARTIAL);
         }
 
     }
 
 
-    public void calculateReleaseMetrics(Release release, List<Ticket> releaseTickets) {
+    public void calculateReleaseMetrics(Release release, List<Ticket> releaseTickets , DataSetType dataSetType) {
         // Utilizziamo ConcurrentHashMap per la thread-safety
         // it is an instance <key method method> because it continusely update methods during the commit
         // so when is present other method with same key upgrade the value in o(1) and not in o(n) if they will be in a set
@@ -444,17 +560,17 @@ public class MetricsCalculator {
                 cachedCommitsSize,
                 data.commitHashesToProcess.size());
 
-        if (!data.releaseResults.isEmpty() && !data.commitHashesToProcess.isEmpty()) {
+        if (!data.releaseResults.isEmpty() && !data.commitHashesToProcess.isEmpty() && dataSetType== DataSetType.TRAINING) {
             System.out.println("writing before the elaboration");
             assignBuggyness(data);
-            ClassWriter.writeResultsToFile(data.release, projectName, data.releaseResults, false);
+            ClassWriter.writeResultsToFile(data.release, projectName, data.releaseResults, DataSetType.PARTIAL);
         }
 
         if (data.commitHashesToProcess.isEmpty()) {
             System.out.println("No commits to process for release ");
             assignBuggyness(data);
             // Notify callback with partial results
-            ClassWriter.writeResultsToFile(data.release, projectName, data.releaseResults, true);
+            ClassWriter.writeResultsToFile(data.release, projectName, data.releaseResults, dataSetType);
             return;
         }
 
@@ -468,7 +584,7 @@ public class MetricsCalculator {
                             attempt + 1, maxRetries, release.getName());
                 }
 
-                processCommits(data);
+                processCommits(data,dataSetType);
 
                 // Se arriviamo qui, l'elaborazione è stata completata con successo
                 LOGGER.info("Elaborazione della release {} completata con successo", release.getName());
@@ -481,14 +597,14 @@ public class MetricsCalculator {
                 // Gestisci l'errore e determina se è necessario un nuovo tentativo
                 boolean resetPerformed = handleProcessingError(data);
 
-                if (!resetPerformed && attempt == maxRetries - 1) {
+                if (!resetPerformed && attempt == maxRetries - 1  && dataSetType== DataSetType.TRAINING) {
                     // Ultimo tentativo fallito senza reset, log di errore finale
                     LOGGER.error("Impossibile completare l'elaborazione della release {} dopo {} tentativi", 
                             release.getName(), maxRetries);
 
                     // Salva comunque i risultati parziali
                     assignBuggyness(data);
-                    ClassWriter.writeResultsToFile(data.release, projectName, data.releaseResults, true);
+                    ClassWriter.writeResultsToFile(data.release, projectName, data.releaseResults, DataSetType.PARTIAL);
                 }
 
             } catch (InterruptedException e) {
@@ -812,7 +928,13 @@ public class MetricsCalculator {
             List<String> modifiedClasses = gitHubInfoRetrieve.getDifference(commit,false);
 
             if (!modifiedClasses.isEmpty()) {
-                updateBuggyness(modifiedClasses,buggyClasses,data.release);
+                // Split large commits into smaller ones if needed
+                List<List<String>> splitCommits = splitLargeCommit(modifiedClasses);
+
+                // Process each split commit
+                for (List<String> splitCommit : splitCommits) {
+                    updateBuggyness(splitCommit, buggyClasses, data.release);
+                }
             }
         }
 
@@ -827,7 +949,10 @@ public class MetricsCalculator {
         for (String path : allPaths) {
             ClassFile currentFile = release.getClassFileByPath(path);
             if (currentFile == null) continue;
+
+            // Add the class to buggyClasses only once
             buggyClasses.add(currentFile);
+
             String oldContent = gitHubInfoRetrieve.getFileContentBefore(path); // da implementare
             String newContent = gitHubInfoRetrieve.getFileContentNow(path);    // da implementare
 
@@ -851,7 +976,7 @@ public class MetricsCalculator {
                 }
             }
 
-            buggyClasses.add(currentFile);
+            // Removed duplicate addition of currentFile to buggyClasses
         }
     }
 
@@ -883,18 +1008,84 @@ public class MetricsCalculator {
         return methodMap;
     }
 
+    /**
+     * Splits a large commit into smaller ones, each containing at most MAX_CLASSES_PER_COMMIT classes.
+     * This ensures that large commits that modify many classes are processed in smaller chunks.
+     *
+     * @param modifiedClasses List of modified classes in the commit
+     * @return List of smaller commits (lists of classes)
+     */
+    private List<List<String>> splitLargeCommit(List<String> modifiedClasses) {
+        List<List<String>> result = new ArrayList<>();
+
+        // If the commit is small enough, return it as is
+        if (modifiedClasses.size() <= ConstantSize.MAX_CLASSES_PER_COMMIT) {
+            result.add(new ArrayList<>(modifiedClasses));
+            return result;
+        }
+
+        // Log that we're splitting a large commit
+        LOGGER.info("Splitting large commit with {} classes into smaller chunks of max {} classes", 
+                modifiedClasses.size(), ConstantSize.MAX_CLASSES_PER_COMMIT);
+
+        // Split the commit into smaller ones
+        int totalClasses = modifiedClasses.size();
+        int startIndex = 0;
+
+        while (startIndex < totalClasses) {
+            int endIndex = Math.min(startIndex + ConstantSize.MAX_CLASSES_PER_COMMIT, totalClasses);
+            List<String> splitCommit = new ArrayList<>(modifiedClasses.subList(startIndex, endIndex));
+            result.add(splitCommit);
+            startIndex = endIndex;
+        }
+
+        LOGGER.info("Split commit into {} smaller chunks", result.size());
+        return result;
+    }
+
 
 
     //un metodo utile per ordinare i commit in ordine temporale
+    //quando si è raggiunta la quota degli ultimi commit prioritizza la loro gestione in modo tale che quelli di taglia maggiore vengano gestiti prima
     private void sortCommits(List<RevCommit> commits){
-        Collections.sort(commits,new RevCommitComparator());
+        int size = commits.size();
+        if (size <= ConstantSize.LAST_COMMITS_TO_PRIORITIZE) {
+            // Se ci sono meno commit del limite, ordina tutti per dimensione
+            Collections.sort(commits, new RevCommitSizeComparator());
+        } else {
+            // Ordina i primi (size-LAST_COMMITS_TO_PRIORITIZE) commit per data
+            Collections.sort(commits.subList(0, size - ConstantSize.LAST_COMMITS_TO_PRIORITIZE), new RevCommitComparator());
+            // Ordina gli ultimi LAST_COMMITS_TO_PRIORITIZE commit per dimensione (numero di file modificati)
+            Collections.sort(commits.subList(size - ConstantSize.LAST_COMMITS_TO_PRIORITIZE, size), new RevCommitSizeComparator());
+        }
     }
 
-    //il comparator utile a sortCommits
+    //il comparator utile a sortCommits per ordinare per data
     private class RevCommitComparator implements Comparator<RevCommit> {
         @Override
         public int compare(RevCommit a, RevCommit b) {
             return a.getCommitterIdent().getWhen().compareTo(b.getCommitterIdent().getWhen());
+        }
+    }
+
+    //il comparator per ordinare per dimensione (numero di file modificati)
+    private class RevCommitSizeComparator implements Comparator<RevCommit> {
+        @Override
+        public int compare(RevCommit a, RevCommit b) {
+            // Ottieni il numero di file modificati per ciascun commit
+            List<String> modifiedFilesA = gitHubInfoRetrieve.getDifference(a, false);
+            List<String> modifiedFilesB = gitHubInfoRetrieve.getDifference(b, false);
+
+            // Ottieni i file aggiunti
+            List<String> addedFilesA = gitHubInfoRetrieve.getDifference(a, true);
+            List<String> addedFilesB = gitHubInfoRetrieve.getDifference(b, true);
+
+            // Calcola il totale senza modificare le liste originali
+            int totalFilesA = modifiedFilesA.size() + addedFilesA.size();
+            int totalFilesB = modifiedFilesB.size() + addedFilesB.size();
+
+            // Ordina in ordine decrescente (i commit più grandi prima)
+            return Integer.compare(totalFilesB, totalFilesA);
         }
     }
 }

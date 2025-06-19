@@ -2,6 +2,7 @@ package project.controllers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import project.models.DataSetType;
 import project.models.MethodInstance;
 import project.models.Release;
 import project.utils.ConstantsWindowsFormat;
@@ -27,37 +28,29 @@ public class ClassWriter {
         return field;
     }
 
-    public static void writeResultsToFile(Release actRelease, String projectName, Map<String, MethodInstance> partialResults, boolean allResultsReceived) {
+    public static void writeResultsToFile(Release actRelease, String projectName, Map<String, MethodInstance> partialResults, DataSetType dataType) {
         if (actRelease == null) {
             LOGGER.error("Received partial results but currentProcessingRelease is null");
             return;
         }
         String outPath;
         try {
-            // Use the same naming convention as the final results, but with a "Partial" prefix
-            if(!allResultsReceived){
-                outPath = projectName.toUpperCase() + "_Partial_Train_Method_Release_" +
-                        actRelease.getName() + "_" +
-                        System.currentTimeMillis() + ".csv";
-
-                LOGGER.info("Writing partial results to {}" , outPath);
-
-            }
-            else{
-                outPath = projectName.toUpperCase() + "_Train_Method_Release_" +actRelease.getName() + ".csv";
-                LOGGER.info("Writing full results to " + outPath);
-            }
-            writePartialResultsToFile(outPath, partialResults);
+            outPath=projectName.toUpperCase()+dataType+ actRelease.getId() + ".csv";
+            LOGGER.info("Writing  results to {}" , outPath);
+            writeResultsToFile(outPath, partialResults,dataType);
 
         } catch (Exception e) {
             LOGGER.error("Error writing results: {}" , e.getMessage());
         }
     }
 
-    private static void writePartialResultsToFile( String path, Map<String, MethodInstance> results) {
+    private static void writeResultsToFile(String path, Map<String, MethodInstance> results, DataSetType dataSetType) {
         Path outputFilePath;
-        if(path.contains("Partial")){
+
+        if (dataSetType== DataSetType.PARTIAL){
             outputFilePath = ConstantsWindowsFormat.PARTIALS_CSV_PATH.resolve(path);
+        } else if (dataSetType==DataSetType.TEST) {
+            outputFilePath = ConstantsWindowsFormat.TEST_CSV_PATH.resolve(path);
         }else{
             outputFilePath = ConstantsWindowsFormat.CSV_PATH.resolve(path);
         }
@@ -68,9 +61,12 @@ public class ClassWriter {
 
             if (Files.notExists(outputFilePath)) {
                 Files.createFile(outputFilePath);
+            }else {
+
             }
 
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFilePath.toFile()))) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFilePath.toFile(), false))
+            ) {
                 // Header
                 writer.write(String.join(",",
                         "release", "class", "method", "path",

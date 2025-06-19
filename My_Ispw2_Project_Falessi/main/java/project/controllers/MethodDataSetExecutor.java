@@ -5,6 +5,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import project.models.DataSetType;
 import project.models.MethodInstance;
 import project.models.Release;
 import project.models.Ticket;
@@ -63,19 +64,21 @@ public class MethodDataSetExecutor {
 
         // Fase 4: Recupero dei ticket e associazione commit-ticket
         List<Ticket> allTickets = jiraInfoRetrieve.retrieveTickets(releaseList);
-        LOGGER.info("Retrieved " + allTickets.size() + " tickets");
+        LOGGER.info("Retrieved {} tockets" , allTickets.size());
         getAllClassesByRelease(releaseList);
 
+        LOGGER.info("Retrieved {} classes from all the release " , releaseList.get(releaseList.size()-1).getReleaseAllClass().size() );
 
-//
 
 
         // Fase 6: Estrazione metodi per ogni release<--------DA CApire dove posizionare
         getAllMethodsByRelease(releaseList);
+        LOGGER.info("Retrieved {} methods from all the class " , releaseList.get(releaseList.size()-1).getReleaseAllMethods().size() );
         associateCommitsToTicket(allCommits, allTickets);
 
         allTickets.removeIf(t -> t.getAssociatedCommits().isEmpty());
-        LOGGER.info("Filtered to " + allTickets.size() + " tickets with associated commits");
+        LOGGER.info("Filtered to {}  tickets with associated commits" , allTickets.size());
+        
         if (allTickets.size() < 5) {
             LOGGER.error("Insufficient tickets with commits ({}) Cannot proceed with analysis. " , allTickets.size());
             return;
@@ -120,9 +123,12 @@ public class MethodDataSetExecutor {
 
         // Fase 8: Scrittura dei file di training
         for (int i = 1; i < avaiableTrainingRelease.size(); i++) {
-            Release release= avaiableTrainingRelease.get(i);
+            // reverse calculation for have first all the commit processed and elaborated
+            Release release= avaiableTrainingRelease.get(avaiableTrainingRelease.size()-i);
             writeReleaseTrainFile(release, releaseList);
         }
+
+        writeTestFiles(releaseList,avaiableTrainingRelease);
 
 
     }
@@ -137,6 +143,24 @@ public class MethodDataSetExecutor {
         return goodTickets;
     }
 
+    public void writeTestFiles(List<Release> releaseList,List<Release> avaiableTrainingRelease) {
+        int len = avaiableTrainingRelease.size();
+        List<Ticket> ticketsForTest = releaseList.get(releaseList.size() - 1).getAllReleaseTicket();
+        adjustIvTickets(ticketsForTest, releaseList.get(releaseList.size()-1).getCurrentProportion(), releaseList);
+
+        for(int i = 1; i < len; i++) {
+            Release currRelease = releaseList.get(i);
+            String path = currentProject.toUpperCase() + "_Test_Release_" + currRelease.getId() + ".csv";
+            List<Release> incrementalReleaseList = new ArrayList<>();
+            incrementalReleaseList.add(currRelease);
+
+            writeFile(incrementalReleaseList,currRelease,ticketsForTest,DataSetType.TEST);
+
+        }
+    }
+
+
+
     private void writeReleaseTrainFile(Release currRelease, List<Release> releaseList) {
 
         List<Release> incrementalReleaseList = releaseList.subList(0, currRelease.getId());
@@ -146,7 +170,7 @@ public class MethodDataSetExecutor {
         this.currentProcessingRelease = currRelease;
 
         adjustIvTickets(releaseTickets, currRelease.getCurrentProportion(), releaseList);
-        writeFile(incrementalReleaseList, currRelease, releaseTickets);
+        writeFile(incrementalReleaseList, currRelease, releaseTickets, DataSetType.TRAINING);
     }
 
 
@@ -177,7 +201,7 @@ public class MethodDataSetExecutor {
 
 
 
-    private void writeFile( List<Release> incrementalReleaseList, Release currRelease, List<Ticket> tickets) {
+    private void writeFile(List<Release> incrementalReleaseList, Release currRelease, List<Ticket> tickets , DataSetType dataSetType) {
         // I need to discard the calculation if I already find completed files
         System.out.println("currently analyzing release " + currRelease.getName());
         String outPath = currentProject.toUpperCase() + "_Train_Method_Release_" + currentProcessingRelease.getName() + ".csv";
@@ -239,7 +263,7 @@ public class MethodDataSetExecutor {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-        this.metricsCalculator.calculateReleaseMetrics( currRelease, usableTicket);
+        this.metricsCalculator.calculateReleaseMetrics( currRelease, usableTicket , dataSetType);
 
 
 

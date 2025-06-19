@@ -13,7 +13,7 @@ public class ConstantsWindowsFormat {
     public static final Path PARTIALS_CSV_PATH = CSV_PATH.resolve("partials");
     public static final Path RULES_SET_PATH = BASE_PATH.resolve("config").resolve("pmd").resolve("custom_rules.xml");
     public static final Path CACHE_PATH = BASE_PATH.resolve("cache");
-
+    public static final Path TEST_CSV_PATH=CSV_PATH.resolve("tests");
     // depends where are the clone
     public static final Path REPO_CLONE_PATH =Paths.get("C:\\isw2\\progetti_clonati\\");
 
