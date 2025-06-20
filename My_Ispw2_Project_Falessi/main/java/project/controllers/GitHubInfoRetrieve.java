@@ -44,77 +44,76 @@ public class GitHubInfoRetrieve {
 
     public GitHubInfoRetrieve(String project) throws IOException {
 
-        // Make sure that if a directory with the backup name exists, remove the current folder
-        // and rename the backup folder
-        // So if inside cloned projects I have: openjpa and openjpa_backup
-        // 1. Delete openjpa
-        // 2. Rename the first folder found from openjpa_backup to openjpa
-        // 3. Delete all remaining openjpa_backup folders
-
-        // Check if backup directory exists
-
-        Path currentDirPath = ConstantsWindowsFormat.REPO_CLONE_PATH.resolve(project);
-        // list of directory names in repo_clone_path
-        try {
-            List<String> directoryNames = java.nio.file.Files.list(ConstantsWindowsFormat.REPO_CLONE_PATH)
-                    .filter(path -> Files.isDirectory(path))
-                    .map(path -> path.getFileName().toString())
-                    .collect(Collectors.toList());
-
-            if (directoryNames.stream().anyMatch(name -> name.startsWith(project + "_backup"))){
-
-                if(Files.exists(currentDirPath)) {
-                    // delete the directory openjpa
-                    java.nio.file.Files.walk(currentDirPath)
-                        .sorted(java.util.Comparator.reverseOrder())
-                        .map(java.nio.file.Path::toFile)
-                        .forEach(java.io.File::delete);
-                   LOGGER.info("Deleted existing directory: {}", currentDirPath);
-                }
-
-                // Find the first backup directory
-                Path firstBackupDir = java.nio.file.Files.list(ConstantsWindowsFormat.REPO_CLONE_PATH)
-                    .filter(path -> Files.isDirectory(path))
-                    .filter(path -> path.getFileName().toString().startsWith(project + "_backup"))
-                    .findFirst()
-                    .orElse(null);
-
-                if (firstBackupDir != null) {
-                    // Rename backup directory to original name
-                    java.nio.file.Files.move(firstBackupDir, currentDirPath);
-                    LOGGER.info("Renamed backup directory to: " + currentDirPath);
-                }
-
-                // Delete all remaining backup directories with the same name pattern
-                java.nio.file.Files.list(ConstantsWindowsFormat.REPO_CLONE_PATH)
-                    .filter(path -> Files.isDirectory(path))
-                    .filter(path -> path.getFileName().toString().startsWith(project + "_backup"))
-                    .forEach(path -> {
-                        try {
-                            java.nio.file.Files.walk(path)
-                                .sorted(java.util.Comparator.reverseOrder())
-                                .map(java.nio.file.Path::toFile)
-                                .forEach(java.io.File::delete);
-                           LOGGER.info("Deleted remaining backup directory: " + path);
-                        } catch (IOException e) {
-                            LOGGER.error("Error deleting backup directory : {}", e.getMessage());
-                        }
-                    });
-            }
-        }finally{
-            LOGGER.info("Finished checking for backup directories");
-        }
-
         this.project = project;
+        initializingRepo();
         Path repoPath = ConstantsWindowsFormat.REPO_CLONE_PATH.resolve(project).resolve(".git");
         this.repo = (FileRepository) new FileRepositoryBuilder()
                 .setGitDir(repoPath.toFile())
                 .build();
         this.git = new Git(this.repo);
     }
+    /*
+    *   Make sure that if a directory with the backup name exists, remove the current folder
+    *    and rename the backup folder
+    *    So if inside cloned projects I have: openjpa and openjpa_backup
+    *    1. Delete openjpa
+    *    2. Rename the first folder found from openjpa_backup to openjpa
+    *    3. Delete all remaining openjpa_backup folders
+    */
+    public void initializingRepo() throws IOException {
+        try {
+            Path currentDirPath = ConstantsWindowsFormat.REPO_CLONE_PATH.resolve(project);
+            List<String> directoryNames = Files.list(ConstantsWindowsFormat.REPO_CLONE_PATH)
+                    .filter(Files::isDirectory)
+                    .map(path -> path.getFileName().toString())
+                    .toList();
 
+            if (directoryNames.stream().anyMatch(name -> name.startsWith(project + "_backup"))) {
 
-    public void getUpdatedRepo()  {
+                if (Files.exists(currentDirPath)) {
+                    // delete the directory openjpa
+                    Files.walk(currentDirPath)
+                            .sorted(Comparator.reverseOrder())
+                            .map(Path::toFile)
+                            .forEach(java.io.File::delete);
+                    LOGGER.info("Deleted existing directory: {}", currentDirPath);
+                }
+
+                // Find the first backup directory
+                Path firstBackupDir = Files.list(ConstantsWindowsFormat.REPO_CLONE_PATH)
+                        .filter(Files::isDirectory)
+                        .filter(path -> path.getFileName().toString().startsWith(project + "_backup"))
+                        .findFirst()
+                        .orElse(null);
+
+                if (firstBackupDir != null) {
+                    // Rename backup directory to original name
+                    Files.move(firstBackupDir, currentDirPath);
+                    LOGGER.info("Renamed backup directory to: " + currentDirPath);
+                }
+
+                // Delete all remaining backup directories with the same name pattern
+                Files.list(ConstantsWindowsFormat.REPO_CLONE_PATH)
+                        .filter(path -> Files.isDirectory(path))
+                        .filter(path -> path.getFileName().toString().startsWith(project + "_backup"))
+                        .forEach(path -> {
+                            try {
+                                Files.walk(path)
+                                        .sorted(Comparator.reverseOrder())
+                                        .map(Path::toFile)
+                                        .forEach(java.io.File::delete);
+                                LOGGER.info("Deleted remaining backup directory: " + path);
+                            } catch (IOException e) {
+                                LOGGER.error("Error deleting backup directory : {}", e.getMessage());
+                            }
+                        });
+            }
+        } finally{
+            LOGGER.info("Finished checking for backup directories");
+        }
+    }
+
+        public void getUpdatedRepo()  {
         LOGGER.info("getUpdatedRepo: Updating repository for project " + project);
 
         try {

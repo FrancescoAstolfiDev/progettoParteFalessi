@@ -21,7 +21,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import static project.models.MethodInstance.ckSignature;
 import project.utils.ConstantSize;
@@ -37,7 +36,7 @@ public class MetricsCalculator {
     private GitHubInfoRetrieve gitHubInfoRetrieve;
     private String projectName;
     private RepositoryManager repositoryManager;
-
+    private boolean resultsChanged;
     private Map <String,Map<String,MethodInstance>> resultCommitsMethods=new HashMap<>();
 
 
@@ -53,9 +52,9 @@ public class MetricsCalculator {
 
         // Initialize the repository manager
         this.repositoryManager = new RepositoryManager(gitHubInfoRetrieve);
-
+        this.resultsChanged=false;
         // Load the commit cache using the optimized method
-        Caching.loadCommitCache(resultCommitsMethods, projectName);
+        Caching.loadCommitCache(resultCommitsMethods, null,projectName);
     }
     /**
      * Data class to hold release processing information
@@ -69,6 +68,7 @@ public class MetricsCalculator {
         Set<String> commitHashesToProcess;
         Map<String, RevCommit> commitsByHash;
         List<Ticket> releaseTickets;
+        DataSetType dataSetType;
     }
 
 
@@ -92,11 +92,12 @@ public class MetricsCalculator {
                 }
                 releaseData.releaseResults.putAll(commitMetrics);
                 releaseData.commitsAnalyzed.put(commitHash, commit);
+                resultsChanged=true;
             }
         }
     }
 
-    void processCommits(ReleaseData releaseData , DataSetType dataSetType) throws IOException, ExecutionException, InterruptedException {
+    void processCommits(ReleaseData releaseData) throws IOException, ExecutionException, InterruptedException {
         System.out.println("processing the other commits ");
         // Crea un lock per sincronizzare l'accesso al repository
         Object threadLock = new Object();
@@ -129,6 +130,9 @@ public class MetricsCalculator {
         // Flag per indicare se è necessario riavviare l'elaborazione dopo un reset
         boolean restartProcessing = false;
 
+        // Thread pool finale che verrà utilizzato anche per processare le classi rimanenti in cache
+        ForkJoinPool finalThreadPool = null;
+
         // Processa i commit in batch con possibilità di riavvio
         while (currentBatchIndex < commitHashList.size()) {
             // Reset del flag di riavvio
@@ -137,6 +141,9 @@ public class MetricsCalculator {
             // Crea un nuovo thread pool per ogni ciclo di elaborazione
             // Questo permette di riavviare completamente l'elaborazione dopo un reset
             ForkJoinPool customThreadPool = new ForkJoinPool(numThreads);
+
+            // Aggiorna il thread pool finale
+            finalThreadPool = customThreadPool;
 
             try {
                 // Calcola l'indice di fine per il batch corrente
@@ -151,118 +158,6 @@ public class MetricsCalculator {
                 // Contatore per gli errori in questo batch specifico
                 AtomicInteger currentBatchErrors = new AtomicInteger(0);
 
-                // Lista per tenere traccia dei commit ancora da processare
-                List<String> remainingCommits = new CopyOnWriteArrayList<>(batchCommits);
-
-                // Thread per monitorare l'attività dei thread e redistribuire il carico di lavoro
-                Thread monitorThread = new Thread(() -> {
-                    try {
-                        while (!remainingCommits.isEmpty() && !Thread.currentThread().isInterrupted()) {
-                            // Controlla il numero di thread attivi
-                            int activeThreads = customThreadPool.getActiveThreadCount();
-
-                            // Se c'è solo un thread attivo e ci sono ancora commit da processare
-                            if (activeThreads <= 1 && remainingCommits.size() > 1) {
-                                LOGGER.info("Solo {} thread attivo, redistribuzione del carico di lavoro per {} commit rimanenti", 
-                                        activeThreads, remainingCommits.size());
-
-                                // Interrompi l'elaborazione corrente
-                                customThreadPool.shutdownNow();
-
-                                // Crea un nuovo thread pool con il numero originale di thread
-                                ForkJoinPool newThreadPool = new ForkJoinPool(numThreads);
-
-                                try {
-                                    try {
-                                        // Redistribuisci il carico di lavoro tra i nuovi thread
-                                        newThreadPool.submit(() ->
-                                            remainingCommits.parallelStream().forEach(commitHash -> {
-                                                try {
-                                                    RevCommit commit = releaseData.commitsByHash.get(commitHash);
-                                                    Path commitTempDir = tempDirPath.resolve(releaseData.release.getName() + "_" + commitHash);
-                                                    releaseData.commitsAnalyzed.put(commitHash, commit);
-
-                                                    // Sincronizza l'accesso al repository Git
-                                                    synchronized (threadLock) {
-                                                        // Checkout del commit appartenente alla release
-                                                        repositoryManager.checkoutRelease(commit, commitTempDir);
-                                                    }
-
-                                                    countThread.getAndIncrement();
-
-                                                    Map<String, MethodInstance> commitMetrics = calculateCKMetrics(commitTempDir, releaseData.release);
-                                                    for (MethodInstance result : commitMetrics.values()) {
-                                                        Release curRelease = releaseData.mapCommitRelease.get(commit);
-                                                        if (curRelease != null) {
-                                                            result.setRelease(curRelease);
-                                                        } else {
-                                                            result.setRelease(releaseData.release);
-                                                        }
-                                                    }
-
-                                                    resultCommitsMethods.put(commitHash, commitMetrics);
-                                                    // Aggiorna i risultati in modo thread-safe
-                                                    releaseData.releaseResults.putAll(commitMetrics);
-
-                                                    synchronized (threadLock) {
-                                                        outData(countThread.get(), releaseData, dataSetType);
-                                                    }
-
-                                                    // Pulisci la directory temporanea del commit
-                                                    repositoryManager.cleanupTempDirectory(commitTempDir);
-
-                                                    // Rimuovi il commit dalla lista dei rimanenti
-                                                    remainingCommits.remove(commitHash);
-
-                                                    // Suggerisci al GC di liberare memoria non utilizzata
-                                                    if (countThread.get() % 10 == 0) {
-                                                        System.gc();
-                                                    }
-                                                } catch (OutOfMemoryError e) {
-                                                    LOGGER.error("Memoria insufficiente durante l'elaborazione del commit: {}", commitHash, e);
-                                                    // Incrementa i contatori di errore
-                                                    currentBatchErrors.incrementAndGet();
-                                                    batchErrorCount.incrementAndGet();
-                                                    // Tenta di liberare memoria
-                                                    System.gc();
-                                                } catch (Exception e) {
-                                                    LOGGER.error("Errore durante l'elaborazione del commit: {}", commitHash, e);
-                                                    // Incrementa i contatori di errore
-                                                    currentBatchErrors.incrementAndGet();
-                                                    batchErrorCount.incrementAndGet();
-                                                }
-                                            })
-                                        ).get(); // Attendi il completamento
-                                    } catch (ExecutionException e) {
-                                        LOGGER.error("Errore durante la redistribuzione del carico di lavoro: {}", e.getMessage(), e);
-                                        // Incrementa i contatori di errore
-                                        currentBatchErrors.incrementAndGet();
-                                        batchErrorCount.incrementAndGet();
-                                    } catch (InterruptedException e) {
-                                        Thread.currentThread().interrupt();
-                                        LOGGER.error("Interruzione durante la redistribuzione del carico di lavoro", e);
-                                    }
-                                } finally {
-                                    newThreadPool.shutdown();
-                                }
-
-                                // Interrompi il thread di monitoraggio
-                                Thread.currentThread().interrupt();
-                            }
-
-                            // Pausa prima del prossimo controllo
-                            Thread.sleep(5000); // Controlla ogni 5 secondi
-                        }
-                    } catch (InterruptedException e) {
-                        // Thread interrotto, termina
-                        Thread.currentThread().interrupt();
-                    }
-                });
-
-                // Avvia il thread di monitoraggio
-                monitorThread.setDaemon(true);
-                monitorThread.start();
-
                 try {
                     customThreadPool.submit(() ->
                             batchCommits.parallelStream().forEach(commitHash -> {
@@ -275,6 +170,7 @@ public class MetricsCalculator {
                                     synchronized (threadLock) {
                                         // Checkout del commit appartenente alla release
                                         repositoryManager.checkoutRelease(commit, commitTempDir);
+
                                     }
 
                                     countThread.getAndIncrement();
@@ -294,14 +190,12 @@ public class MetricsCalculator {
                                     releaseData.releaseResults.putAll(commitMetrics);
 
                                     synchronized (threadLock) {
-                                        outData(countThread.get(), releaseData, dataSetType);
+                                        resultsChanged=true;
+                                        outData(countThread.get(), releaseData);
                                     }
 
                                     // Pulisci la directory temporanea del commit
                                     repositoryManager.cleanupTempDirectory(commitTempDir);
-
-                                    // Rimuovi il commit dalla lista dei rimanenti
-                                    remainingCommits.remove(commitHash);
 
                                     // Suggerisci al GC di liberare memoria non utilizzata
                                     if (countThread.get() % 10 == 0) {
@@ -322,16 +216,13 @@ public class MetricsCalculator {
                                 }
                             })
                         ).get(); // Attendi il completamento
-
-                    // Interrompi il thread di monitoraggio
-                    monitorThread.interrupt();
                 } catch (Exception e) {
                     LOGGER.error("Errore durante l'elaborazione del batch: {}", e.getMessage(), e);
                     // Incrementa il contatore degli errori di batch
                     batchErrorCount.incrementAndGet();
 
                     // Se ci sono troppi errori, esegui un reset completo
-                    if (batchErrorCount.get() >= ERROR_THRESHOLD) {
+                    if (batchErrorCount.get() >= 3) { // Soglia fissa per errori di batch
                         LOGGER.warn("Troppi errori di batch ({}). Esecuzione reset completo...", batchErrorCount.get());
 
                         // Chiudi il thread pool corrente
@@ -393,33 +284,32 @@ public class MetricsCalculator {
             // Rimuovi i commit già elaborati dalla lista da processare
             releaseData.commitHashesToProcess.removeAll(releaseData.commitsAnalyzed.keySet());
             // Richiama ricorsivamente il metodo per elaborare i commit rimanenti
-            processCommits(releaseData,dataSetType);
+            processCommits(releaseData);
             return;
         }
 
         // Completamento normale dell'elaborazione
-        Caching.saveCommitCache(resultCommitsMethods, projectName);
-        repositoryManager.restoreFromBackup();
-        assignBuggyness(releaseData);
-        // Notify callback with full results
-        ClassWriter.writeResultsToFile(releaseData.release, projectName, releaseData.releaseResults, dataSetType);
+        // Usa lo stesso thread pool per processare le classi rimanenti in cache
+        if (finalThreadPool != null) {
+            processRemainingClassesInCache(releaseData, finalThreadPool);
+        } else {
+            // Fallback nel caso in cui il thread pool non sia stato creato
+            LOGGER.warn("Thread pool non disponibile, elaborazione sequenziale");
+            Caching.saveCommitCache(resultCommitsMethods, projectName);
+            repositoryManager.restoreFromBackup();
+            assignBuggyness(releaseData);
+            ClassWriter.writeResultsToFile(releaseData.release, projectName, releaseData.releaseResults, releaseData.dataSetType);
+        }
     }
-
-    // Contatore per tenere traccia degli errori significativi
-    private AtomicInteger significantErrorCount = new AtomicInteger(0);
-
-    // Soglia di errori oltre la quale consideriamo necessario un reset completo
-    private static final int ERROR_THRESHOLD = 5;
 
     // Flag per indicare se è in corso un reset completo
     private volatile boolean resetInProgress = false;
 
     /**
-     * Gestisce un errore durante l'elaborazione, con possibilità di reset completo
-     * se il numero di errori supera una soglia.
+     * Gestisce un errore durante l'elaborazione, eseguendo sempre un reset completo.
      * 
      * @param releaseData I dati della release in elaborazione
-     * @param forceReset Se true, forza un reset completo indipendentemente dal conteggio degli errori
+     * @param forceReset Parametro mantenuto per compatibilità, non utilizzato
      * @return true se è stato eseguito un reset completo, false altrimenti
      */
     private boolean handleProcessingError(ReleaseData releaseData, boolean forceReset) {
@@ -439,24 +329,17 @@ public class MetricsCalculator {
             LOGGER.info("Stato memoria durante l'errore: Usata {}MB, Libera {}MB, Totale {}MB, Max {}MB",
                     usedMemory, freeMemory, totalMemory, maxMemory);
 
-            // Incrementa il contatore degli errori
-            int currentErrorCount = significantErrorCount.incrementAndGet();
-
-            // Determina se è necessario un reset completo
-            boolean needsReset = forceReset || currentErrorCount >= ERROR_THRESHOLD;
-
-            if (needsReset && !resetInProgress) {
+            if (!resetInProgress) {
                 // Imposta il flag per evitare reset concorrenti
                 resetInProgress = true;
 
-                LOGGER.warn("Rilevati {} errori significativi. Esecuzione reset completo...", currentErrorCount);
+                LOGGER.warn("Errore rilevato. Esecuzione reset completo...");
 
                 // Attendi un momento per permettere al sistema di stabilizzarsi
-                Thread.sleep(2000);
+                Thread.sleep(10000);
 
                 // Tenta di ripristinare il backup
-                repositoryManager.restoreFromBackup();
-
+                gitHubInfoRetrieve.initializingRepo();
                 // Crea un nuovo backup per ripartire da uno stato pulito
                 LOGGER.info("Creazione di un nuovo backup dopo il reset...");
                 repositoryManager.backupRepository();
@@ -467,26 +350,12 @@ public class MetricsCalculator {
                     Caching.saveCommitCache(resultCommitsMethods, projectName);
                 }
 
-                // Reset del contatore degli errori
-                significantErrorCount.set(0);
                 resetPerformed = true;
 
                 // Reset completato
                 resetInProgress = false;
 
                 LOGGER.info("Reset completo eseguito con successo. Riavvio dell'elaborazione...");
-            } else {
-                // Gestione standard dell'errore senza reset completo
-                LOGGER.info("Errore gestito senza reset completo (errori: {}/{})", currentErrorCount, ERROR_THRESHOLD);
-
-                // Attendi un momento per permettere al sistema di stabilizzarsi
-                Thread.sleep(10000);
-
-                // Salva lo stato corrente per non perdere il lavoro fatto finora
-                if (!resultCommitsMethods.isEmpty()) {
-                    LOGGER.info("Salvataggio dello stato corrente dopo l'errore...");
-                    Caching.saveCommitCache(resultCommitsMethods, projectName);
-                }
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -506,7 +375,43 @@ public class MetricsCalculator {
         return handleProcessingError(releaseData, false);
     }
 
-    private void outData(int log, ReleaseData releaseData , DataSetType dataSetType) {
+    /**
+     * Processa le classi rimanenti in cache utilizzando lo stesso thread pool
+     * 
+     * @param releaseData I dati della release in elaborazione
+     * @param threadPool Il thread pool da utilizzare per l'elaborazione
+     */
+    private void processRemainingClassesInCache(ReleaseData releaseData, ForkJoinPool threadPool) {
+        try {
+            // Utilizza il thread pool fornito per elaborare le classi rimanenti in cache
+            threadPool.submit(() -> {
+                try {
+                    // Salva la cache
+                    Caching.saveCommitCache(resultCommitsMethods, projectName);
+
+                    // Ripristina il repository
+                    repositoryManager.restoreFromBackup();
+
+                    // Assegna la buggyness
+                    assignBuggyness(releaseData);
+
+                    // Notifica con i risultati completi
+                    ClassWriter.writeResultsToFile(releaseData.release, projectName, releaseData.releaseResults, releaseData.dataSetType);
+
+                    LOGGER.info("Elaborazione delle classi rimanenti in cache completata con successo");
+                } catch (Exception e) {
+                    LOGGER.error("Errore durante l'elaborazione delle classi rimanenti in cache: {}", e.getMessage(), e);
+                }
+            }).get(); // Attendi il completamento
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            LOGGER.error("Elaborazione interrotta per le classi rimanenti in cache", e);
+        } catch (ExecutionException e) {
+            LOGGER.error("Errore durante l'esecuzione dell'elaborazione delle classi rimanenti in cache: {}", e.getMessage(), e);
+        }
+    }
+
+    private void outData(int log, ReleaseData releaseData) {
         if ((log % ConstantSize.FREQUENCY_LOG) == 0) {
             int totalCommits = releaseData.releaseCommits.size() - releaseData.commitsAnalyzed.size();
             int processedCommits = releaseData.commitsAnalyzed.size();
@@ -519,7 +424,7 @@ public class MetricsCalculator {
         if ((log % ConstantSize.FREQUENCY_WRITE_CACHE) == 0) {
             Caching.saveCommitCache(resultCommitsMethods, projectName);
         }
-        if ((log % ConstantSize.FREQUENCY_WRITE_CSV) == 0 && dataSetType== DataSetType.TRAINING) {
+        if ((log % ConstantSize.FREQUENCY_WRITE_CSV) == 0  && releaseData.dataSetType.equals(DataSetType.TRAINING)) {
             // Calculate buggyness for partial results
             assignBuggyness(releaseData);
             // Notify callback with partial results
@@ -529,7 +434,7 @@ public class MetricsCalculator {
     }
 
 
-    public void calculateReleaseMetrics(Release release, List<Ticket> releaseTickets , DataSetType dataSetType) {
+    public void calculateReleaseMetrics(Release release, List<Ticket> releaseTickets, DataSetType dataSetType) {
         // Utilizziamo ConcurrentHashMap per la thread-safety
         // it is an instance <key method method> because it continusely update methods during the commit
         // so when is present other method with same key upgrade the value in o(1) and not in o(n) if they will be in a set
@@ -538,6 +443,7 @@ public class MetricsCalculator {
         data.release = release;
         data.releaseResults = new ConcurrentHashMap<>();
         data.releaseTickets = releaseTickets;
+        data.dataSetType = dataSetType;
         LOGGER.info((" \n\n inizio calcolo metriche per la release " + release.getName()));
 
         // Numero ottimale di thread basato sui core disponibili
@@ -550,74 +456,75 @@ public class MetricsCalculator {
         data.commitHashesToProcess = new HashSet<>();
         data.commitsByHash = new HashMap<>();
 
-        // Reset del contatore degli errori significativi all'inizio di ogni release
-        significantErrorCount.set(0);
-
         getCommitsInCache(data);
         int cachedCommitsSize = data.releaseCommits.size() - data.commitHashesToProcess.size();
 
         LOGGER.info("Found {} commits in cache, need to process {} commits",
                 cachedCommitsSize,
                 data.commitHashesToProcess.size());
+        if (data.commitHashesToProcess.isEmpty()) {
+            System.out.println("No commits to process for release ");
+            assignBuggyness(data);
+            ClassWriter.writeResultsToFile(data.release, projectName, data.releaseResults, dataSetType);
 
-        if (!data.releaseResults.isEmpty() && !data.commitHashesToProcess.isEmpty() && dataSetType== DataSetType.TRAINING) {
+        }
+
+        if (!data.releaseResults.isEmpty() && data.commitHashesToProcess.size() > ConstantSize.FREQUENCY_WRITE_CSV && dataSetType.equals(DataSetType.TRAINING)) {
             System.out.println("writing before the elaboration");
             assignBuggyness(data);
             ClassWriter.writeResultsToFile(data.release, projectName, data.releaseResults, DataSetType.PARTIAL);
         }
 
-        if (data.commitHashesToProcess.isEmpty()) {
-            System.out.println("No commits to process for release ");
-            assignBuggyness(data);
-            // Notify callback with partial results
-            ClassWriter.writeResultsToFile(data.release, projectName, data.releaseResults, dataSetType);
-            return;
-        }
 
-        // Process only the commits that aren't in the cache
-        int maxRetries = 3; // Numero massimo di tentativi di elaborazione completa
-        for (int attempt = 0; attempt < maxRetries; attempt++) {
-            try {
-                // Se non è il primo tentativo, log informativo
-                if (attempt > 0) {
-                    LOGGER.info("Tentativo {} di {} per l'elaborazione della release {}", 
-                            attempt + 1, maxRetries, release.getName());
+        if (!data.commitHashesToProcess.isEmpty()) {
+            // Process only the commits that aren't in the cache
+            int maxRetries = 3; // Numero massimo di tentativi di elaborazione completa
+            for (int attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    // Se non è il primo tentativo, log informativo
+                    if (attempt > 0) {
+                        LOGGER.info("Tentativo {} di {} per l'elaborazione della release {}",
+                                attempt + 1, maxRetries, release.getName());
+                    }
+
+                    processCommits(data);
+
+                    // Se arriviamo qui, l'elaborazione è stata completata con successo
+                    LOGGER.info("Elaborazione della release {} completata con successo", release.getName());
+                    break;
+
+                } catch (IOException | ExecutionException e) {
+                    LOGGER.error("Errore durante l'elaborazione della release {}: {}",
+                            release.getName(), e.getMessage(), e);
+
+                    // Gestisci l'errore e determina se è necessario un nuovo tentativo
+                    boolean resetPerformed = handleProcessingError(data);
+
+                    if (!resetPerformed && attempt == maxRetries - 1 && dataSetType.equals(DataSetType.TRAINING)) {
+                        // Ultimo tentativo fallito senza reset, log di errore finale
+                        LOGGER.error("Impossibile completare l'elaborazione della release {} dopo {} tentativi",
+                                release.getName(), maxRetries);
+
+                        // Salva comunque i risultati parziali
+                        assignBuggyness(data);
+                        ClassWriter.writeResultsToFile(data.release, projectName, data.releaseResults, dataSetType);
+                    }
+
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt(); // Restore the interrupted status
+                    LOGGER.error("Elaborazione interrotta per la release {}", release.getName(), e);
+
+                    // Gestisci l'errore di interruzione
+                    handleProcessingError(data);
+
+                    // Non ritentiamo in caso di interruzione esplicita
+                    LOGGER.warn("Elaborazione della release {} interrotta dall'utente", release.getName());
+                    break;
                 }
 
-                processCommits(data,dataSetType);
-
-                // Se arriviamo qui, l'elaborazione è stata completata con successo
-                LOGGER.info("Elaborazione della release {} completata con successo", release.getName());
-                break;
-
-            } catch (IOException | ExecutionException e) {
-                LOGGER.error("Errore durante l'elaborazione della release {}: {}", 
-                        release.getName(), e.getMessage(), e);
-
-                // Gestisci l'errore e determina se è necessario un nuovo tentativo
-                boolean resetPerformed = handleProcessingError(data);
-
-                if (!resetPerformed && attempt == maxRetries - 1  && dataSetType== DataSetType.TRAINING) {
-                    // Ultimo tentativo fallito senza reset, log di errore finale
-                    LOGGER.error("Impossibile completare l'elaborazione della release {} dopo {} tentativi", 
-                            release.getName(), maxRetries);
-
-                    // Salva comunque i risultati parziali
-                    assignBuggyness(data);
-                    ClassWriter.writeResultsToFile(data.release, projectName, data.releaseResults, DataSetType.PARTIAL);
-                }
-
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt(); // Restore the interrupted status
-                LOGGER.error("Elaborazione interrotta per la release {}", release.getName(), e);
-
-                // Gestisci l'errore di interruzione
-                handleProcessingError(data);
-
-                // Non ritentiamo in caso di interruzione esplicita
-                LOGGER.warn("Elaborazione della release {} interrotta dall'utente", release.getName());
-                break;
             }
+
+
         }
     }
 
@@ -870,6 +777,8 @@ public class MetricsCalculator {
 
     //questo metodo scorre le release e assegna il valore buggyness delle classi
     void assignBuggyness(ReleaseData data){
+        if(!resultsChanged)return;
+        resultsChanged=false;
         List<ClassFile> buggyClasses = new ArrayList<>();
         LOGGER.info("Assign buggyness");
         List<RevCommit> revCommitList = new ArrayList<>();
@@ -928,13 +837,7 @@ public class MetricsCalculator {
             List<String> modifiedClasses = gitHubInfoRetrieve.getDifference(commit,false);
 
             if (!modifiedClasses.isEmpty()) {
-                // Split large commits into smaller ones if needed
-                List<List<String>> splitCommits = splitLargeCommit(modifiedClasses);
-
-                // Process each split commit
-                for (List<String> splitCommit : splitCommits) {
-                    updateBuggyness(splitCommit, buggyClasses, data.release);
-                }
+                updateBuggyness(modifiedClasses,buggyClasses,data.release);
             }
         }
 
@@ -949,10 +852,7 @@ public class MetricsCalculator {
         for (String path : allPaths) {
             ClassFile currentFile = release.getClassFileByPath(path);
             if (currentFile == null) continue;
-
-            // Add the class to buggyClasses only once
             buggyClasses.add(currentFile);
-
             String oldContent = gitHubInfoRetrieve.getFileContentBefore(path); // da implementare
             String newContent = gitHubInfoRetrieve.getFileContentNow(path);    // da implementare
 
@@ -976,7 +876,7 @@ public class MetricsCalculator {
                 }
             }
 
-            // Removed duplicate addition of currentFile to buggyClasses
+            buggyClasses.add(currentFile);
         }
     }
 
@@ -1008,84 +908,18 @@ public class MetricsCalculator {
         return methodMap;
     }
 
-    /**
-     * Splits a large commit into smaller ones, each containing at most MAX_CLASSES_PER_COMMIT classes.
-     * This ensures that large commits that modify many classes are processed in smaller chunks.
-     *
-     * @param modifiedClasses List of modified classes in the commit
-     * @return List of smaller commits (lists of classes)
-     */
-    private List<List<String>> splitLargeCommit(List<String> modifiedClasses) {
-        List<List<String>> result = new ArrayList<>();
-
-        // If the commit is small enough, return it as is
-        if (modifiedClasses.size() <= ConstantSize.MAX_CLASSES_PER_COMMIT) {
-            result.add(new ArrayList<>(modifiedClasses));
-            return result;
-        }
-
-        // Log that we're splitting a large commit
-        LOGGER.info("Splitting large commit with {} classes into smaller chunks of max {} classes", 
-                modifiedClasses.size(), ConstantSize.MAX_CLASSES_PER_COMMIT);
-
-        // Split the commit into smaller ones
-        int totalClasses = modifiedClasses.size();
-        int startIndex = 0;
-
-        while (startIndex < totalClasses) {
-            int endIndex = Math.min(startIndex + ConstantSize.MAX_CLASSES_PER_COMMIT, totalClasses);
-            List<String> splitCommit = new ArrayList<>(modifiedClasses.subList(startIndex, endIndex));
-            result.add(splitCommit);
-            startIndex = endIndex;
-        }
-
-        LOGGER.info("Split commit into {} smaller chunks", result.size());
-        return result;
-    }
-
 
 
     //un metodo utile per ordinare i commit in ordine temporale
-    //quando si è raggiunta la quota degli ultimi commit prioritizza la loro gestione in modo tale che quelli di taglia maggiore vengano gestiti prima
     private void sortCommits(List<RevCommit> commits){
-        int size = commits.size();
-        if (size <= ConstantSize.LAST_COMMITS_TO_PRIORITIZE) {
-            // Se ci sono meno commit del limite, ordina tutti per dimensione
-            Collections.sort(commits, new RevCommitSizeComparator());
-        } else {
-            // Ordina i primi (size-LAST_COMMITS_TO_PRIORITIZE) commit per data
-            Collections.sort(commits.subList(0, size - ConstantSize.LAST_COMMITS_TO_PRIORITIZE), new RevCommitComparator());
-            // Ordina gli ultimi LAST_COMMITS_TO_PRIORITIZE commit per dimensione (numero di file modificati)
-            Collections.sort(commits.subList(size - ConstantSize.LAST_COMMITS_TO_PRIORITIZE, size), new RevCommitSizeComparator());
-        }
+        Collections.sort(commits,new RevCommitComparator());
     }
 
-    //il comparator utile a sortCommits per ordinare per data
+    //il comparator utile a sortCommits
     private class RevCommitComparator implements Comparator<RevCommit> {
         @Override
         public int compare(RevCommit a, RevCommit b) {
             return a.getCommitterIdent().getWhen().compareTo(b.getCommitterIdent().getWhen());
-        }
-    }
-
-    //il comparator per ordinare per dimensione (numero di file modificati)
-    private class RevCommitSizeComparator implements Comparator<RevCommit> {
-        @Override
-        public int compare(RevCommit a, RevCommit b) {
-            // Ottieni il numero di file modificati per ciascun commit
-            List<String> modifiedFilesA = gitHubInfoRetrieve.getDifference(a, false);
-            List<String> modifiedFilesB = gitHubInfoRetrieve.getDifference(b, false);
-
-            // Ottieni i file aggiunti
-            List<String> addedFilesA = gitHubInfoRetrieve.getDifference(a, true);
-            List<String> addedFilesB = gitHubInfoRetrieve.getDifference(b, true);
-
-            // Calcola il totale senza modificare le liste originali
-            int totalFilesA = modifiedFilesA.size() + addedFilesA.size();
-            int totalFilesB = modifiedFilesB.size() + addedFilesB.size();
-
-            // Ordina in ordine decrescente (i commit più grandi prima)
-            return Integer.compare(totalFilesB, totalFilesA);
         }
     }
 }

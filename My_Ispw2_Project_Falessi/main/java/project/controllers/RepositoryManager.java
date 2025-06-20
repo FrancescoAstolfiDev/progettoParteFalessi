@@ -13,6 +13,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import project.utils.ConstantSize;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,8 +21,11 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -34,6 +38,9 @@ public class RepositoryManager {
     private String originalRepoPath;
     private String backupRepoPath;
     private final GitHubInfoRetrieve gitHubInfoRetrieve;
+
+    // Cache for storing excess files from commits
+    private final Map<String, byte[]> cachedFiles = new HashMap<>();
 
     /**
      * Constructor that takes a GitHubInfoRetrieve object
@@ -371,52 +378,102 @@ public class RepositoryManager {
     }
 
     private void exportCodeToDirectory(RevCommit commit, Path targetDir) {
-        try{
-            RevWalk revWalk = new RevWalk(repository);
-            RevCommit parent = commit.getParentCount() > 0 ? revWalk.parseCommit(commit.getParent(0).getId()) : null;
+        try {
+            // Ensure target directory exists
+            ensureTempDirectoryExists(targetDir);
 
-            DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE);
-            df.setRepository(repository);
-            df.setDiffComparator(RawTextComparator.DEFAULT);
-            df.setDetectRenames(true);
+            // Track how many files we've processed in this call
+            int processedFilesCount = 0;
+            int maxFilesToProcess = ConstantSize.MAX_CLASSES_PER_COMMIT;
 
-            List<DiffEntry> diffs = df.scan(parent == null ? null : parent.getTree(), commit.getTree());
+            // First, use files from cache if available
+            if (!cachedFiles.isEmpty()) {
+                LOGGER.info("Using {} files from cache", cachedFiles.size());
 
-            for (DiffEntry entry : diffs) {
-                if (entry.getChangeType() == DiffEntry.ChangeType.DELETE) continue; // Ignora file rimossi
+                // Create a list of entries to avoid concurrent modification
+                List<Map.Entry<String, byte[]>> cachedEntries = new ArrayList<>(cachedFiles.entrySet());
 
-                String path = entry.getNewPath();
-                if (path.endsWith(".java") && ! isTestFile(path)) {
-                    ObjectId objectId = commit.getTree().getId();
+                // Process files from cache up to the maximum limit
+                for (Map.Entry<String, byte[]> entry : cachedEntries) {
+                    if (processedFilesCount >= maxFilesToProcess) {
+                        break;
+                    }
+
+                    String path = entry.getKey();
+                    byte[] content = entry.getValue();
+
+                    Path targetFilePath = targetDir.resolve(path);
+                    Files.createDirectories(targetFilePath.getParent());
+                    Files.write(targetFilePath, content);
+
+                    // Remove this file from cache as it's been processed
+                    cachedFiles.remove(path);
+                    processedFilesCount++;
+                }
+            }
+
+            // If we still need more files, process from the current commit
+            if (processedFilesCount < maxFilesToProcess) {
+                RevWalk revWalk = new RevWalk(repository);
+                RevCommit parent = commit.getParentCount() > 0 ? revWalk.parseCommit(commit.getParent(0).getId()) : null;
+
+                DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE);
+                df.setRepository(repository);
+                df.setDiffComparator(RawTextComparator.DEFAULT);
+                df.setDetectRenames(true);
+
+                List<DiffEntry> diffs = df.scan(parent == null ? null : parent.getTree(), commit.getTree());
+
+                // Collect all Java files from the commit
+                List<DiffEntry> javaFiles = new ArrayList<>();
+                for (DiffEntry entry : diffs) {
+                    if (entry.getChangeType() != DiffEntry.ChangeType.DELETE) {
+                        String path = entry.getNewPath();
+                        if (path.endsWith(".java") && !isTestFile(path)) {
+                            javaFiles.add(entry);
+                        }
+                    }
+                }
+
+                LOGGER.info("Found {} Java files in commit", javaFiles.size());
+
+                // Process files up to the maximum limit
+                for (int i = 0; i < javaFiles.size(); i++) {
+                    DiffEntry entry = javaFiles.get(i);
+                    String path = entry.getNewPath();
 
                     try (TreeWalk treeWalk = TreeWalk.forPath(repository, path, commit.getTree())) {
                         if (treeWalk != null) {
                             byte[] content = repository.open(treeWalk.getObjectId(0)).getBytes();
 
-                            Path targetFilePath = targetDir.resolve(path);
-                            Files.createDirectories(targetFilePath.getParent());
-                            Files.write(targetFilePath, content);
+                            // If we've reached the maximum, cache the remaining files
+                            if (processedFilesCount >= maxFilesToProcess) {
+                                cachedFiles.put(path, content);
+                            } else {
+                                // Otherwise, write the file to the target directory
+                                Path targetFilePath = targetDir.resolve(path);
+                                Files.createDirectories(targetFilePath.getParent());
+                                Files.write(targetFilePath, content);
+                                processedFilesCount++;
+                            }
                         }
                     }
                 }
             }
 
-            // Stampiamo quanti file sono stati effettivamente esportati
-            // Verifichiamo prima che la directory esista
-
-            long  count = 0;
+            // Count the actual number of files exported
+            long count = 0;
             if (Files.exists(targetDir)) {
                 count = Files.walk(targetDir)
                         .filter(p -> p.toString().endsWith(".java"))
                         .count();
-
             }
-            LOGGER.info("classi da processare : {} ", count);
+
+            LOGGER.info("Classi da processare: {}, Rimaste in cache: {}", count, cachedFiles.size());
 
         } catch (Exception e) {
             LOGGER.error("Errore durante l'esportazione dei file del commit: {} ", commit.getName(), e);
         }
-
     }
     private boolean isTestFile(String path) {
         String lowerPath = path.toLowerCase();

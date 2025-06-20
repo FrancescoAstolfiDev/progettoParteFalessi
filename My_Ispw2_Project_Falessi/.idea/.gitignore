@@ -1,10 +1,55 @@
-# Default ignored files
-/shelf/
-/workspace.xml
-# Editor-based HTTP Client requests
-/httpRequests/
-# Environment-dependent path to Maven home directory
-/mavenHomeManager.xml
-# Datasource local storage ignored files
-/dataSources/
-/dataSources.local.xml
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+shelf/
+workspace.xml
+httpRequests/
+mavenHomeManager.xml
+
+# IDE data sources
+dataSources/
+dataSources.local.xml
+
+# Build directories
+target/
+cache/
+bin/
+build/
+out/
+dist/
+
+# Compiled files
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# Package Files
+dependency-reduced-pom.xml
+
+# Cache directories
+.gradle/
+.m2/
+.settings/
+.project
+.classpath
+
+# OS specific
+.DS_Store
+Thumbs.db
