@@ -4,37 +4,32 @@ on:
   workflow_dispatch:  # ⬅️ Abilita il bottone "Run workflow" su GitHub Actions
 
 jobs:
-  sonar:
-    name: Analyze with SonarCloud
+  build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./My_ispw2_Project  # ← Update this if incorrect
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # importante per l’analisi SonarCloud
+      - uses: actions/checkout@v3
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v3
         with:
-          java-version: 17
-          distribution: 'zulu'
+          java-version: '17'
+          distribution: 'temurin'
 
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v4
+      - name: Cache Maven packages
+        uses: actions/cache@v3
         with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven
 
-      - name: Run SonarCloud scan
-        working-directory: progetto_parte_falessi/My_ispw2_Project
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-            -Dsonar.projectKey=org.example:My_Ispw2_Project_Falessi \
-            -Dsonar.organization=org-example \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=${SONAR_TOKEN}
+      - name: Build and analyze
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+          -Dsonar.projectKey=org.example:My_Ispw2_Project_Falessi \
+          -Dsonar.organization=org-example \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
