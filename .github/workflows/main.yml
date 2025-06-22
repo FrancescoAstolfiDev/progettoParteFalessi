@@ -1,18 +1,23 @@
-name: SonarCloud Manual Analysis
+name: SonarQube
 
 on:
-  workflow_dispatch:  # ⬅️ Abilita il bottone "Run workflow" su GitHub Actions
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:  # Permette l'esecuzione manuale da GitHub UI
 
 jobs:
-  sonar:
-    name: Analyze with SonarCloud
+  build:
+    name: Build and analyze
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # importante per l’analisi SonarCloud
+          fetch-depth: 0  # Necessario per un'analisi SonarQube accurata
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -20,17 +25,23 @@ jobs:
           java-version: 17
           distribution: 'zulu'
 
-      - name: Cache SonarCloud packages
+      - name: Cache SonarQube packages
         uses: actions/cache@v4
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
-      - name: Run SonarCloud scan
-        working-directory: ./My_Ispw2_Project_Falessi  # adattalo se la cartella è diversa
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build and analyze with SonarQube
+        working-directory: ./My_Ispw2_Project_Falessi
+        continue-on-error: false
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-            -Dsonar.projectKey=org.example:My_Ispw2_Project_Falessi \
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=francescoastolfidev_progettoParteFalessi
