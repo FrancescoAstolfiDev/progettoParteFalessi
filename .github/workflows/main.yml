@@ -28,9 +28,13 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
 
       - name: Run SonarCloud scan
-        working-directory: ./My_Ispw2_Project_Falessi  # adattalo se la cartella è diversa
+        working-directory: progetto_parte_falessi/My_ispw2_Project
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
             -Dsonar.projectKey=org.example:My_Ispw2_Project_Falessi \
+            -Dsonar.organization=org-example \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.login=${SONAR_TOKEN}
+
