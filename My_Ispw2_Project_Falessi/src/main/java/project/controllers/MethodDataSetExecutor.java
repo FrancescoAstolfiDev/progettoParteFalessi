@@ -6,14 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import project.models.DataSetType;
-import project.models.MethodInstance;
 import project.models.Release;
 import project.models.Ticket;
 import project.utils.ConstantSize;
 import project.utils.ConstantsWindowsFormat;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

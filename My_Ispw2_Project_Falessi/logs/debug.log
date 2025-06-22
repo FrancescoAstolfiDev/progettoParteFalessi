@@ -23402,3 +23402,73 @@ java.lang.UnsupportedOperationException
 2025-06-22 22:44:55 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_95544768f628b62e02947fcbd00d61bd98ec90e6\openjpa-persistence\src\main\java\org\apache\openjpa\persistence\XMLPersistenceMetaDataParser.java
 2025-06-22 22:44:55 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_95544768f628b62e02947fcbd00d61bd98ec90e6\openjpa-persistence\src\main\java\org\apache\openjpa\persistence\XMLPersistenceMetaDataParser.java, className=org.apache.openjpa.persistence.XMLPersistenceMetaDataParser]
 2025-06-22 22:45:09 INFO  CK:112 - Finished parsing
+2025-06-22 22:45:20 INFO  CK:57 - Found 0 java files
+2025-06-22 22:45:20 INFO  CK:83 - Found 0 src dirs
+2025-06-22 22:45:20 DEBUG CK:96 - Max partition size: 400, total partitions=0
+2025-06-22 22:45:20 INFO  CK:112 - Finished parsing
+2025-06-22 22:45:23 INFO  CK:57 - Found 1 java files
+2025-06-22 22:45:23 INFO  CK:83 - Found 0 src dirs
+2025-06-22 22:45:23 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-22 22:45:23 DEBUG CK:99 - Next partition
+2025-06-22 22:45:23 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_aedc261abc6fddb00f815e5c68906ef7b2e255fc\openjpa-persistence\src\main\java\org\apache\openjpa\persistence\PersistenceProductDerivation.java
+2025-06-22 22:45:23 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_aedc261abc6fddb00f815e5c68906ef7b2e255fc\openjpa-persistence\src\main\java\org\apache\openjpa\persistence\PersistenceProductDerivation.java, className=org.apache.openjpa.persistence.PersistenceProductDerivation$PUNameCollision]
+2025-06-22 22:45:25 INFO  CK:57 - Found 3 java files
+2025-06-22 22:45:25 INFO  CK:83 - Found 0 src dirs
+2025-06-22 22:45:25 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-22 22:45:25 DEBUG CK:99 - Next partition
+2025-06-22 22:45:25 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_aedc261abc6fddb00f815e5c68906ef7b2e255fc\openjpa-persistence\src\main\java\org\apache\openjpa\persistence\PersistenceProductDerivation.java, className=org.apache.openjpa.persistence.PersistenceProductDerivation]
+2025-06-22 22:45:25 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_8a66927c2d37d91c9e55cfadc252a5c5c9eeec76\openjpa-kernel\src\main\java\org\apache\openjpa\conf\OpenJPAConfiguration.java
+2025-06-22 22:45:26 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_8a66927c2d37d91c9e55cfadc252a5c5c9eeec76\openjpa-kernel\src\main\java\org\apache\openjpa\conf\OpenJPAConfiguration.java, className=org.apache.openjpa.conf.OpenJPAConfiguration]
+2025-06-22 22:45:38 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_aedc261abc6fddb00f815e5c68906ef7b2e255fc\openjpa-persistence\src\main\java\org\apache\openjpa\persistence\PersistenceProductDerivation.java, className=org.apache.openjpa.persistence.PersistenceProductDerivation$ConfigurationParser]
+2025-06-22 22:45:42 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_aedc261abc6fddb00f815e5c68906ef7b2e255fc\openjpa-persistence\src\main\java\org\apache\openjpa\persistence\PersistenceProductDerivation.java, className=org.apache.openjpa.persistence.PersistenceProductDerivation$ConfigurationProviderImpl]
+2025-06-22 22:45:43 INFO  CK:57 - Found 1 java files
+2025-06-22 22:45:43 INFO  CK:83 - Found 0 src dirs
+2025-06-22 22:45:43 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-22 22:45:43 DEBUG CK:99 - Next partition
+2025-06-22 22:45:44 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_f55dff2069f4a1dc2f27d7e5a9dd126bcc5a2d67\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\schema\SchemaGenerator.java
+2025-06-22 22:45:44 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_f55dff2069f4a1dc2f27d7e5a9dd126bcc5a2d67\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\schema\SchemaGenerator.java, className=org.apache.openjpa.jdbc.schema.SchemaGenerator$Listener]
+2025-06-22 22:45:44 INFO  CK:112 - Finished parsing
+2025-06-22 22:45:44 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_f55dff2069f4a1dc2f27d7e5a9dd126bcc5a2d67\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\schema\SchemaGenerator.java, className=org.apache.openjpa.jdbc.schema.SchemaGenerator$Event]
+2025-06-22 22:45:45 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_f55dff2069f4a1dc2f27d7e5a9dd126bcc5a2d67\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\schema\SchemaGenerator.java, className=org.apache.openjpa.jdbc.schema.SchemaGenerator]
+2025-06-22 22:45:46 INFO  CK:112 - Finished parsing
+2025-06-22 22:45:47 INFO  CK:57 - Found 1 java files
+2025-06-22 22:45:47 INFO  CK:83 - Found 0 src dirs
+2025-06-22 22:45:47 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-22 22:45:47 DEBUG CK:99 - Next partition
+2025-06-22 22:45:47 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_e23ea92319dd33ff98dc475f71e8d8a269926113\openjpa-slice\src\main\java\org\apache\openjpa\slice\jdbc\DistributedStoreManager.java
+2025-06-22 22:45:47 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_e23ea92319dd33ff98dc475f71e8d8a269926113\openjpa-slice\src\main\java\org\apache\openjpa\slice\jdbc\DistributedStoreManager.java, className=org.apache.openjpa.slice.jdbc.DistributedStoreManager]
+2025-06-22 22:45:20 INFO  CK:57 - Found 0 java files
+2025-06-22 22:45:20 INFO  CK:83 - Found 0 src dirs
+2025-06-22 22:45:20 DEBUG CK:96 - Max partition size: 400, total partitions=0
+2025-06-22 22:45:20 INFO  CK:112 - Finished parsing
+2025-06-22 22:45:23 INFO  CK:57 - Found 1 java files
+2025-06-22 22:45:23 INFO  CK:83 - Found 0 src dirs
+2025-06-22 22:45:23 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-22 22:45:23 DEBUG CK:99 - Next partition
+2025-06-22 22:45:23 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_aedc261abc6fddb00f815e5c68906ef7b2e255fc\openjpa-persistence\src\main\java\org\apache\openjpa\persistence\PersistenceProductDerivation.java
+2025-06-22 22:45:23 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_aedc261abc6fddb00f815e5c68906ef7b2e255fc\openjpa-persistence\src\main\java\org\apache\openjpa\persistence\PersistenceProductDerivation.java, className=org.apache.openjpa.persistence.PersistenceProductDerivation$PUNameCollision]
+2025-06-22 22:45:25 INFO  CK:57 - Found 3 java files
+2025-06-22 22:45:25 INFO  CK:83 - Found 0 src dirs
+2025-06-22 22:45:25 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-22 22:45:25 DEBUG CK:99 - Next partition
+2025-06-22 22:45:25 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_aedc261abc6fddb00f815e5c68906ef7b2e255fc\openjpa-persistence\src\main\java\org\apache\openjpa\persistence\PersistenceProductDerivation.java, className=org.apache.openjpa.persistence.PersistenceProductDerivation]
+2025-06-22 22:45:25 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_8a66927c2d37d91c9e55cfadc252a5c5c9eeec76\openjpa-kernel\src\main\java\org\apache\openjpa\conf\OpenJPAConfiguration.java
+2025-06-22 22:45:26 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_8a66927c2d37d91c9e55cfadc252a5c5c9eeec76\openjpa-kernel\src\main\java\org\apache\openjpa\conf\OpenJPAConfiguration.java, className=org.apache.openjpa.conf.OpenJPAConfiguration]
+2025-06-22 22:45:38 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_aedc261abc6fddb00f815e5c68906ef7b2e255fc\openjpa-persistence\src\main\java\org\apache\openjpa\persistence\PersistenceProductDerivation.java, className=org.apache.openjpa.persistence.PersistenceProductDerivation$ConfigurationParser]
+2025-06-22 22:45:42 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_aedc261abc6fddb00f815e5c68906ef7b2e255fc\openjpa-persistence\src\main\java\org\apache\openjpa\persistence\PersistenceProductDerivation.java, className=org.apache.openjpa.persistence.PersistenceProductDerivation$ConfigurationProviderImpl]
+2025-06-22 22:45:43 INFO  CK:57 - Found 1 java files
+2025-06-22 22:45:43 INFO  CK:83 - Found 0 src dirs
+2025-06-22 22:45:43 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-22 22:45:43 DEBUG CK:99 - Next partition
+2025-06-22 22:45:44 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_f55dff2069f4a1dc2f27d7e5a9dd126bcc5a2d67\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\schema\SchemaGenerator.java
+2025-06-22 22:45:44 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_f55dff2069f4a1dc2f27d7e5a9dd126bcc5a2d67\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\schema\SchemaGenerator.java, className=org.apache.openjpa.jdbc.schema.SchemaGenerator$Listener]
+2025-06-22 22:45:44 INFO  CK:112 - Finished parsing
+2025-06-22 22:45:44 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_f55dff2069f4a1dc2f27d7e5a9dd126bcc5a2d67\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\schema\SchemaGenerator.java, className=org.apache.openjpa.jdbc.schema.SchemaGenerator$Event]
+2025-06-22 22:45:45 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_f55dff2069f4a1dc2f27d7e5a9dd126bcc5a2d67\openjpa-jdbc\src\main\java\org\apache\openjpa\jdbc\schema\SchemaGenerator.java, className=org.apache.openjpa.jdbc.schema.SchemaGenerator]
+2025-06-22 22:45:46 INFO  CK:112 - Finished parsing
+2025-06-22 22:45:47 INFO  CK:57 - Found 1 java files
+2025-06-22 22:45:47 INFO  CK:83 - Found 0 src dirs
+2025-06-22 22:45:47 DEBUG CK:96 - Max partition size: 400, total partitions=1
+2025-06-22 22:45:47 DEBUG CK:99 - Next partition
+2025-06-22 22:45:47 INFO  MetricsExecutor:33 - Processing: C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_e23ea92319dd33ff98dc475f71e8d8a269926113\openjpa-slice\src\main\java\org\apache\openjpa\slice\jdbc\DistributedStoreManager.java
+2025-06-22 22:45:47 INFO  MetricsExecutor:40 - CKClassResult [file=C:\Users\FRANCE~1\AppData\Local\Temp\ck_analysis\2.0.0-M3_e23ea92319dd33ff98dc475f71e8d8a269926113\openjpa-slice\src\main\java\org\apache\openjpa\slice\jdbc\DistributedStoreManager.java, className=org.apache.openjpa.slice.jdbc.DistributedStoreManager]
