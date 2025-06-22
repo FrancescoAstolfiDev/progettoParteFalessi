@@ -23,7 +23,6 @@ import org.json.JSONObject;
 import project.models.Ticket;
 
 
-
 public class JiraInfoRetrieve {
     private static final Logger LOGGER = Logger.getLogger(JiraInfoRetrieve.class.getName());
     private static final int MAX_RETRIES = 5;  // Increased from 3 to 5

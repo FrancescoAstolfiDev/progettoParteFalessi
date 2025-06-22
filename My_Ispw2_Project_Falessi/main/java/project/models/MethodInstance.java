@@ -7,7 +7,6 @@ public class MethodInstance {
     private Release release;
     private String filePath;
     private String methodName;
-    private String className;
     private String signature;
     private String fullSignature;
 
@@ -55,13 +54,14 @@ public class MethodInstance {
      * @return Una chiave univoca per il metodo
      */
     public static String createMethodKey(MethodInstance method) {
-        String className = method.getClassName() != null ?
-                method.getClassName() : "anonymous";
+        String className = method.getFilePath() != null ?
+                method.getFilePath() : "anonymous";
         String methodName = method.getMethodName() != null ?
                 method.getMethodName() : "anonymous";
-
+        String releaseName= method.getRelease() !=null?
+                method.getRelease().getName():"0.0.0";
         // Use full class name + method name as key
-        return className + "#" + methodName;
+        return className + "#" + methodName + "#"  + methodName;
     }
 
     public Release getRelease() {
@@ -78,17 +78,6 @@ public class MethodInstance {
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
-    }
-
-    public String getClassName() {
-
-        return className;
-    }
-
-    public void setClassName(String className) {
-        String expectedPath = className.replace('.', '/') + ".java";
-//        expectedPath="bookkeeper-server/src/main/java/"+expectedPath;
-        this.className = expectedPath;
     }
 
     public String getMethodName() {

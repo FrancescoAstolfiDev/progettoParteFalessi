@@ -42,6 +42,8 @@ public class RepositoryManager {
     // Cache for storing excess files from commits
     private final Map<String, byte[]> cachedFiles = new HashMap<>();
 
+
+
     /**
      * Constructor that takes a GitHubInfoRetrieve object
      */
@@ -306,7 +308,7 @@ public class RepositoryManager {
         }
     }
 
-    protected void checkoutRelease(RevCommit commit, Path commitTempDir) {
+    protected void checkoutRelease(RevCommit commit, Path commitTempDir, boolean processAllCommits) {
         try {
             // First try: clean the working directory before checkout
             try {
@@ -371,49 +373,55 @@ public class RepositoryManager {
             }
 
             ensureTempDirectoryExists(commitTempDir);
-            exportCodeToDirectory(commit, commitTempDir);
+            exportCodeToDirectory(commit, commitTempDir,processAllCommits);
         } catch (GitAPIException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void exportCodeToDirectory(RevCommit commit, Path targetDir) {
-        try {
-            // Ensure target directory exists
-            ensureTempDirectoryExists(targetDir);
+    public  int  handleCachedFile(Path targetDir) throws IOException {
+        // Ensure target directory exists
+        ensureTempDirectoryExists(targetDir);
 
-            // Track how many files we've processed in this call
-            int processedFilesCount = 0;
-            int maxFilesToProcess = ConstantSize.MAX_CLASSES_PER_COMMIT;
+        // Track how many files we've processed in this call
+        int processedFilesCount = 0;
+        int maxFilesToProcess = ConstantSize.MAX_CLASSES_PER_COMMIT;
 
-            // First, use files from cache if available
-            if (!cachedFiles.isEmpty()) {
-                LOGGER.info("Using {} files from cache", cachedFiles.size());
+        // First, use files from cache if available
+        if (!cachedFiles.isEmpty()) {
+            LOGGER.info("Using {} files from cache", cachedFiles.size());
 
-                // Create a list of entries to avoid concurrent modification
-                List<Map.Entry<String, byte[]>> cachedEntries = new ArrayList<>(cachedFiles.entrySet());
+            // Create a list of entries to avoid concurrent modification
+            List<Map.Entry<String, byte[]>> cachedEntries = new ArrayList<>(cachedFiles.entrySet());
 
-                // Process files from cache up to the maximum limit
-                for (Map.Entry<String, byte[]> entry : cachedEntries) {
-                    if (processedFilesCount >= maxFilesToProcess) {
-                        break;
-                    }
-
-                    String path = entry.getKey();
-                    byte[] content = entry.getValue();
-
-                    Path targetFilePath = targetDir.resolve(path);
-                    Files.createDirectories(targetFilePath.getParent());
-                    Files.write(targetFilePath, content);
-
-                    // Remove this file from cache as it's been processed
-                    cachedFiles.remove(path);
-                    processedFilesCount++;
+            // Process files from cache up to the maximum limit
+            for (Map.Entry<String, byte[]> entry : cachedEntries) {
+                if (processedFilesCount >= maxFilesToProcess) {
+                    break;
                 }
-            }
 
-            // If we still need more files, process from the current commit
-            if (processedFilesCount < maxFilesToProcess) {
+                String path = entry.getKey();
+                byte[] content = entry.getValue();
+
+                Path targetFilePath = targetDir.resolve(path);
+                Files.createDirectories(targetFilePath.getParent());
+                Files.write(targetFilePath, content);
+
+                // Remove this file from cache as it's been processed
+                cachedFiles.remove(path);
+                processedFilesCount++;
+            }
+        }
+
+        return processedFilesCount;
+    }
+
+    private void exportCodeToDirectory(RevCommit commit, Path targetDir, boolean processAllCommits) {
+        try {
+            // Track how many files we've processed in this call
+            int processedFilesCount = handleCachedFile(targetDir);
+            int maxFilesToProcess = ConstantSize.MAX_CLASSES_PER_COMMIT;
+            if (processedFilesCount < maxFilesToProcess ) {
                 RevWalk revWalk = new RevWalk(repository);
                 RevCommit parent = commit.getParentCount() > 0 ? revWalk.parseCommit(commit.getParent(0).getId()) : null;
 
@@ -447,14 +455,14 @@ public class RepositoryManager {
                             byte[] content = repository.open(treeWalk.getObjectId(0)).getBytes();
 
                             // If we've reached the maximum, cache the remaining files
-                            if (processedFilesCount >= maxFilesToProcess) {
-                                cachedFiles.put(path, content);
-                            } else {
+                            if (processAllCommits || processedFilesCount < maxFilesToProcess){
                                 // Otherwise, write the file to the target directory
                                 Path targetFilePath = targetDir.resolve(path);
                                 Files.createDirectories(targetFilePath.getParent());
                                 Files.write(targetFilePath, content);
                                 processedFilesCount++;
+                            } else {
+                                cachedFiles.put(path, content);
                             }
                         }
                     }
@@ -478,6 +486,9 @@ public class RepositoryManager {
     private boolean isTestFile(String path) {
         String lowerPath = path.toLowerCase();
         return lowerPath.contains("/test/") || lowerPath.contains("test") || lowerPath.contains("mock");
+    }
+    public boolean getEmptyCache(){
+        return cachedFiles.isEmpty();
     }
 
 }

@@ -37,14 +37,14 @@ public class ClassWriter {
         try {
             outPath=projectName.toUpperCase()+dataType+ actRelease.getId() + ".csv";
             LOGGER.info("Writing  results to {}" , outPath);
-            writeResultsToFile(outPath, partialResults,dataType);
+            writeResultsToFile(outPath, partialResults,dataType,actRelease);
 
         } catch (Exception e) {
             LOGGER.error("Error writing results: {}" , e.getMessage());
         }
     }
 
-    private static void writeResultsToFile(String path, Map<String, MethodInstance> results, DataSetType dataSetType) {
+    static void writeResultsToFile(String path, Map<String, MethodInstance> results, DataSetType dataSetType, Release currRelease) {
         Path outputFilePath;
 
         if (dataSetType== DataSetType.PARTIAL){
@@ -69,17 +69,19 @@ public class ClassWriter {
             ) {
                 // Header
                 writer.write(String.join(",",
-                        "release", "class", "method", "path",
+                        "release", "method", "path",
                         "loc", "wmc", "assignmentsQty", "mathOperationsQty", "qtyTryCatch", "qtyReturn", "fanin", "fanout",
                         "age","nAuth", "nr", "nSmell","buggy"));
                 writer.newLine();
                 for (MethodInstance result : results.values()) {
-                    if(result.getAge()<0){
+                    if(result.getAge()<0 || result.getRelease()==null){
+                        continue;
+                    }
+                    if(result.getRelease().getId()>=currRelease.getId()){
                         continue;
                     }
                     String csvRow = String.join(",",
                             escapeCsv(result.getRelease().getName()),
-                            escapeCsv(result.getClassName()),
                             escapeCsv(result.getMethodName()),
                             escapeCsv(String.valueOf(result.getFilePath())),
 

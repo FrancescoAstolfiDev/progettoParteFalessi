@@ -490,5 +490,70 @@ public class GitHubInfoRetrieve {
             return "exception occurred";
         }
     }
+    /**
+     * Recupera i metodi modificati o cancellati in un commit specifico
+     * @param commit Il commit da analizzare
+     * @return Lista di MethodInstance modificate o cancellate
+     */
+    public List<MethodInstance> getChangedMethodInstances(RevCommit commit) {
+        List<MethodInstance> changedMethods = new ArrayList<>();
+        RevCommit parent;
+
+        try {
+            parent = commit.getParent(0);
+        } catch (Exception e) {
+            LOGGER.error("Nessun commit padre trovato per {}", commit.getName());
+            return changedMethods;
+        }
+
+        try (DiffFormatter diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE)) {
+            diffFormatter.setRepository(repo);
+            diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
+
+            List<DiffEntry> diffs = diffFormatter.scan(parent.getTree(), commit.getTree());
+
+            for (DiffEntry diff : diffs) {
+                if ((diff.getChangeType() == DiffEntry.ChangeType.MODIFY ||
+                        diff.getChangeType() == DiffEntry.ChangeType.DELETE) &&
+                        diff.getOldPath().endsWith(SUFFIX) &&
+                        !diff.getOldPath().contains(PREFIX)) {
+
+                    // Ottieni il contenuto della vecchia versione del file
+                    String oldContent = getFileContentAtCommit(diff.getOldPath(), parent);
+                    List<MethodInstance> oldMethods = extractMethodsFromFile(oldContent, diff.getOldPath());
+
+                    if (diff.getChangeType() == DiffEntry.ChangeType.DELETE) {
+                        // Se il file è stato cancellato, aggiungi tutti i suoi metodi
+                        changedMethods.addAll(oldMethods);
+                    } else {
+                        // Se il file è stato modificato, confronta i metodi
+                        String newContent = getFileContentAtCommit(diff.getNewPath(), commit);
+                        List<MethodInstance> newMethods = extractMethodsFromFile(newContent, diff.getNewPath());
+
+                        // Trova i metodi modificati e cancellati
+                        for (MethodInstance oldMethod : oldMethods) {
+                            boolean found = false;
+                            for (MethodInstance newMethod : newMethods) {
+                                if (oldMethod.getMethodName().equals(newMethod.getMethodName())) {
+                                    found = true;
+                                    if (!oldContent.equals(newContent)) {
+                                        changedMethods.add(newMethod);
+                                    }
+                                    break;
+                                }
+                            }
+                            if (!found) {
+                                changedMethods.add(oldMethod);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.error("Errore nell'analisi delle modifiche del commit: {}", e.getMessage());
+        }
+
+        return changedMethods;
+    }
 
 }

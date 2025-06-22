@@ -8,10 +8,7 @@ import project.utils.ConstantsWindowsFormat;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
 
 public class Caching {
     /**
@@ -85,16 +82,15 @@ public class Caching {
                     String methodKey = methodEntry.getKey();
                     MethodInstance method = methodEntry.getValue();
 
-                    // Skip if this method is already in the cache for this commit
+                    // Create a JSON object for this method or update existing one
+                    JSONObject methodJson;
                     if (commitJson.has(methodKey)) {
-                        continue;
+                        methodJson = commitJson.getJSONObject(methodKey);
+                    } else {
+                        methodJson = new JSONObject();
                     }
-
-                    // Create a JSON object for this method
-                    JSONObject methodJson = new JSONObject();
                     methodJson.put("filePath", method.getFilePath());
                     methodJson.put("methodName", method.getMethodName());
-                    methodJson.put("className", method.getClassName());
                     methodJson.put("loc", method.getLoc());
                     methodJson.put("wmc", method.getWmc());
                     methodJson.put("qtyAssigment", method.getQtyAssigment());
@@ -107,7 +103,7 @@ public class Caching {
                     methodJson.put("nAuth", method.getnAuth());
                     methodJson.put("nr", method.getNr());
                     methodJson.put("nSmells", method.getnSmells());
-                    methodJson.put("buggy", method.isBuggy());
+                    // Removed buggyness value from cache as per requirements
 
                     // Add the method to the commit JSON
                     commitJson.put(methodKey, methodJson);
@@ -205,7 +201,6 @@ public class Caching {
                         MethodInstance method = new MethodInstance();
                         method.setFilePath(methodJson.optString("filePath", ""));
                         method.setMethodName(methodJson.optString("methodName", ""));
-                        method.setClassName(methodJson.optString("className", ""));
                         method.setLoc(methodJson.optInt("loc", 0));
                         method.setWmc(methodJson.optInt("wmc", 0));
                         method.setQtyAssigment(methodJson.optInt("qtyAssigment", 0));
@@ -218,7 +213,9 @@ public class Caching {
                         method.setnAuth(methodJson.optInt("nAuth", 0));
                         method.setNr(methodJson.optInt("nr", 0));
                         method.setnSmells(methodJson.optInt("nSmells", 0));
-                        method.setBuggy(methodJson.optBoolean("buggy", false));
+                        // Always set buggy to false when loading from cache
+                        // This ensures compatibility with the new cache format that doesn't store buggyness
+                        method.setBuggy(false);
 
                         // Add the method to the map
                         methodMap.put(methodKey, method);
@@ -311,6 +308,65 @@ public class Caching {
     public static Set<String> getAvailableCommits() {
         // Use a default project name
         return getAvailableCommits("default");
+    }
+
+    /**
+     * Rimuove i primi N commit dalla cache di un progetto
+     * @param projectName Il nome del progetto
+     * @param numCommitsToRemove Numero di commit da rimuovere (ordinati per data)
+     * @return Il numero di commit effettivamente rimossi
+     */
+    public static int removeOldestCommitsFromCache(String projectName, int numCommitsToRemove) {
+        Path cacheFilePath = getCacheFilePath(projectName);
+
+        if (!Files.exists(cacheFilePath)) {
+            System.out.println("No commit cache found at " + cacheFilePath);
+            return 0;
+        }
+
+        try {
+            // Leggi la cache esistente
+            JSONObject cacheJson;
+            try (java.io.BufferedInputStream bis = new java.io.BufferedInputStream(
+                    Files.newInputStream(cacheFilePath), 8192)) {
+                org.json.JSONTokener tokener = new org.json.JSONTokener(bis);
+                cacheJson = new JSONObject(tokener);
+            }
+
+            // Converti le chiavi in una lista ordinata
+            List<String> commitHashes = new ArrayList<>(cacheJson.keySet());
+
+            // Determina quanti commit rimuovere (non più di quanti ne esistono)
+            int commitsToRemove = Math.min(numCommitsToRemove, commitHashes.size());
+
+            if (commitsToRemove == 0) {
+                System.out.println("No commits to remove from cache");
+                return 0;
+            }
+
+            // Rimuovi i primi N commit
+            int removedCount = 0;
+            for (int i = 0; i < commitsToRemove; i++) {
+                String commitHash = commitHashes.get(i);
+                cacheJson.remove(commitHash);
+                removedCount++;
+            }
+
+            // Scrivi la cache aggiornata
+            try (java.io.BufferedWriter writer = Files.newBufferedWriter(cacheFilePath)) {
+                writer.write(cacheJson.toString());
+            }
+
+            System.out.println("Successfully removed " + removedCount + " commits from cache for project " + projectName);
+            System.out.println("Remaining commits in cache: " + cacheJson.length());
+
+            return removedCount;
+
+        } catch (IOException | JSONException e) {
+            System.err.println("Error removing commits from cache for project " + projectName + ": " + e.getMessage());
+            e.printStackTrace();
+            return 0;
+        }
     }
 
 }

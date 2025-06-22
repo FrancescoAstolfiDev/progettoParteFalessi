@@ -65,20 +65,21 @@ public class MethodDataSetExecutor {
         // Fase 4: Recupero dei ticket e associazione commit-ticket
         List<Ticket> allTickets = jiraInfoRetrieve.retrieveTickets(releaseList);
         LOGGER.info("Retrieved {} tockets" , allTickets.size());
-        getAllClassesByRelease(releaseList);
 
+        getAllClassesByRelease(releaseList);
         LOGGER.info("Retrieved {} classes from all the release " , releaseList.get(releaseList.size()-1).getReleaseAllClass().size() );
 
 
 
         // Fase 6: Estrazione metodi per ogni release<--------DA CApire dove posizionare
-        getAllMethodsByRelease(releaseList);
+//        getAllMethodsByRelease(releaseList);
+
         LOGGER.info("Retrieved {} methods from all the class " , releaseList.get(releaseList.size()-1).getReleaseAllMethods().size() );
         associateCommitsToTicket(allCommits, allTickets);
 
         allTickets.removeIf(t -> t.getAssociatedCommits().isEmpty());
         LOGGER.info("Filtered to {}  tickets with associated commits" , allTickets.size());
-        
+
         if (allTickets.size() < 5) {
             LOGGER.error("Insufficient tickets with commits ({}) Cannot proceed with analysis. " , allTickets.size());
             return;
@@ -124,11 +125,11 @@ public class MethodDataSetExecutor {
         // Fase 8: Scrittura dei file di training
         for (int i = 1; i < avaiableTrainingRelease.size(); i++) {
             // reverse calculation for have first all the commit processed and elaborated
-            Release release= avaiableTrainingRelease.get(avaiableTrainingRelease.size()-i);
+            Release release= avaiableTrainingRelease.get(i);
             writeReleaseTrainFile(release, releaseList);
         }
 
-        writeTestFiles(releaseList,avaiableTrainingRelease);
+        writeTestFiles(allTickets,avaiableTrainingRelease);
 
 
     }
@@ -143,18 +144,15 @@ public class MethodDataSetExecutor {
         return goodTickets;
     }
 
-    public void writeTestFiles(List<Release> releaseList,List<Release> avaiableTrainingRelease) {
+    public void writeTestFiles(List<Ticket> allTickets,List<Release> avaiableTrainingRelease) {
         int len = avaiableTrainingRelease.size();
-        List<Ticket> ticketsForTest = releaseList.get(releaseList.size() - 1).getAllReleaseTicket();
-        adjustIvTickets(ticketsForTest, releaseList.get(releaseList.size()-1).getCurrentProportion(), releaseList);
-
         for(int i = 1; i < len; i++) {
-            Release currRelease = releaseList.get(i);
+            Release currRelease = avaiableTrainingRelease.get(i);
             String path = currentProject.toUpperCase() + "_Test_Release_" + currRelease.getId() + ".csv";
-            List<Release> incrementalReleaseList = new ArrayList<>();
-            incrementalReleaseList.add(currRelease);
+            // Include all releases up to the current one to ensure tickets are properly filtered
+            List<Release> incrementalReleaseList = avaiableTrainingRelease.subList(0, currRelease.getId());
 
-            writeFile(incrementalReleaseList,currRelease,ticketsForTest,DataSetType.TEST);
+            writeFile(incrementalReleaseList,currRelease,allTickets,DataSetType.TEST);
 
         }
     }
@@ -204,7 +202,7 @@ public class MethodDataSetExecutor {
     private void writeFile(List<Release> incrementalReleaseList, Release currRelease, List<Ticket> tickets , DataSetType dataSetType) {
         // I need to discard the calculation if I already find completed files
         System.out.println("currently analyzing release " + currRelease.getName());
-        String outPath = currentProject.toUpperCase() + "_Train_Method_Release_" + currentProcessingRelease.getName() + ".csv";
+        String outPath = currentProject.toUpperCase() + dataSetType + currentProcessingRelease.getId() + ".csv";
         Path outputFilePath = ConstantsWindowsFormat.CSV_PATH.resolve(outPath);
         if ( Files.exists(outputFilePath) ) {
             try {
@@ -225,6 +223,13 @@ public class MethodDataSetExecutor {
         }
         System.out.println("Iterating through all releases prior to the current one, calculating buggyness and writing the file (cur release, incrementalList)= (" + currRelease + "," + incrementalReleaseList + ")");
         List<Ticket> usableTicket = new ArrayList<>();
+        if(dataSetType.equals(DataSetType.TEST)){
+            usableTicket=tickets;
+            System.out.println("Usable: " + usableTicket.size());
+            this.metricsCalculator.calculateReleaseMetrics( currRelease, usableTicket , dataSetType);
+
+            return;
+        }
         for (Release release : incrementalReleaseList) {
             System.out.println("Iterating through release " + release.getName());
             if (release == currRelease) continue;
@@ -275,13 +280,13 @@ public class MethodDataSetExecutor {
 
 
 
-    private void getAllMethodsByRelease(List<Release> releaseList) throws IOException {
-        for (Release release : releaseList) {
-            gitHubInfoRetrieve.getMethodInstancesOfCommit(release);
-        }
-        Release last = releaseList.get(releaseList.size() - 1);
-        last.setReleaseAllMethods(releaseList.get(releaseList.size() - 1).getReleaseAllMethods());
-    }
+//    private void getAllMethodsByRelease(List<Release> releaseList) throws IOException {
+//        for (Release release : releaseList) {
+//            gitHubInfoRetrieve.getMethodInstancesOfCommit(release);
+//        }
+//        Release last = releaseList.get(releaseList.size() - 1);
+//        last.setReleaseAllMethods(releaseList.get(releaseList.size() - 1).getReleaseAllMethods());
+//    }
 
     //method that, given a list of commits and a list of tickets, assigns to each ticket the commits that are related to that ticket
     //i.e., the commits that mention the tickets in their comment
