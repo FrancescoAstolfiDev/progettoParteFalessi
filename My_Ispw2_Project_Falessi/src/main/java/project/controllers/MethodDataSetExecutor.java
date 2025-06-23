@@ -67,10 +67,6 @@ public class MethodDataSetExecutor {
         LOGGER.info("Retrieved {} classes from all the release " , releaseList.get(releaseList.size()-1).getReleaseAllClass().size() );
 
 
-
-        // Fase 6: Estrazione metodi per ogni release<--------DA CApire dove posizionare
-//        getAllMethodsByRelease(releaseList);
-
         LOGGER.info("Retrieved {} methods from all the class " , releaseList.get(releaseList.size()-1).getReleaseAllMethods().size() );
         associateCommitsToTicket(allCommits, allTickets);
 
@@ -82,8 +78,8 @@ public class MethodDataSetExecutor {
             return;
         }
 
-        //double proportion = coldStartProportion();
-        double proportion =2.15;
+        double proportion = coldStartProportion();
+//        double proportion =2.15;
         jiraInfoRetrieve.assignTicketToRelease(releaseList,allTickets);
 
         //se non ho sufficienti ticket in tutto il progetto posso settare il proportion di tutte le release al valore
@@ -111,23 +107,25 @@ public class MethodDataSetExecutor {
 
         List<Release> avaiableTrainingRelease = releaseList.subList(0, split);
 
-
-
-
         // Initialize the metrics calculator with only the needed commits and the current project name
         this.metricsCalculator = new MetricsCalculator(this.gitHubInfoRetrieve, this.currentProject);
         metricsCalculator.calculateAll(avaiableTrainingRelease);
 
-
         // Fase 8: Scrittura dei file di training
-        for (int i = 1; i < avaiableTrainingRelease.size(); i++) {
+        for (int i = 1; i < avaiableTrainingRelease.size()-1; i++) {
             // reverse calculation for have first all the commit processed and elaborated
             Release release= avaiableTrainingRelease.get(i);
-            writeReleaseTrainFile(release, releaseList);
+            writeReleaseFile(release, releaseList, DataSetType.TRAINING, false);
+        }
+        for (int i=2 ; i< avaiableTrainingRelease.size();i++){
+            Release release=avaiableTrainingRelease.get(i);
+            writeReleaseFile(release, releaseList, DataSetType.TEST,false);
+            if(i==avaiableTrainingRelease.size()-1){
+               writeReleaseFile(release, releaseList, DataSetType.TEST,true);
+            }
         }
 
-        writeTestFiles(allTickets,avaiableTrainingRelease);
-
+        CSVtoARFFConverter.executeConversion(currentProject,avaiableTrainingRelease.size());
 
     }
 
@@ -141,36 +139,42 @@ public class MethodDataSetExecutor {
         return goodTickets;
     }
 
-    public void writeTestFiles(List<Ticket> allTickets,List<Release> avaiableTrainingRelease) {
-        int len = avaiableTrainingRelease.size();
-        for(int i = 1; i < len; i++) {
-            Release currRelease = avaiableTrainingRelease.get(i);
-            String path = currentProject.toUpperCase() + "_Test_Release_" + currRelease.getId() + ".csv";
-            // Include all releases up to the current one to ensure tickets are properly filtered
-            List<Release> incrementalReleaseList = avaiableTrainingRelease.subList(0, currRelease.getId());
 
-            writeFile(incrementalReleaseList,currRelease,allTickets,DataSetType.TEST);
 
+    public List<Ticket> getAddTicket(List<Release> releaseList){
+        List<Ticket> releaseTickets;
+        List<Ticket> allTickets = new ArrayList<>();
+        for(int i=0; i<releaseList.size(); i++){
+            Release release = releaseList.get(i);
+            releaseTickets = new ArrayList<>(release.getAllReleaseTicket());
+            allTickets.addAll(releaseTickets);
         }
+        adjustIvTickets(allTickets, releaseList.get(releaseList.size()-1).getCurrentProportion(), releaseList);
+        return allTickets;
     }
 
 
 
-    private void writeReleaseTrainFile(Release currRelease, List<Release> releaseList) {
-
-        List<Release> incrementalReleaseList = releaseList.subList(0, currRelease.getId());
-        List<Ticket> releaseTickets = currRelease.getAllReleaseTicket();
-
-        // Set current processing release and tickets for partial results callback
-        this.currentProcessingRelease = currRelease;
-
-        adjustIvTickets(releaseTickets, currRelease.getCurrentProportion(), releaseList);
-        writeFile(incrementalReleaseList, currRelease, releaseTickets, DataSetType.TRAINING);
+    private void writeReleaseFile(Release curRelease, List<Release> releaseList, DataSetType datasetTipe, boolean isLastRelease) {
+        this.currentProcessingRelease = curRelease;
+        List<Ticket> tickets= new ArrayList<>();
+        for(int i=0;i<curRelease.getId();i++){
+            Release release=releaseList.get(i);
+            tickets.addAll(release.getAllReleaseTicket());
+        }
+        adjustIvTickets(tickets, curRelease.getCurrentProportion(), releaseList);
+        if(isLastRelease){
+            tickets.addAll(getAddTicket(releaseList));
+        }
+        writeFile(releaseList.subList(0,curRelease.getId()), curRelease, tickets, datasetTipe);
     }
 
 
     public void adjustIvTickets(List<Ticket> tickets, double proportion, List<Release> releaseList){
         for(Ticket ticket:tickets){
+            if(ticket.getIv() == null && ticket.getOv().getId() > releaseList.size()-1){
+                ticket.setIv(releaseList.get(releaseList.size()-1));
+            }
             if(ticket.getIv() == null){
                 int ov = ticket.getOv().getId();
                 int fv = ticket.getFv().getId();
@@ -200,7 +204,13 @@ public class MethodDataSetExecutor {
         // I need to discard the calculation if I already find completed files
         System.out.println("currently analyzing release " + currRelease.getName());
         String outPath = currentProject.toUpperCase() + dataSetType + currentProcessingRelease.getId() + ".csv";
-        Path outputFilePath = ConstantsWindowsFormat.CSV_PATH.resolve(outPath);
+        Path outputFilePath=null;
+        if(dataSetType==DataSetType.TRAINING){
+            outputFilePath = ConstantsWindowsFormat.CSV_PATH.resolve(outPath);
+        } if (dataSetType==DataSetType.TEST){
+            outputFilePath = ConstantsWindowsFormat.TEST_CSV_PATH.resolve(outPath);
+        }
+
         if ( Files.exists(outputFilePath) ) {
             try {
                 // Check if the file is valid (not empty)
@@ -218,46 +228,21 @@ public class MethodDataSetExecutor {
                 // If there's an error checking the file, proceed with the computation
             }
         }
-        System.out.println("Iterating through all releases prior to the current one, calculating buggyness and writing the file (cur release, incrementalList)= (" + currRelease + "," + incrementalReleaseList + ")");
-        List<Ticket> usableTicket = new ArrayList<>();
-        if(dataSetType.equals(DataSetType.TEST)){
-            usableTicket=tickets;
-            System.out.println("Usable: " + usableTicket.size());
-            this.metricsCalculator.calculateReleaseMetrics( currRelease, usableTicket , dataSetType);
+        // filtering from all the tickets avaiable the tickets that a release could use
 
-            return;
-        }
+       List<Ticket> usableTicket = new ArrayList<>();
         for (Release release : incrementalReleaseList) {
             System.out.println("Iterating through release " + release.getName());
             if (release == currRelease) continue;
-
             for (Ticket ticket : tickets) {
-                Release iv = ticket.getCalculatedIv();
-                Release fv = ticket.getFv();
-
-                // Verifica se IV è null
-                if (iv == null) {
-                    //System.out.println("Ticket " + ticket.getKey() + " ha IV null");
-                    continue;
-                }
-
-                // Verifica ciascuna condizione separatamente
-                boolean cond1 = iv.getId() <= release.getId();
-                boolean cond2 = fv.getId() > release.getId();
-                boolean cond3 = iv.getId() < fv.getId();
-                //System.out.println("condizioni: " + cond1 + " " + cond2 + " " + cond3);
-
-
-                if (cond1 && cond2 && cond3) {
+                if (ticket.getCalculatedIv().getId() <= release.getId()
+                        && ticket.getCalculatedIv().getId() < ticket.getFv().getId()) {
                     usableTicket.add(ticket);
-
                 }
             }
         }
 
         System.out.println("Usable: " + usableTicket.size());
-
-
         System.out.println("Relevant tickets found for release " + currRelease.getName() + ": " + usableTicket.size());
         // Calculate metrics for the current release
         try {
@@ -267,8 +252,6 @@ public class MethodDataSetExecutor {
         }
         this.metricsCalculator.calculateReleaseMetrics( currRelease, usableTicket , dataSetType);
 
-
-
     }
 
 
@@ -277,16 +260,6 @@ public class MethodDataSetExecutor {
 
 
 
-//    private void getAllMethodsByRelease(List<Release> releaseList) throws IOException {
-//        for (Release release : releaseList) {
-//            gitHubInfoRetrieve.getMethodInstancesOfCommit(release);
-//        }
-//        Release last = releaseList.get(releaseList.size() - 1);
-//        last.setReleaseAllMethods(releaseList.get(releaseList.size() - 1).getReleaseAllMethods());
-//    }
-
-    //method that, given a list of commits and a list of tickets, assigns to each ticket the commits that are related to that ticket
-    //i.e., the commits that mention the tickets in their comment
     private void associateCommitsToTicket(List<RevCommit> allCommits, List<Ticket> allTickets) {
         LOGGER.info("\n\n********************BEGIN METHOD-LEVEL COMMIT ASSOCIATION********************");
 

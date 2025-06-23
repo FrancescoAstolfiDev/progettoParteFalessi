@@ -66,39 +66,102 @@ public class MetricsCalculator {
         List<Ticket> releaseTickets;
         DataSetType dataSetType;
     }
+    Map <Release,Set<CommitCheck>> referenceMap=new HashMap<>();
+    private static class CommitCheck {
+        private final RevCommit commit;
+        private Set<MethodInstance> methods;
+
+        public CommitCheck(RevCommit commit) {
+            this.commit = commit;
+            this.methods = null;
+        }
+
+        public void addMethods(Collection<MethodInstance> methods) {
+            if(this.methods==null)this.methods=new HashSet<>();
+            this.methods.addAll(methods);
+        }
+        public Set<MethodInstance> getMethods(){
+            return methods;
+        }
+
+    }
+
+
+
     void getCommitsInCache(ReleaseData releaseData ) {
-        int counter=0;
-        for (RevCommit commit : releaseData.releaseCommits) {
-            String commitHash = commit.getId().getName();
-            releaseData.commitsByHash.put(commitHash, commit);
-            if (!resultCommitsMethods.containsKey(commitHash)) {
-                releaseData.commitHashesToProcess.add(commitHash);
-            } else {
-                // This commit is already in cache, use it directly
-                Map<String, MethodInstance> commitMetrics = resultCommitsMethods.get(commitHash);
-                // Update the release for each method
-                for (MethodInstance result : commitMetrics.values()) {
-                    Release cur_release = releaseData.mapCommitRelease.get(commit);
-                    cur_release=cur_release!=null?cur_release:releaseData.release;
-                    result.setRelease(cur_release);
-                    ClassFile classFile=cur_release.getClassFileByPath(result.getFilePath());
-                    if(classFile!=null)classFile.addMethod(result);
+        List<Release> relevantReleases = releaseList.stream()
+                .filter(r -> r.getId() < releaseData.release.getId())
+                .toList();
+
+        // Popola la reference map per le release che non sono ancora state processate
+        int commitCached=0;
+        int commitToProcess=0;
+        for (Release release : relevantReleases) {
+            if (!referenceMap.containsKey(release)) {
+                Set<CommitCheck> releaseCommits = new HashSet<>();
+                for (RevCommit commit : release.getAllReleaseCommits()) {
+                    String commitHash = commit.getId().getName();
+                    if (resultCommitsMethods.containsKey(commitHash)) {
+                        CommitCheck commitCheck = new CommitCheck(commit);
+                        commitCheck.addMethods(resultCommitsMethods.get(commitHash).values());
+                        releaseCommits.add(commitCheck);
+                        commitCached++;
+                    }else{
+                        CommitCheck commitCheck = new CommitCheck(commit);
+                        releaseCommits.add(commitCheck);
+                        commitToProcess++;
+                    }
                 }
-                releaseData.releaseResults.putAll(commitMetrics);
-                releaseData.commitsAnalyzed.put(commitHash, commit);
-                resultsChanged=true;
+                referenceMap.put(release, releaseCommits);
+            }
+            LOGGER.info("release {} commit cached {} commit to process {}", release.getName(), commitCached, commitToProcess);
+        }
+
+        // Log dei risultati
+        LOGGER.info(" after the association commit in cache ");
+        int countMethods=0;
+        int countCommits=0;
+        for(Release release :relevantReleases){
+            for(CommitCheck commitCheck: referenceMap.get(release)){
+                for(MethodInstance method: commitCheck.methods){
+                    countMethods++;
+                }
+                countCommits++;
+            }
+            LOGGER.debug("found methods {}  in {} commits for the release {} ", countMethods,countCommits, release.getName());
+        }
+
+        for(Release release: relevantReleases){
+            for( CommitCheck commitCheck: referenceMap.get(release)){
+                String commitHash = commitCheck.commit.getId().getName();
+                if(commitCheck.methods==null){
+                    releaseData.commitHashesToProcess.add(commitHash);
+                }else{
+                    Map<String,MethodInstance> commitMetrics=new HashMap<>();
+                    for( MethodInstance method: commitCheck.methods){
+                        method.setRelease(release);
+                        ClassFile classFile=release.getClassFileByPath(method.getFilePath());
+                        if(classFile!=null)classFile.addMethod(method);
+                        commitMetrics.put(MethodInstance.createMethodKey(method),method);
+                    }
+                    releaseData.releaseResults.putAll(commitMetrics);
+                    releaseData.commitsAnalyzed.put(commitHash, commitCheck.commit);
+                    resultsChanged=true;
+                }
             }
         }
-          LOGGER.info(" after the association commit in cache ");
-          for(Release release :releaseList){
-              int count=0;
-              for(MethodInstance method: releaseData.releaseResults.values()){
-                  if(method.getRelease().equals(release)){
-                      count++;
-                  }
-              }
-              LOGGER.info("found methods {} for the release {} ", count, release.getName());
-          }
+
+        LOGGER.info(" after the association commit in cache ");
+        for(Release release :releaseList){
+            int count=0;
+            for(MethodInstance method: releaseData.releaseResults.values()){
+                if(method.getRelease().equals(release)){
+                    count++;
+                }
+            }
+            LOGGER.debug("found methods {} for the release {} ", count, release.getName());
+
+        }
 
     }
 
@@ -581,7 +644,7 @@ public class MetricsCalculator {
 
         // Mantieni una lista ordinata di release fino a quella target
         List<Release> relevantReleases = releaseList.stream()
-                .filter(r -> r.getId() <= targetRelease.getId())
+                .filter(r -> r.getId() < targetRelease.getId())
                 .sorted(Comparator.comparing(Release::getDate))
                 .collect(Collectors.toList());
 
@@ -605,11 +668,11 @@ public class MetricsCalculator {
             releaseCount.merge(release, 1, Integer::sum);
         }
 
-        LOGGER.info("after filtering commit for the release {} ", targetRelease.getName());
+        LOGGER.debug("after filtering commit for the release {} ", targetRelease.getName());
 
 // Stampa i conteggi una sola volta per release
         releaseCount.forEach((release, count) ->
-                LOGGER.info("found commits {} for the release {} ", count, release.getName())
+                LOGGER.debug("found commits {} for the release {} ", count, release.getName())
         );
 
 
@@ -745,10 +808,9 @@ public class MetricsCalculator {
         // Processa i ticket
         for (Ticket ticket : data.releaseTickets) {
             Release checkInj = ticket.getIv() != null ? ticket.getIv() : ticket.getCalculatedIv();
-            if (checkInj == null || checkInj.getId() > data.release.getId()) {
+            if (checkInj == null ) {
                 continue;
             }
-
             processTicketChanges(ticket, methodsByRelease, data);
         }
 

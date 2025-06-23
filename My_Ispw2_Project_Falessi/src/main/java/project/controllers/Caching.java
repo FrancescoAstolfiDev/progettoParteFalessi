@@ -2,6 +2,8 @@ package project.controllers;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import project.models.MethodInstance;
 import project.utils.ConstantsWindowsFormat;
 
@@ -11,10 +13,13 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class Caching {
+    Caching(){}
     /**
      * Saves the commit cache to disk
      */
     private static final Path cacheDirPath = ConstantsWindowsFormat.CACHE_PATH;
+    private static final String NO_COMMIT_CACHE_FOUND = "No commit cache found";
+    private static final Logger LOGGER = LoggerFactory.getLogger(Caching.class);
 
     /**
      * Gets the cache file path for a specific project
@@ -58,7 +63,7 @@ public class Caching {
 
                     // Parse the JSON object
                     cacheJson = new JSONObject(tokener);
-                    System.out.println("Loaded existing cache for project " + projectName + " with " + cacheJson.length() + " commits");
+                    LOGGER.info("Loaded existing cache for project {} with {} commits" , projectName , cacheJson.length());
                 }
             }
 
@@ -70,14 +75,8 @@ public class Caching {
 
                 // Create or get the JSON object for this commit
                 JSONObject commitJson;
-                if (cacheJson.has(commitHash)) {
-                    commitJson = cacheJson.getJSONObject(commitHash);
-                } else {
-                    commitJson = new JSONObject();
-                }
-
+                commitJson =cacheJson.has(commitHash)? cacheJson.getJSONObject(commitHash): new JSONObject();
                 // For each method in the commit
-                int methodsAdded = 0;
                 for (Map.Entry<String, MethodInstance> methodEntry : methodMap.entrySet()) {
                     String methodKey = methodEntry.getKey();
                     MethodInstance method = methodEntry.getValue();
@@ -107,7 +106,6 @@ public class Caching {
 
                     // Add the method to the commit JSON
                     commitJson.put(methodKey, methodJson);
-                    methodsAdded++;
                     totalMethods++;
                 }
 
@@ -117,7 +115,7 @@ public class Caching {
 
                 // Log progress periodically
                 if (commitCount % 100 == 0) {
-                    System.out.println("Processed " + commitCount + " commits for saving...");
+                    LOGGER.info("Processed {} commits for saving " ,  commitCount );
                 }
             }
 
@@ -128,18 +126,14 @@ public class Caching {
             }
 
             long endTime = System.currentTimeMillis();
-            System.out.println("Commit cache for project " + projectName + " saved to " + cacheFilePath +
-                    " with " + cacheJson.length() + " commits and " +
-                    totalMethods + " methods in " +
-                    (endTime - startTime) + "ms");
+            LOGGER.info("Commit cache for project {} saved to {} with {} commits and {} methods in {} ms" , projectName , cacheFilePath ,
+                    cacheJson.length(), totalMethods , (endTime - startTime) );
 
         } catch (IOException | JSONException e) {
-            System.err.println("Error saving commit cache for project " + projectName + ": " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.error("Error saving commit cache for project {} : {} error " ,  projectName , e.getMessage()  );
+
         }
-
     }
-
 
 
 
@@ -154,7 +148,7 @@ public class Caching {
         Path cacheFilePath = getCacheFilePath(projectName);
 
         if (!Files.exists(cacheFilePath)) {
-            System.out.println("No commit cache found at " + cacheFilePath);
+            LOGGER.error("{} {}" ,NO_COMMIT_CACHE_FOUND , cacheFilePath);
             return;
         }
 
@@ -228,7 +222,7 @@ public class Caching {
 
                     // Log progress periodically to avoid console spam
                     if (commitCount % 100 == 0) {
-                        System.out.println("Loaded " + commitCount + " commits so far...");
+                        LOGGER.info("Loaded {}  commits so far...", commitCount);
                     }
                 }
 
@@ -236,14 +230,13 @@ public class Caching {
                 String filterMsg = commitHashes != null ?
                         " (filtered " + skippedCommits + " commits)" : "";
 
-                System.out.println("Loaded commit cache for project " + projectName + " from " + cacheFilePath +
-                        " with " + commitCount + " commits" + filterMsg + " and " +
-                        methodCount + " methods in " +
-                        (endTime - startTime) + "ms");
+                LOGGER.info("Loaded commit cache for project {} from {} with {} commits {} and {} methods in {} ms " , projectName,  cacheFilePath,
+                        commitCount,  filterMsg ,
+                        methodCount, (endTime - startTime));
             }
         } catch (IOException | JSONException e) {
-            System.err.println("Error loading commit cache for project " + projectName + ": " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.error("Error loading commit cache for project {} : {} " ,  projectName , e.getMessage());
+
         }
     }
 
@@ -259,7 +252,7 @@ public class Caching {
         Set<String> availableCommits = new HashSet<>();
 
         if (!Files.exists(cacheFilePath)) {
-            System.out.println("No commit cache found at " + cacheFilePath);
+            LOGGER.error("{}  {} ", NO_COMMIT_CACHE_FOUND,  cacheFilePath);
             return availableCommits;
         }
 
@@ -289,12 +282,12 @@ public class Caching {
                 }
 
                 long endTime = System.currentTimeMillis();
-                System.out.println("Found " + availableCommits.size() + " commits in cache for project " + projectName + " in " +
-                        (endTime - startTime) + "ms");
+                LOGGER.info("Found {} commits in cache for the project {} in {} ms " , availableCommits.size() , projectName ,
+                        (endTime - startTime));
             }
         } catch (IOException | JSONException e) {
-            System.err.println("Error checking available commits in cache for project " + projectName + ": " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.info("Error checking available commits in cache for project {}  :  {}" , projectName ,  e.getMessage());
+
         }
 
         return availableCommits;
@@ -320,7 +313,7 @@ public class Caching {
         Path cacheFilePath = getCacheFilePath(projectName);
 
         if (!Files.exists(cacheFilePath)) {
-            System.out.println("No commit cache found at " + cacheFilePath);
+            LOGGER.error("{}  {} ", NO_COMMIT_CACHE_FOUND,  cacheFilePath);
             return 0;
         }
 
@@ -340,7 +333,7 @@ public class Caching {
             int commitsToRemove = Math.min(numCommitsToRemove, commitHashes.size());
 
             if (commitsToRemove == 0) {
-                System.out.println("No commits to remove from cache");
+                LOGGER.info("No commits to remove from cache");
                 return 0;
             }
 
@@ -357,14 +350,13 @@ public class Caching {
                 writer.write(cacheJson.toString());
             }
 
-            System.out.println("Successfully removed " + removedCount + " commits from cache for project " + projectName);
-            System.out.println("Remaining commits in cache: " + cacheJson.length());
+            LOGGER.info("Successfully removed {} commits from cache for project {} ", removedCount , projectName);
+            LOGGER.info("Remaining commits in cache: {} ", cacheJson.length());
 
             return removedCount;
 
         } catch (IOException | JSONException e) {
-            System.err.println("Error removing commits from cache for project " + projectName + ": " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.error("Error removing commits from cache for project {}  :  {} ", projectName, e.getMessage());
             return 0;
         }
     }

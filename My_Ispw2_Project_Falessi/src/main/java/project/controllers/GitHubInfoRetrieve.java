@@ -172,11 +172,11 @@ public class GitHubInfoRetrieve {
                 LOGGER.debug("getUpdatedRepo: Successfully opened repository: " + this.repo);
             } catch (Exception e) {
                 LOGGER.error("getUpdatedRepo: Error opening repository: " + e.getMessage());
-                e.printStackTrace();
+
             }
         } catch (Exception e) {
             System.err.println("getUpdatedRepo: Error updating repository: " + e.getMessage());
-            e.printStackTrace();
+
         }
     }
 
@@ -406,7 +406,6 @@ public class GitHubInfoRetrieve {
             }
         } catch (Exception e) {
             LOGGER.error("Error retrieving the content of the previous file: " + e.getMessage());
-            e.printStackTrace(); // Print stack trace for better debugging
             return "exception occurred";
         }
     }
@@ -439,7 +438,6 @@ public class GitHubInfoRetrieve {
             }
         } catch (Exception e) {
             LOGGER.error("Error retrieving the content of the current file: " + e.getMessage());
-            e.printStackTrace(); // Print stack trace for better debugging
             return "exception occurred";
         }
     }

@@ -51,14 +51,14 @@ public class MethodInstance {
      * @return Una chiave univoca per il metodo
      */
     public static String createMethodKey(MethodInstance method) {
-        String className = method.getFilePath() != null ?
+        String releaseName= method.getRelease() !=null?
+                method.getRelease().getName():"0.0.0";
+        String filePath = method.getFilePath() != null ?
                 method.getFilePath() : "anonymous";
         String methodName = method.getMethodName() != null ?
                 method.getMethodName() : "anonymous";
-        String releaseName= method.getRelease() !=null?
-                method.getRelease().getName():"0.0.0";
         // Use full class name + method name as key
-        return className + "#" + methodName + "#"  + methodName;
+        return releaseName + "#" + filePath + "#"  + methodName;
     }
 
     public Release getRelease() {

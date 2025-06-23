@@ -1,6 +1,7 @@
 package project.controllers;
 
 import project.models.ResultsHolder;
+import project.utils.ConstantsWindowsFormat;
 import weka.filters.supervised.attribute.AttributeSelection;
 import weka.attributeSelection.CfsSubsetEval;
 import weka.attributeSelection.GreedyStepwise;
@@ -90,28 +91,37 @@ public class EvaluationFlow {
             numRelease = 4;
         }
         else{
-            numRelease = 17;
+            numRelease = 12; // Changed from 17 to 12 to match available files
         }
 
         for (int i = 3; i <= numRelease; i++) {
 
             //recupero i dati dai file .arff
-            DataSource trainSource = new DataSource( this.projectName+ "_Train_R" + i + ".arff");
-            DataSource testSource = new DataSource(this.projectName + "_Test_R" + i + ".arff");
-            Instances trainSet = trainSource.getDataSet();
-            Instances testSet = testSource.getDataSet();
+            String trainFileName = this.projectName + "_Train_R" + i + ".arff";
+            String testFileName = this.projectName + "_Test_R" + i + ".arff";
+            String trainFilePath = ConstantsWindowsFormat.ARFF_PATH.resolve(trainFileName).toString();
+            String testFilePath = ConstantsWindowsFormat.ARFF_PATH.resolve(testFileName).toString();
 
-            //setto il parametro buggy come variabile di interesse
-            trainSet.setClassIndex(trainSet.numAttributes() - 1);
-            testSet.setClassIndex(testSet.numAttributes() - 1);
+            try {
+                DataSource trainSource = new DataSource(trainFilePath);
+                DataSource testSource = new DataSource(testFilePath);
+                Instances trainSet = trainSource.getDataSet();
+                Instances testSet = testSource.getDataSet();
 
-            evalStandard(trainSet,testSet,i,false,false,false);
-            evalCostSensitive(trainSet,testSet,i,false);
-            evalUnderSampling(trainSet,testSet,i);
-            evalOverSampling(trainSet,testSet,i);
-            evalFeatureSelection(trainSet,testSet,i);
-            evalUnderSampFeatureSelection(trainSet,testSet,i);
-            evalCostFeatureSelection(trainSet,testSet,i);
+                //setto il parametro buggy come variabile di interesse
+                trainSet.setClassIndex(trainSet.numAttributes() - 1);
+                testSet.setClassIndex(testSet.numAttributes() - 1);
+
+                evalStandard(trainSet,testSet,i,false,false,false);
+                evalCostSensitive(trainSet,testSet,i,false);
+                evalUnderSampling(trainSet,testSet,i);
+                evalOverSampling(trainSet,testSet,i);
+                evalFeatureSelection(trainSet,testSet,i);
+                evalUnderSampFeatureSelection(trainSet,testSet,i);
+                evalCostFeatureSelection(trainSet,testSet,i);
+            } catch (Exception e) {
+                out.println("Error loading ARFF files for release " + i + ": " + e.getMessage());
+            }
         }
 
         List<List<ResultsHolder>> allResults = new ArrayList<>();
@@ -373,7 +383,7 @@ public class EvaluationFlow {
                 }
             }
 
-        out.println("File CSV creato con successo.");
+            out.println("File CSV creato con successo.");
         } catch (IOException e) {
             out.println("Si è verificato un errore durante la creazione del file CSV: " + e.getMessage());
         }

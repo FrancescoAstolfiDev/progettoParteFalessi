@@ -67,6 +67,7 @@ public class Release {
 	}
 
 	public void setCurrentProportion(double proportion) {
+
 		this.currentProportion = proportion;
 	}
 
