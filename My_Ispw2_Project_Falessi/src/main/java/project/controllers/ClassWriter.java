@@ -15,8 +15,10 @@ import java.nio.file.Path;
 import java.util.Map;
 
 public class ClassWriter {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClassWriter.class);
+    ClassWriter(){
 
+    }
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClassWriter.class);
     // Funzione per escape CSV sicuro
     private static  String escapeCsv(String field) {
         if (field == null) return "";
@@ -61,8 +63,6 @@ public class ClassWriter {
 
             if (Files.notExists(outputFilePath)) {
                 Files.createFile(outputFilePath);
-            }else {
-
             }
 
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFilePath.toFile(), false))
@@ -74,12 +74,10 @@ public class ClassWriter {
                         "age","nAuth", "nr", "nSmell","buggy"));
                 writer.newLine();
                 for (MethodInstance result : results.values()) {
-                    if(result.getAge()<0 || result.getRelease()==null){
+                    if(result.getAge()<0 || result.getRelease()==null || result.getRelease().getId()>=currRelease.getId() ){
                         continue;
                     }
-                    if(result.getRelease().getId()>=currRelease.getId()){
-                        continue;
-                    }
+
                     String csvRow = String.join(",",
                             escapeCsv(result.getRelease().getName()),
                             escapeCsv(result.getMethodName()),

@@ -1,0 +1,65 @@
+### MLP (Multi-Layer Perceptron)
+1. **Punti di forza**:
+
+- Ottima precision (tra 0.85 e 0.95 in molti casi)
+- Recall molto alto (spesso superiore a 0.90)
+- AUC consistentemente buono (0.71-0.79)
+- Performance particolarmente buone con sampling:
+    - Precision fino a 0.95
+    - AUC fino a 0.79
+    - Kappa fino a 0.37
+
+1. **Condizioni ottimali**:
+
+- Funziona meglio con sampling
+- Mostra risultati migliori senza cost-sensitive learning
+- Particolarmente efficace quando bilanciato con sampling
+
+### SGD (Stochastic Gradient Descent)
+1. **Punti di forza**:
+
+- Buona precision (0.82-0.95)
+- Recall variabile ma generalmente buono
+- AUC moderato (0.55-0.72)
+
+1. **Condizioni ottimali**:
+
+- Performance migliori con sampling
+- Più stabile senza cost-sensitive learning
+- Efficace in scenari con dati bilanciati
+
+### RF (Random Forest)
+Dai dati forniti, il Random Forest mostra valori tutti a 0, il che suggerisce:
+- Possibili problemi di implementazione
+- Potenziale incompatibilità con il dataset
+- Necessità di ulteriore tuning dei parametri
+
+### Conclusioni generali:
+1. **Migliore classificatore complessivo**: MLP
+
+- Offre il miglior bilanciamento tra precision e recall
+- AUC più alto e consistente
+- Kappa scores più elevati
+
+1. **Condizioni ottimali per ciascun classificatore**:
+
+- **MLP**:
+    - Usare sampling
+    - Evitare cost-sensitive learning
+    - Ideale per dataset bilanciati
+
+- **SGD**:
+    - Efficace con sampling
+    - Preferibile senza cost-sensitive learning
+    - Buono per classificazione binaria
+
+- **RF**:
+    - Necessita di ulteriore ottimizzazione
+    - Non utilizzabile nelle condizioni attuali
+
+1. **Raccomandazioni**:
+
+- Per la maggior parte dei casi, utilizzare MLP con sampling
+- SGD come alternativa quando la velocità di training è importante
+- Evitare RF finché non viene ottimizzato
+- Il sampling sembra essere più efficace del cost-sensitive learning per tutti i classificatori

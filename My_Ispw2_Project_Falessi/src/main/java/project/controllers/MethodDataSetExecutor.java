@@ -5,6 +5,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import project.Projects;
 import project.models.DataSetType;
 import project.models.Release;
 import project.models.Ticket;
@@ -16,12 +17,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.*;
-import java.lang.Thread;
 
-import static java.lang.System.out;
+
+
 
 public class MethodDataSetExecutor {
-    private final Logger LOGGER = LoggerFactory.getLogger(MethodDataSetExecutor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodDataSetExecutor.class);
     private String currentProject;
     private GitHubInfoRetrieve gitHubInfoRetrieve;
     private MetricsCalculator metricsCalculator;
@@ -39,37 +40,27 @@ public class MethodDataSetExecutor {
     private List<String> projects = new ArrayList<>(Arrays.asList("AVRO","OPENJPA","STORM","ZOOKEEPER","BOOKKEEPER","TAJO"));
 
     public void executeFlow() throws IOException, ParseException, GitAPIException {
-        // Fase 1: Recupero delle release e dei commit
+
         JiraInfoRetrieve jiraInfoRetrieve = new JiraInfoRetrieve(this.currentProject);
-
-
         List<Release> releaseList = jiraInfoRetrieve.retrieveReleases();
-        LOGGER.info("Retrieved " + releaseList.size() + " releases");
+        LOGGER.info("Retrieved {} release",  releaseList.size());
 
         List<RevCommit> allCommits = gitHubInfoRetrieve.getAllCommits();
-        LOGGER.info("Retrieved " + allCommits.size() + " commits");
+        LOGGER.info("Retrieved {} commits ", allCommits.size() );
 
-
-        // Fase 2: Ordinamento e associazione commit-release
         jiraInfoRetrieve.sortReleaseList(releaseList);
 
         gitHubInfoRetrieve.orderCommitsByReleaseDate(allCommits, releaseList);
         gitHubInfoRetrieve.setReleaseLastCommit(releaseList);
 
-        // Fase 3: Limitazione all'insieme di release analizzabili (metà del totale)
-        //List<Release> analyzableReleases = releaseList.subList(0, releaseList.size() / 2);
 
-        // Fase 4: Recupero dei ticket e associazione commit-ticket
         List<Ticket> allTickets = jiraInfoRetrieve.retrieveTickets(releaseList);
-        LOGGER.info("Retrieved {} tockets" , allTickets.size());
+        LOGGER.info("Retrieved {} tickets" , allTickets.size());
 
         getAllClassesByRelease(releaseList);
         LOGGER.info("Retrieved {} classes from all the release " , releaseList.get(releaseList.size()-1).getReleaseAllClass().size() );
 
-
-        LOGGER.info("Retrieved {} methods from all the class " , releaseList.get(releaseList.size()-1).getReleaseAllMethods().size() );
         associateCommitsToTicket(allCommits, allTickets);
-
         allTickets.removeIf(t -> t.getAssociatedCommits().isEmpty());
         LOGGER.info("Filtered to {}  tickets with associated commits" , allTickets.size());
 
@@ -79,7 +70,7 @@ public class MethodDataSetExecutor {
         }
 
         double proportion = coldStartProportion();
-//        double proportion =2.15;
+        //double proportion =2.15;
         jiraInfoRetrieve.assignTicketToRelease(releaseList,allTickets);
 
         //se non ho sufficienti ticket in tutto il progetto posso settare il proportion di tutte le release al valore
@@ -102,8 +93,8 @@ public class MethodDataSetExecutor {
                 }
             }
         }
-
-        int split=Math.max(1, (int) (releaseList.size() * ConstantSize.SPLIT_PERCENTAGE));
+        Projects curProject=Projects.valueOf(this.currentProject.toUpperCase());
+        int split=Math.max(1, (int) (releaseList.size() * curProject.getSplit()));
 
         List<Release> avaiableTrainingRelease = releaseList.subList(0, split);
 
@@ -111,7 +102,7 @@ public class MethodDataSetExecutor {
         this.metricsCalculator = new MetricsCalculator(this.gitHubInfoRetrieve, this.currentProject);
         metricsCalculator.calculateAll(avaiableTrainingRelease);
 
-        // Fase 8: Scrittura dei file di training
+
         for (int i = 1; i < avaiableTrainingRelease.size()-1; i++) {
             // reverse calculation for have first all the commit processed and elaborated
             Release release= avaiableTrainingRelease.get(i);
@@ -129,6 +120,14 @@ public class MethodDataSetExecutor {
 
     }
 
+    //method that sets the list of files present in the release
+    private void getAllClassesByRelease(List<Release> releaseList) throws IOException {
+        int len = releaseList.size();
+        for (int i = 0; i < len; i++) {
+            gitHubInfoRetrieve.getClassFilesOfCommit(releaseList.get(i));
+        }
+        releaseList.get(releaseList.size()-1).setReleaseAllClass(releaseList.get(len-1).getReleaseAllClass());
+    }
     private List<Ticket> getTicketsWithAv(List<Ticket> allTicket) {
         List<Ticket> goodTickets = new ArrayList<>();
         for (Ticket t : allTicket) {
@@ -166,7 +165,11 @@ public class MethodDataSetExecutor {
         if(isLastRelease){
             tickets.addAll(getAddTicket(releaseList));
         }
-        writeFile(releaseList.subList(0,curRelease.getId()), curRelease, tickets, datasetTipe);
+        try {
+            writeFile(releaseList.subList(0,curRelease.getId()), curRelease, tickets, datasetTipe);
+        } catch (IOException e) {
+            LOGGER.error("Error writing release file: {}" , e.getMessage());
+        }
     }
 
 
@@ -200,39 +203,29 @@ public class MethodDataSetExecutor {
 
 
 
-    private void writeFile(List<Release> incrementalReleaseList, Release currRelease, List<Ticket> tickets , DataSetType dataSetType) {
+    private void writeFile(List<Release> incrementalReleaseList, Release currRelease, List<Ticket> tickets , DataSetType dataSetType) throws IOException {
         // I need to discard the calculation if I already find completed files
-        System.out.println("currently analyzing release " + currRelease.getName());
+        LOGGER.info("currently analyzing release {} " , currRelease.getName());
         String outPath = currentProject.toUpperCase() + dataSetType + currentProcessingRelease.getId() + ".csv";
-        Path outputFilePath=null;
-        if(dataSetType==DataSetType.TRAINING){
-            outputFilePath = ConstantsWindowsFormat.CSV_PATH.resolve(outPath);
-        } if (dataSetType==DataSetType.TEST){
-            outputFilePath = ConstantsWindowsFormat.TEST_CSV_PATH.resolve(outPath);
-        }
-
+        Path outputFilePath= dataSetType==DataSetType.TEST?ConstantsWindowsFormat.TEST_CSV_PATH.resolve(outPath):ConstantsWindowsFormat.CSV_PATH.resolve(outPath);
         if ( Files.exists(outputFilePath) ) {
-            try {
-                // Check if the file is valid (not empty)
-                long fileSize = Files.size(outputFilePath);
-                if (fileSize > 0) {
-                    System.out.println("The file " + outputFilePath + " already exists and is valid. Computation skipped.");
-                    return;
-                } else {
-                    System.out.println("The file " + outputFilePath + " exists but is empty. Proceeding with computation.");
-                    // Delete the empty file
-                    Files.delete(outputFilePath);
-                }
-            } catch (IOException e) {
-                System.out.println("Error checking file " + outputFilePath + ": " + e.getMessage() + ". Proceeding with computation.");
-                // If there's an error checking the file, proceed with the computation
+            // Check if the file is valid (not empty)
+            long fileSize = Files.size(outputFilePath);
+            if (fileSize > 0) {
+               LOGGER.info("The file {} already exists and is valid. Computation skipped."  ,outputFilePath );
+                return;
+            } else {
+                LOGGER.info("The file {} exists but is empty. Proceeding with computation.  " , outputFilePath );
+                // Delete the empty file
+                Files.delete(outputFilePath);
             }
+
         }
         // filtering from all the tickets avaiable the tickets that a release could use
 
        List<Ticket> usableTicket = new ArrayList<>();
         for (Release release : incrementalReleaseList) {
-            System.out.println("Iterating through release " + release.getName());
+            LOGGER.debug("Iterating through release {} " , release.getName());
             if (release == currRelease) continue;
             for (Ticket ticket : tickets) {
                 if (ticket.getCalculatedIv().getId() <= release.getId()
@@ -242,8 +235,8 @@ public class MethodDataSetExecutor {
             }
         }
 
-        System.out.println("Usable: " + usableTicket.size());
-        System.out.println("Relevant tickets found for release " + currRelease.getName() + ": " + usableTicket.size());
+        LOGGER.info ("Usable: {}" , usableTicket.size());
+        LOGGER.info("Relevant tickets found for release {} : {}",currRelease.getName(), usableTicket.size());
         // Calculate metrics for the current release
         try {
             Thread.sleep(10000);
@@ -253,11 +246,6 @@ public class MethodDataSetExecutor {
         this.metricsCalculator.calculateReleaseMetrics( currRelease, usableTicket , dataSetType);
 
     }
-
-
-
-
-
 
 
     private void associateCommitsToTicket(List<RevCommit> allCommits, List<Ticket> allTickets) {
@@ -276,17 +264,10 @@ public class MethodDataSetExecutor {
                 }
             }
         }
-        out.println("\n********************END ASSOCIATION********************");
+        LOGGER.info("\n********************END ASSOCIATION********************");
     }
 
-    //method that sets the list of files present in the release
-    private void getAllClassesByRelease(List<Release> releaseList) throws IOException {
-        int len = releaseList.size();
-        for (int i = 0; i < len; i++) {
-            gitHubInfoRetrieve.getClassFilesOfCommit(releaseList.get(i));
-        }
-        releaseList.get(releaseList.size()-1).setReleaseAllClass(releaseList.get(len-1).getReleaseAllClass());
-    }
+
 
     //method for calculating the proportion in case there are not enough tickets
     private double coldStartProportion() throws IOException, ParseException {

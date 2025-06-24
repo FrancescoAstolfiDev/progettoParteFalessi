@@ -8,7 +8,6 @@ public class ConstantSize {
     }
     public static final double SPLIT_PERCENTAGE=33.0/100;
     public static final int NUM_COMMITS = 100000;
-    public static final int MAX_BUGGY_PERCETAGE = 10;
 
     // Maximum cache file size in bytes (90MB)
     public static final long MAX_CACHE_FILE_SIZE = 90 * 1024 * 1024;

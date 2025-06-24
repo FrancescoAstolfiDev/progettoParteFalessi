@@ -13,6 +13,7 @@ import org.eclipse.jgit.util.io.DisabledOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import project.utils.ConstantSize;
+import project.utils.CostumException;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +26,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 
 /**
@@ -47,36 +49,22 @@ public class RepositoryManager {
      * Constructor that takes a GitHubInfoRetrieve object
      */
     public RepositoryManager(GitHubInfoRetrieve gitHubInfoRetrieve) {
-
+        this.gitHubInfoRetrieve = gitHubInfoRetrieve;
+        File repoDir = new File(gitHubInfoRetrieve.getPath());
 
         try {
-            this.gitHubInfoRetrieve = gitHubInfoRetrieve;
-            File repoDir = new File(gitHubInfoRetrieve.getPath());
-            this.repository = Git.open(repoDir).getRepository();
-            this.git = new Git(repository);
+            // Open repository and create Git instance in try-with-resources
+            try (Git gitResource = Git.open(repoDir)) {
+                this.repository = gitResource.getRepository();
+                this.git = new Git(this.repository);  // Create new Git instance from the repository
+                LOGGER.info("RepositoryManager: Repository opened successfully");
+            }
         } catch (IOException e) {
-            throw new ProcessingInterruptedException("no opening of the git directory", e);
-        }finally{
-            LOGGER.info("RepositoryManager: Repository opened successfully");
+            throw new CostumException("Failed to open git directory: " + repoDir.getAbsolutePath(), e);
         }
-
     }
 
-
-
-    /**
-     * Gets the original repository path
-     */
-    public String getOriginalRepoPath() {
-        return originalRepoPath;
-    }
-
-    /**
-     * Gets the backup repository path
-     */
-    public String getBackupRepoPath() {
-        return backupRepoPath;
-    }
+    
 
     /**
      * Copies a directory and its contents to a target directory
@@ -95,7 +83,7 @@ public class RepositoryManager {
                         Files.copy(source, destination);
                     }
                 } catch (IOException e) {
-                    throw new UncheckedIOException("Errore durante la copia: " + source, e);
+                    throw new UncheckedIOException("Error during copy: " + source, e);
                 }
             });
         }
@@ -105,13 +93,13 @@ public class RepositoryManager {
      * Creates a backup of the repository
      */
     public void backupRepository() throws IOException {
-        // Verifica prerequisiti
+        // Verifica dei prerequisiti
         if (repository == null) {
-            throw new IOException("Repository non inizializzato");
+            throw new IOException("Repository not initialized");
         }
 
         try {
-            // Chiudi le risorse esistenti
+            // Chiude le risorse esistenti
             if (git != null) {
                 git.close();
             }
@@ -121,20 +109,22 @@ public class RepositoryManager {
             originalRepoPath = gitDir.getParentFile().getAbsolutePath();
             backupRepoPath = originalRepoPath + "_backup_" + System.currentTimeMillis();
 
-            // Crea e verifica directory di backup
+            // Crea e verifica la directory di backup
             Path backupPath = Paths.get(backupRepoPath);
             Files.createDirectories(backupPath);
 
             // Copia i file
             copyDirectory(Paths.get(originalRepoPath), backupPath);
 
-            // Riapri il repository originale
+            // Riapre il repository originale usando try-with-resources
             File repoDir = new File(gitHubInfoRetrieve.getPath());
-            this.repository = Git.open(repoDir).getRepository();
-            this.git = new Git(repository);
+            try (Git tempGit = Git.open(repoDir)) {
+                this.repository = tempGit.getRepository();
+                this.git = new Git(repository);
+            }
 
         } catch (UncheckedIOException e) {
-            throw new IOException("Errore durante il backup: " + e.getMessage(), e.getCause());
+            throw new IOException("Error during backup: " + e.getMessage(), e.getCause());
         }
     }
 
@@ -149,87 +139,124 @@ public class RepositoryManager {
      * Restores the repository from a backup with improved handling for locked files
      */
     public void restoreFromBackup(String backupRepoPath, String originalRepoPath) throws IOException {
-        // Verifica prerequisiti
+        validatePaths(backupRepoPath, originalRepoPath);
+
+        try {
+            closeResources();
+            prepareForRestore();
+
+            Path backupPath = Paths.get(backupRepoPath);
+            Path originalPath = Paths.get(originalRepoPath);
+
+            handleOriginalDirectory(originalPath);
+            performRestore(backupPath, originalPath);
+
+        } catch (UncheckedIOException e) {
+            logAndRethrowCopyError(e);
+        } catch (InterruptedException e) {
+            handleInterruption(e);
+        }
+    }
+
+    private void validatePaths(String backupRepoPath, String originalRepoPath) throws IOException {
         if (backupRepoPath == null || originalRepoPath == null) {
-            throw new IOException("Nessun backup disponibile per il ripristino");
+            throw new IOException("No backup available for restoration");
         }
 
         Path backupPath = Paths.get(backupRepoPath);
         if (!Files.exists(backupPath)) {
-            throw new IOException("Directory di backup non trovata: " + backupRepoPath);
-        }
-
-        try {
-            // Chiudi il repository corrente e rilascia tutte le risorse
-            if (git != null) {
-                git.close();
-                git = null;
-            }
-            if (repository != null) {
-                repository.close();
-                repository = null;
-            }
-
-            // Forza la garbage collection per liberare risorse
-            System.gc();
-            Thread.sleep(500); // Attendi che la GC faccia effetto
-
-            // Elimina la directory corrente con retry
-            Path originalPath = Paths.get(originalRepoPath);
-            if (Files.exists(originalPath)) {
-                boolean deleted = deleteDirectoryWithRetry(originalPath, 5, 1000);
-                if (!deleted) {
-                    LOGGER.warn("Alcuni file non sono stati eliminati durante il ripristino. " +
-                               "Il ripristino continuerà comunque, ma potrebbero esserci problemi.");
-                }
-            }
-
-            // Crea la directory originale
-            Files.createDirectories(originalPath);
-
-            // Copia i file dal backup
-            copyDirectory(backupPath, originalPath);
-
-            // Tenta di aprire il nuovo repository
-            try {
-                git = Git.open(new File(originalRepoPath));
-                repository = git.getRepository();
-
-                // Verifica che il repository sia valido
-                if (repository.getBranch() != null) {
-                    // Solo se tutto è ok, elimina il backup con retry
-                    boolean backupDeleted = deleteDirectoryWithRetry(backupPath, 3, 500);
-                    if (backupDeleted) {
-                        LOGGER.info("Repository ripristinato con successo e backup eliminato");
-                    } else {
-                        LOGGER.info("Repository ripristinato con successo, ma il backup non è stato completamente eliminato: {}", backupPath);
-                    }
-                } else {
-                    throw new IOException("Repository ripristinato non valido");
-                }
-            } catch (IOException e) {
-                LOGGER.error("Errore nell'apertura del repository ripristinato: {}", e.getMessage());
-                if (Files.exists(backupPath)) {
-                    LOGGER.info("Backup mantenuto per possibile recupero manuale in: {}", backupPath);
-                }
-                throw new IOException("Errore nel ripristino del repository", e);
-            }
-
-        } catch (UncheckedIOException e) {
-            LOGGER.error("Errore durante la copia dei file: {}", e.getMessage());
-            throw new IOException("Errore durante il ripristino", e.getCause());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IOException("Operazione interrotta durante il ripristino", e);
+            throw new IOException("Backup directory not found: " + backupRepoPath);
         }
     }
 
-    // Metodo di supporto per pulire le directory temporanee
+    private void closeResources() {
+        if (git != null) {
+            git.close();
+            git = null;
+        }
+        if (repository != null) {
+            repository.close();
+            repository = null;
+        }
+    }
+
+    private void prepareForRestore() throws InterruptedException {
+        Thread.sleep(500);
+    }
+
+    private void handleOriginalDirectory(Path originalPath){
+        if (!Files.exists(originalPath)) {
+            return;
+        }
+
+        boolean deleted = deleteDirectoryWithRetry(originalPath, 5, 1000);
+        if (!deleted) {
+            LOGGER.warn("Some files were not deleted during restoration. " +
+                    "The restoration will continue anyway, but there might be problems.");
+        }
+    }
+
+    private void performRestore(Path backupPath, Path originalPath) throws IOException {
+        Files.createDirectories(originalPath);
+        copyDirectory(backupPath, originalPath);
+        openAndVerifyRepository(originalPath, backupPath);
+    }
+
+    private void openAndVerifyRepository(Path originalPath, Path backupPath) throws IOException {
+        try {
+            openRepository(originalPath.toString());
+            verifyAndCleanup(backupPath);
+        } catch (IOException e) {
+            handleRepositoryOpenError(e, backupPath);
+        }
+    }
+
+    private void openRepository(String path) throws IOException {
+        git = Git.open(new File(path));
+        repository = git.getRepository();
+
+        if (repository.getBranch() == null) {
+            throw new IOException("Restored repository is not valid");
+        }
+    }
+
+    private void verifyAndCleanup(Path backupPath){
+        boolean backupDeleted = deleteDirectoryWithRetry(backupPath, 3, 500);
+        logRestoreResult(backupDeleted, backupPath);
+    }
+
+    private void logRestoreResult(boolean backupDeleted, Path backupPath) {
+        if (backupDeleted) {
+            LOGGER.info("Repository restored successfully and backup deleted");
+        } else {
+            LOGGER.info("Repository restored successfully, but the backup was not completely deleted: {}", backupPath);
+        }
+    }
+
+    private void handleRepositoryOpenError(IOException e, Path backupPath) throws IOException {
+        LOGGER.error("Error opening the restored repository: {}", e.getMessage());
+        if (Files.exists(backupPath)) {
+            LOGGER.info("Backup kept for possible manual recovery at: {}", backupPath);
+        }
+        throw new IOException("Error restoring the repository", e);
+    }
+
+    private void logAndRethrowCopyError(UncheckedIOException e) throws IOException {
+        LOGGER.error("Error during file copying: {}", e.getMessage());
+        throw new IOException("Error during restoration", e.getCause());
+    }
+
+    private void handleInterruption(InterruptedException e) throws IOException {
+        Thread.currentThread().interrupt();
+        throw new IOException("Operation interrupted during restoration", e);
+    }
+
+    // Support method for cleaning temporary directories
     public void cleanupTempDirectory(Path dirPath) {
         if (Files.exists(dirPath)) {
             boolean deleted = deleteDirectoryWithRetry(dirPath, 3, 500);
             if (!deleted) {
-                LOGGER.warn("Alcuni file nella directory temporanea {} non sono stati eliminati", dirPath);
+                LOGGER.warn("Some files in the temporary directory {} were not deleted", dirPath);
             }
         }
     }
@@ -243,140 +270,191 @@ public class RepositoryManager {
      */
     public boolean deleteDirectoryWithRetry(Path dirPath, int maxRetries, long retryDelayMs) {
         if (!Files.exists(dirPath)) {
-            return true; // Directory doesn't exist, consider it deleted
+            return true;
         }
 
-        boolean allDeleted = true;
-
         try {
-            // First attempt to release resources by calling System.gc()
-            System.gc();
-            Thread.sleep(100); // Give GC a moment to work
+            prepareForDeletion();
+            List<Path> pathsToDelete = getPathsToDelete(dirPath);
+            return deletePaths(pathsToDelete, maxRetries, retryDelayMs);
+        } catch (IOException | InterruptedException e) {
+            handleDeletionError(e);
+            return false;
+        }
+    }
 
-            // Get all files in reverse order (leaves first, then directories)
-            List<Path> pathsToDelete = Files.walk(dirPath)
+    private void prepareForDeletion() throws InterruptedException {
+        Thread.sleep(100);
+    }
+
+    private List<Path> getPathsToDelete(Path dirPath) throws IOException {
+        try (Stream<Path> walkStream = Files.walk(dirPath)) {
+            return walkStream
                     .sorted(Comparator.reverseOrder())
                     .toList();
+        }
+    }
 
-            // Try to delete each file/directory
-            for (Path path : pathsToDelete) {
-                boolean deleted = false;
-                File file = path.toFile();
+    private boolean deletePaths(List<Path> paths, int maxRetries, long retryDelayMs)
+            throws InterruptedException {
+        boolean allDeleted = true;
 
-                // Try multiple times for each file
-                for (int attempt = 0; attempt < maxRetries && !deleted; attempt++) {
-                    try {
-                        deleted = file.delete();
-                        if (!deleted) {
-                            // If not deleted, wait before retry
-                            if (attempt < maxRetries - 1) {
-                                Thread.sleep(retryDelayMs);
-                                System.gc(); // Try to release file handles
-                            }
-                        }
-                    } catch (Exception e) {
-                        if (attempt == maxRetries - 1) {
-                            LOGGER.warn("Failed to delete {} after {} attempts: {}", path, maxRetries, e.getMessage());
-                            allDeleted = false;
-                        } else {
-                            // Wait before retry
-                            Thread.sleep(retryDelayMs);
-                        }
-                    }
-                }
-
-                if (!deleted) {
-                    LOGGER.warn("Could not delete file after {} attempts: {}", maxRetries, path);
-                    allDeleted = false;
-                }
+        for (Path path : paths) {
+            if (!deletePathWithRetry(path, maxRetries, retryDelayMs)) {
+                allDeleted = false;
             }
-        } catch (IOException | InterruptedException e) {
-            LOGGER.error("Error during directory deletion: {}", e.getMessage());
-            Thread.currentThread().interrupt(); // Restore interrupted status
-            return false;
         }
 
         return allDeleted;
     }
+
+    private boolean deletePathWithRetry(Path path, int maxRetries, long retryDelayMs)
+            throws InterruptedException {
+                for (int attempt = 0; attempt < maxRetries; attempt++) {
+                    if (tryDelete( path, attempt, maxRetries, retryDelayMs)) {
+                        return true;
+                    }
+                }
+
+        logDeletionFailure(path, maxRetries);
+        return false;
+    }
+
+    private boolean tryDelete(Path path, int attempt, int maxRetries, long retryDelayMs)
+            throws InterruptedException {
+        try {
+            Files.delete(path);
+            return true;
+        } catch (IOException e) {
+            if (attempt == maxRetries - 1) {
+                LOGGER.warn("Eliminazione fallita di {} dopo {} tentativi: {}",
+                        path, maxRetries, e.getMessage());
+            } else {
+                Thread.sleep(retryDelayMs);
+            }
+        }
+        return false;
+    }
+
+
+    private void logDeletionFailure(Path path, int maxRetries) {
+        LOGGER.warn("Impossibile eliminare il file dopo {} tentativi: {}", maxRetries, path);
+    }
+
+    private void handleDeletionError(Exception e) {
+        LOGGER.error("Errore durante l'eliminazione della directory: {}", e.getMessage());
+        if (e instanceof InterruptedException) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+
     public File ensureTempDirectoryExists(Path path) {
         try {
             Files.createDirectories(path);
             return path.toFile();
         } catch (IOException e) {
-            throw new RuntimeException("Impossibile creare la directory temporanea: " + path, e);
+            throw new CostumException("failed to create a new direcory",e);
         }
     }
 
     protected void checkoutRelease(RevCommit commit, Path commitTempDir, boolean processAllCommits) {
         try {
-            // First try: clean the working directory before checkout
-            try {
-                // Clean the working directory to remove any untracked files
-                git.clean().setCleanDirectories(true).setForce(true).call();
-
-                // Reset any changes to tracked files
-                git.reset().setMode(org.eclipse.jgit.api.ResetCommand.ResetType.HARD).call();
-
-                // Attempt checkout
-                git.checkout()
-                   .setName(commit.getName())
-                   .call();
-            } catch (GitAPIException firstAttemptException) {
-                LOGGER.warn("First checkout attempt failed for commit {}: {}", 
-                           commit.getName(), firstAttemptException.getMessage());
-
-                // Second try: more aggressive approach with stash
-                try {
-                    // Reset the repository to a clean state
-                    git.reset().setMode(org.eclipse.jgit.api.ResetCommand.ResetType.HARD).call();
-
-                    // Try to stash any changes
-                    try {
-                        git.stashCreate().call();
-                    } catch (Exception stashException) {
-                        LOGGER.warn("Stash failed, continuing with checkout: {}", stashException.getMessage());
-                    }
-
-                    // Try checkout again
-                    git.checkout()
-                       .setName(commit.getName())
-                       .call();
-                } catch (GitAPIException secondAttemptException) {
-                    LOGGER.warn("Second checkout attempt failed for commit {}: {}", 
-                               commit.getName(), secondAttemptException.getMessage());
-
-                    // Third try: handle the specific problematic file
-                    try {
-                        // Reset again
-                        git.reset().setMode(org.eclipse.jgit.api.ResetCommand.ResetType.HARD).call();
-
-                        // Delete the problematic file if it exists
-                        java.io.File problematicFile = new java.io.File(repository.getWorkTree(), 
-                                                                      "openjpa-project/src/doc/manual/ref_guide_runtime.xml");
-                        if (problematicFile.exists()) {
-                            LOGGER.info("Deleting problematic file: {}", problematicFile.getPath());
-                            problematicFile.delete();
-                        }
-
-                        // Try checkout one more time
-                        git.checkout()
-                           .setName(commit.getName())
-                           .call();
-                    } catch (GitAPIException thirdAttemptException) {
-                        // If all attempts fail, log the error and throw the exception
-                        LOGGER.error("Failed to checkout commit {} after multiple attempts: {}", 
-                                    commit.getName(), thirdAttemptException.getMessage());
-                        throw thirdAttemptException;
-                    }
-                }
+            if (tryCheckout(commit, CheckoutStrategy.CLEAN)) {
+                finalizeCheckout(commitTempDir, commit, processAllCommits);
+                return;
             }
 
-            ensureTempDirectoryExists(commitTempDir);
-            exportCodeToDirectory(commit, commitTempDir,processAllCommits);
+            if (tryCheckout(commit, CheckoutStrategy.STASH)) {
+                finalizeCheckout(commitTempDir, commit, processAllCommits);
+                return;
+            }
+
+            if (tryCheckout(commit, CheckoutStrategy.DELETE_PROBLEMATIC)) {
+                finalizeCheckout(commitTempDir, commit, processAllCommits);
+                return;
+            }
+
+            throw new GitAPIException("Checkout fallito dopo tutti i tentativi") {
+                @Override
+                public String getMessage() {
+                    return "Checkout fallito dopo tutti i tentativi per il commit: " + commit.getName();
+                }
+            };
+
         } catch (GitAPIException e) {
             throw new RuntimeException(e);
         }
     }
+
+    private enum CheckoutStrategy {
+        CLEAN,
+        STASH,
+        DELETE_PROBLEMATIC
+    }
+
+    private boolean tryCheckout(RevCommit commit, CheckoutStrategy strategy) throws GitAPIException {
+        try {
+            resetRepository();
+
+            switch (strategy) {
+                case CLEAN -> cleanWorkingDirectory();
+                case STASH -> stashChanges();
+                case DELETE_PROBLEMATIC -> deleteProblematicFile();
+            }
+
+            git.checkout()
+                    .setName(commit.getName())
+                    .call();
+
+            return true;
+        } catch (GitAPIException e) {
+            LOGGER.warn("Tentativo di checkout {} fallito per il commit {}: {}",
+                    strategy, commit.getName(), e.getMessage());
+            return false;
+        }
+    }
+
+    private void resetRepository() throws GitAPIException {
+        git.reset()
+                .setMode(org.eclipse.jgit.api.ResetCommand.ResetType.HARD)
+                .call();
+    }
+
+    private void cleanWorkingDirectory() {
+        try {
+            git.clean()
+                    .setCleanDirectories(true)
+                    .setForce(true)
+                    .call();
+        } catch (GitAPIException e) {
+            throw new CostumException("not handling the cleaning of all the director from the filese",e);
+        }
+
+    }
+
+    private void stashChanges() {
+        try {
+            git.stashCreate().call();
+        } catch (Exception e) {
+            LOGGER.warn("Stash fallito, proseguo con il checkout: {}", e.getMessage());
+        }
+    }
+
+    private void deleteProblematicFile() {
+        java.io.File problematicFile = new java.io.File(repository.getWorkTree(),
+                "openjpa-project/src/doc/manual/ref_guide_runtime.xml");
+        if (problematicFile.exists()) {
+            LOGGER.info("Eliminazione file problematico: {}", problematicFile.getPath());
+            problematicFile.delete();
+        }
+    }
+
+    private void finalizeCheckout(Path commitTempDir, RevCommit commit, boolean processAllCommits) {
+        ensureTempDirectoryExists(commitTempDir);
+        exportCodeToDirectory(commit, commitTempDir, processAllCommits);
+    }
+
 
     public  int  handleCachedFile(Path targetDir) throws IOException {
         // Ensure target directory exists
@@ -417,71 +495,81 @@ public class RepositoryManager {
 
     private void exportCodeToDirectory(RevCommit commit, Path targetDir, boolean processAllCommits) {
         try {
-            // Track how many files we've processed in this call
             int processedFilesCount = handleCachedFile(targetDir);
             int maxFilesToProcess = ConstantSize.MAX_CLASSES_PER_COMMIT;
-            if (processedFilesCount < maxFilesToProcess ) {
-                RevWalk revWalk = new RevWalk(repository);
-                RevCommit parent = commit.getParentCount() > 0 ? revWalk.parseCommit(commit.getParent(0).getId()) : null;
 
-                DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE);
-                df.setRepository(repository);
-                df.setDiffComparator(RawTextComparator.DEFAULT);
-                df.setDetectRenames(true);
-
-                List<DiffEntry> diffs = df.scan(parent == null ? null : parent.getTree(), commit.getTree());
-
-                // Collect all Java files from the commit
-                List<DiffEntry> javaFiles = new ArrayList<>();
-                for (DiffEntry entry : diffs) {
-                    if (entry.getChangeType() != DiffEntry.ChangeType.DELETE) {
-                        String path = entry.getNewPath();
-                        if (path.endsWith(".java") && !isTestFile(path)) {
-                            javaFiles.add(entry);
-                        }
-                    }
-                }
-
-                LOGGER.info("Found {} Java files in commit", javaFiles.size());
-
-                // Process files up to the maximum limit
-                for (int i = 0; i < javaFiles.size(); i++) {
-                    DiffEntry entry = javaFiles.get(i);
-                    String path = entry.getNewPath();
-
-                    try (TreeWalk treeWalk = TreeWalk.forPath(repository, path, commit.getTree())) {
-                        if (treeWalk != null) {
-                            byte[] content = repository.open(treeWalk.getObjectId(0)).getBytes();
-
-                            // If we've reached the maximum, cache the remaining files
-                            if (processAllCommits || processedFilesCount < maxFilesToProcess){
-                                // Otherwise, write the file to the target directory
-                                Path targetFilePath = targetDir.resolve(path);
-                                Files.createDirectories(targetFilePath.getParent());
-                                Files.write(targetFilePath, content);
-                                processedFilesCount++;
-                            } else {
-                                cachedFiles.put(path, content);
-                            }
-                        }
-                    }
-                }
+            if (processedFilesCount < maxFilesToProcess) {
+                processCommitFiles(commit, targetDir, processAllCommits, processedFilesCount, maxFilesToProcess);
             }
 
-            // Count the actual number of files exported
-            long count = 0;
-            if (Files.exists(targetDir)) {
-                count = Files.walk(targetDir)
-                        .filter(p -> p.toString().endsWith(".java"))
-                        .count();
-            }
-
-            LOGGER.info("Classi da processare: {}, Rimaste in cache: {}", count, cachedFiles.size());
-
+            logProcessedFilesCount(targetDir);
         } catch (Exception e) {
-            LOGGER.error("Errore durante l'esportazione dei file del commit: {} ", commit.getName(), e);
+            LOGGER.error("Error during export of commit files: {} ", commit.getName(), e);
         }
     }
+    private void processCommitFiles(RevCommit commit, Path targetDir, boolean processAllCommits,
+                                    int processedFilesCount, int maxFilesToProcess) throws IOException {
+        try (RevWalk revWalk = new RevWalk(repository);
+             DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE)) {
+
+            df.setRepository(repository);
+            df.setDiffComparator(RawTextComparator.DEFAULT);
+            df.setDetectRenames(true);
+
+            RevCommit parent = commit.getParentCount() > 0 ? revWalk.parseCommit(commit.getParent(0).getId()) : null;
+            List<DiffEntry> diffs = df.scan(parent == null ? null : parent.getTree(), commit.getTree());
+
+            List<DiffEntry> javaFiles = filterJavaFiles(diffs);
+            LOGGER.info("Found {} Java files in commit", javaFiles.size());
+
+            processJavaFiles(javaFiles, commit, targetDir, processAllCommits, processedFilesCount, maxFilesToProcess);
+        }
+    }
+    private List<DiffEntry> filterJavaFiles(List<DiffEntry> diffs) {
+        List<DiffEntry> javaFiles = new ArrayList<>();
+        for (DiffEntry entry : diffs) {
+            if (entry.getChangeType() != DiffEntry.ChangeType.DELETE) {
+                String path = entry.getNewPath();
+                if (path.endsWith(".java") && !isTestFile(path)) {
+                    javaFiles.add(entry);
+                }
+            }
+        }
+        return javaFiles;
+    }
+    private void processJavaFiles(List<DiffEntry> javaFiles, RevCommit commit, Path targetDir,
+                                  boolean processAllCommits, int processedFilesCount, int maxFilesToProcess) throws IOException {
+        for (DiffEntry entry : javaFiles) {
+            String path = entry.getNewPath();
+            try (TreeWalk treeWalk = TreeWalk.forPath(repository, path, commit.getTree())) {
+                if (treeWalk != null) {
+                    byte[] content = repository.open(treeWalk.getObjectId(0)).getBytes();
+                    if (processAllCommits || processedFilesCount < maxFilesToProcess) {
+                        writeFileToTarget(targetDir, path, content);
+                        processedFilesCount++;
+                    } else {
+                        cachedFiles.put(path, content);
+                    }
+                }
+            }
+        }
+    }
+    private void writeFileToTarget(Path targetDir, String path, byte[] content) throws IOException {
+        Path targetFilePath = targetDir.resolve(path);
+        Files.createDirectories(targetFilePath.getParent());
+        Files.write(targetFilePath, content);
+    }
+
+    private void logProcessedFilesCount(Path targetDir) throws IOException {
+        long count = 0;
+        if (Files.exists(targetDir)) {
+            try (Stream<Path> stream = Files.walk(targetDir)) {
+                count = stream.filter(p -> p.toString().endsWith(".java")).count();
+            }
+        }
+        LOGGER.info("Classes to process: {}, Remaining in cache: {}", count, cachedFiles.size());
+    }
+
     private boolean isTestFile(String path) {
         String lowerPath = path.toLowerCase();
         return lowerPath.contains("/test/") || lowerPath.contains("test") || lowerPath.contains("mock");

@@ -1,0 +1,18 @@
+
+=== Feature Selection Results for Release 12 ===
+Selected Features (5):
+  - release
+  - loc
+  - fanin
+  - age
+  - nAuth
+Discarded Features (8):
+  - wmc
+  - assignmentsQty
+  - mathOperationsQty
+  - qtyTryCatch
+  - qtyReturn
+  - fanout
+  - nr
+  - nSmell
+
