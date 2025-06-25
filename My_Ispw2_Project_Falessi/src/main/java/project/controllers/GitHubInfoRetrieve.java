@@ -41,7 +41,7 @@ public class GitHubInfoRetrieve {
     private FileRepository repo;
     private  static final String SUFFIX = ".java";
     private  static final String PREFIX = "/test/";
-    private static final String BACKUP="_backup";
+    private static final String BACKUP="_backup_";
     private final String project;
 
     public GitHubInfoRetrieve(String project) throws IOException {
@@ -55,29 +55,35 @@ public class GitHubInfoRetrieve {
         this.git = new Git(this.repo);
     }
     /*
-    *   Make sure that if a directory with the backup name exists, remove the current folder
-    *    and rename the backup folder
-    *    So if inside cloned projects I have: openjpa and openjpa_backup
-    *    1. Delete openjpa
-    *    2. Rename the first folder found from openjpa_backup to openjpa
-    *    3. Delete all remaining openjpa_backup folders
+    *   Make sure that if directories with the backup name exist, remove the current folder
+    *    and rename the most recent backup folder to the original name
+    *    So if inside cloned projects I have: bookkeeper and bookkeeper_backup_1750856812981
+    *    1. Delete bookkeeper
+    *    2. Find the most recent backup folder based on timestamp (e.g., bookkeeper_backup_1750856812981)
+    *    3. Rename the most recent backup folder to bookkeeper
+    *    4. Delete all remaining backup folders
     */
     public void initializingRepo() throws IOException {
         try {
             Path currentDirPath = ConstantsWindowsFormat.REPO_CLONE_PATH.resolve(project);
-            List<String> directoryNames;
+            List<Path> backupDirs = new ArrayList<>();
+
+            // Find all backup directories for this project
             try (Stream<Path> pathStream = Files.list(ConstantsWindowsFormat.REPO_CLONE_PATH)) {
-                directoryNames = pathStream
+                backupDirs = pathStream
                         .filter(Files::isDirectory)
-                        .map(path -> path.getFileName().toString())
+                        .filter(path -> {
+                            String dirName = path.getFileName().toString();
+                            return dirName.startsWith(project + "_backup");
+                        })
                         .toList();
             }
 
+            if (!backupDirs.isEmpty()) {
+                LOGGER.info("Found {} backup directories for project {}", backupDirs.size(), project);
 
-            if (directoryNames.stream().anyMatch(name -> name.startsWith(project + BACKUP))) {
-
+                // Delete the current project directory if it exists
                 if (Files.exists(currentDirPath)) {
-                    // delete the directory openjpa
                     try (Stream<Path> pathStream = Files.walk(currentDirPath)) {
                         pathStream
                                 .sorted(Comparator.reverseOrder())
@@ -85,51 +91,51 @@ public class GitHubInfoRetrieve {
                                 .forEach(java.io.File::delete);
                         LOGGER.info("Deleted existing directory: {}", currentDirPath);
                     }
-
                 }
 
-                // Find the first backup directory
-                Path firstBackupDir ;
-                try (Stream<Path> pathStream = Files.list(ConstantsWindowsFormat.REPO_CLONE_PATH)){
-                    firstBackupDir = pathStream
-                            .filter(Files::isDirectory)
-                            .filter(path -> path.getFileName().toString().startsWith(project + BACKUP))
-                            .findFirst()
-                            .orElse(null);
-                } catch (IOException e) {
-                    throw new CostumException("error when trying to move to backup dir",e);
-                }
-
-                if (firstBackupDir != null) {
-                    // Rename backup directory to original name
-                    Files.move(firstBackupDir, currentDirPath, StandardCopyOption.REPLACE_EXISTING);
-                    LOGGER.info("Renamed backup directory to: {} ", currentDirPath);
-                }
-
-                // Delete all remaining backup directories with the same name pattern
-                try (Stream<Path> paths = Files.list(ConstantsWindowsFormat.REPO_CLONE_PATH)) {
-                    paths.filter(Files::isDirectory)
-                            .filter(path -> path.getFileName().toString().startsWith(project + BACKUP))
-                            .forEach(path -> {
-                                try (Stream<Path> walkStream = Files.walk(path)) {
-                                    walkStream.sorted(Comparator.reverseOrder())
-                                            .forEach(p -> {
-                                                try {
-                                                    Files.delete(p);
-                                                } catch (IOException e) {
-                                                    LOGGER.error("Error deleting path: {}", e.getMessage());
-                                                }
-                                            });
-                                    LOGGER.info("Deleted remaining backup directory: {} ", path);
-                                } catch (IOException e) {
-                                    LOGGER.error("Error deleting backup directory : {}", e.getMessage());
+                // Find the most recent backup directory (assuming timestamp is part of the name)
+                Path mostRecentBackup = backupDirs.stream()
+                        .max(Comparator.comparing(path -> {
+                            String name = path.getFileName().toString();
+                            // Extract timestamp from name (project_backup_timestamp)
+                            int lastUnderscoreIndex = name.lastIndexOf('_');
+                            if (lastUnderscoreIndex > 0 && lastUnderscoreIndex < name.length() - 1) {
+                                try {
+                                    return Long.parseLong(name.substring(lastUnderscoreIndex + 1));
+                                } catch (NumberFormatException e) {
+                                    return 0L;
                                 }
-                            });
+                            }
+                            return 0L;
+                        }))
+                        .orElse(null);
+
+                if (mostRecentBackup != null) {
+                    // Rename most recent backup directory to original name
+                    Files.move(mostRecentBackup, currentDirPath, StandardCopyOption.REPLACE_EXISTING);
+                    LOGGER.info("Renamed most recent backup directory {} to: {}", mostRecentBackup, currentDirPath);
+
+                    // Delete all remaining backup directories
+                    for (Path backupDir : backupDirs) {
+                        if (!backupDir.equals(mostRecentBackup) && Files.exists(backupDir)) {
+                            try (Stream<Path> walkStream = Files.walk(backupDir)) {
+                                walkStream.sorted(Comparator.reverseOrder())
+                                        .forEach(p -> {
+                                            try {
+                                                Files.delete(p);
+                                            } catch (IOException e) {
+                                                LOGGER.error("Error deleting path: {}", e.getMessage());
+                                            }
+                                        });
+                                LOGGER.info("Deleted remaining backup directory: {}", backupDir);
+                            } catch (IOException e) {
+                                LOGGER.error("Error deleting backup directory: {}", e.getMessage());
+                            }
+                        }
+                    }
                 }
-
-
             }
-        } finally{
+        } finally {
             LOGGER.info("Finished checking for backup directories");
         }
     }
@@ -345,14 +351,14 @@ public class GitHubInfoRetrieve {
         List<MethodInstance> changedMethods = new ArrayList<>();
         RevCommit parent = getParentCommit(commit);
         if (parent == null) return changedMethods;
-        
+
         try (DiffFormatter diffFormatter = setupDiffFormatter()) {
             List<DiffEntry> diffs = diffFormatter.scan(parent.getTree(), commit.getTree());
             processChangedFiles(diffs, parent, commit, changedMethods);
         } catch (IOException e) {
             LOGGER.error("Errore nell'analisi delle modifiche del commit: {}", e.getMessage());
         }
-        
+
         return changedMethods;
     }
 
@@ -404,7 +410,7 @@ private void processModifiedFile(DiffEntry diff, RevCommit commit, String oldCon
                                List<MethodInstance> oldMethods, List<MethodInstance> changedMethods) throws IOException {
     String newContent = getFileContentAtCommit(diff.getNewPath(), commit);
     List<MethodInstance> newMethods = extractMethodsFromFile(newContent, diff.getNewPath());
-    
+
     for (MethodInstance oldMethod : oldMethods) {
         processMethod(oldMethod, newMethods, oldContent, newContent, changedMethods);
     }

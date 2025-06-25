@@ -98,11 +98,13 @@ public class MethodDataSetExecutor {
         // Initialize the metrics calculator with only the needed commits and the current project name
         this.metricsCalculator = new MetricsCalculator(this.gitHubInfoRetrieve, this.currentProject);
         metricsCalculator.calculateAll(avaiableTrainingRelease);
-
+        LOGGER.info("Iterating through release {} " , avaiableTrainingRelease.size());
 
         for (int i = 1; i < avaiableTrainingRelease.size()-1; i++) {
+            LOGGER.info("Iterating through release {} " , releaseList.get(i).getName());
             // reverse calculation for have first all the commit processed and elaborated
             Release release= avaiableTrainingRelease.get(i);
+
             writeReleaseFile(release, releaseList, DataSetType.TRAINING, false,allTickets);
         }
         for (int i=2 ; i< avaiableTrainingRelease.size();i++){
@@ -140,6 +142,7 @@ public class MethodDataSetExecutor {
         List<Ticket> releaseTickets;
         List<Ticket> addTickets = new ArrayList<>();
         for(int i=0; i<releaseList.size(); i++){
+
             Release release = releaseList.get(i);
             releaseTickets = new ArrayList<>(JiraInfoRetrieve.getAllReleaseTicket(release,allTickets));
             addTickets.addAll(releaseTickets);
@@ -154,14 +157,17 @@ public class MethodDataSetExecutor {
         this.currentProcessingRelease = curRelease;
         List<Ticket> tickets= new ArrayList<>();
         for(int i=0;i<curRelease.getId();i++){
+            LOGGER.info("Iterating through release {} " , releaseList.get(i).getName());
             Release release=releaseList.get(i);
             tickets.addAll(JiraInfoRetrieve.getAllReleaseTicket(release,allTickets));
         }
+
         adjustIvTickets(tickets, curRelease.getCurrentProportion(), releaseList);
         if(isLastRelease){
             tickets.addAll(getAddTicket(releaseList,allTickets));
         }
         try {
+
             writeFile(releaseList.subList(0,curRelease.getId()), curRelease, tickets, datasetTipe);
         } catch (IOException e) {
             LOGGER.error("Error writing release file: {}" , e.getMessage());

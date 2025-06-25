@@ -2,13 +2,13 @@ package project;
 
 
 public enum Projects {
-    BOOKKEEPER("Bookkeeper"),
-    OPENJPA("Openjpa");
+    BOOKKEEPER("bookkeeper"),
+    OPENJPA("openjpa");
     private final String label;
     private double split;
     Projects(String label ){
         this.label=label;
-        if(label.equals("Bookkeeper")){
+        if(label.equals("bookkeeper")){
             split=  50/100.0 ;
         }else{
             split=  33/100.0;

@@ -212,8 +212,7 @@ public class JiraInfoRetrieve {
     }
 
 
-    /*This method retrieves all the versions of the project (Avro or Bookkeeper) that are released and with a release date*/
-    /*This method retrieves all the versions of the project (Avro or Bookkeeper) that are released and with a release date*/
+    /*This method retrieves all the versions of the project (Avro or bookkeeper) that are released and with a release date*/
     public List<Release> retrieveReleases() throws JSONException, IOException, ParseException {
         try {
             List<Release> allRelease = new ArrayList<>();

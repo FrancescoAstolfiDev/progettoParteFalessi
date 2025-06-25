@@ -149,6 +149,18 @@ public class Caching {
 
         if (!Files.exists(cacheFilePath)) {
             LOGGER.error("{} {}" ,NO_COMMIT_CACHE_FOUND , cacheFilePath);
+            // Create a new empty cache file
+            try {
+                // Ensure the directory exists
+                Files.createDirectories(cacheFilePath.getParent());
+                // Create an empty JSON object and write it to the file
+                try (java.io.BufferedWriter writer = Files.newBufferedWriter(cacheFilePath)) {
+                    writer.write("{}");
+                }
+                LOGGER.info("Created new empty cache file for project {}: {}", projectName, cacheFilePath);
+            } catch (IOException e) {
+                LOGGER.error("Error creating new cache file for project {}: {}", projectName, e.getMessage());
+            }
             return;
         }
 
@@ -237,6 +249,22 @@ public class Caching {
         } catch (IOException | JSONException e) {
             LOGGER.error("Error loading commit cache for project {} : {} " ,  projectName , e.getMessage());
 
+            // If the cache file exists but is invalid, recreate it
+            if (e instanceof JSONException && e.getMessage().contains("Expected a JSON object")) {
+                try {
+                    // Delete the invalid cache file
+                    Files.delete(cacheFilePath);
+                    LOGGER.info("Deleted invalid cache file for project {}: {}", projectName, cacheFilePath);
+
+                    // Create a new empty cache file
+                    try (java.io.BufferedWriter writer = Files.newBufferedWriter(cacheFilePath)) {
+                        writer.write("{}");
+                    }
+                    LOGGER.info("Created new empty cache file for project {}: {}", projectName, cacheFilePath);
+                } catch (IOException ex) {
+                    LOGGER.error("Error recreating cache file for project {}: {}", projectName, ex.getMessage());
+                }
+            }
         }
     }
 
