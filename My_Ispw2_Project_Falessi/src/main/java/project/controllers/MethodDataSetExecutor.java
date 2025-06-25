@@ -70,7 +70,6 @@ public class MethodDataSetExecutor {
         }
 
         double proportion = coldStartProportion();
-        //double proportion =2.15;
         jiraInfoRetrieve.assignTicketToRelease(releaseList,allTickets);
 
         //se non ho sufficienti ticket in tutto il progetto posso settare il proportion di tutte le release al valore
@@ -126,7 +125,6 @@ public class MethodDataSetExecutor {
         for (int i = 0; i < len; i++) {
             gitHubInfoRetrieve.getClassFilesOfCommit(releaseList.get(i));
         }
-        releaseList.get(releaseList.size()-1).setReleaseAllClass(releaseList.get(len-1).getReleaseAllClass());
     }
     private List<Ticket> getTicketsWithAv(List<Ticket> allTicket) {
         List<Ticket> goodTickets = new ArrayList<>();

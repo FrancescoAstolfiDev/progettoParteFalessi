@@ -17,7 +17,6 @@ public class Release {
 
 	private List<MethodInstance> releaseAllMethods;
 	private Map<String, ClassFile> classFileMap;
-	private List<ClassFile> releaseAllClass;
 
 	public Release(int id, String name, Date date) {
 		this.id = id;
@@ -180,8 +179,7 @@ public class Release {
 
 		// Se "benchmark" non viene trovato, restituisci solo il nome della classe
 		int lastDot = cleanName.lastIndexOf('.');
-		String classNameOnly = (lastDot != -1) ? cleanName.substring(lastDot + 1) : cleanName;
-		return classNameOnly;
+		return  (lastDot != -1) ? cleanName.substring(lastDot + 1) : cleanName;
 	}
 
 	public  ClassFile findClassFileByApproxName(String className) {
@@ -198,7 +196,6 @@ public class Release {
 	}
 
 	public List<ClassFile> getReleaseAllClass() {
-
 		return new ArrayList<>(classFileMap.values());
 	}
 
@@ -210,7 +207,4 @@ public class Release {
 		return this.date;
 	}
 
-	public void setReleaseAllClass(List<ClassFile> allClass){
-		this.releaseAllClass = allClass;
-	}
 }

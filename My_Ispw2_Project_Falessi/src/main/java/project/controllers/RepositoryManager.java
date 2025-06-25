@@ -33,7 +33,7 @@ import java.util.stream.Stream;
  * Class dedicated to repository operations like backup and restore.
  */
 public class RepositoryManager {
-    private  final Logger LOGGER = LoggerFactory.getLogger(RepositoryManager.class);
+    private static  final Logger LOGGER = LoggerFactory.getLogger(RepositoryManager.class);
     private Git git;
     private Repository repository;
     private String originalRepoPath;
@@ -383,7 +383,7 @@ public class RepositoryManager {
             };
 
         } catch (GitAPIException e) {
-            throw new RuntimeException(e);
+            throw new CostumException("failed to checkout commit " + commit.getName(),e);
         }
     }
 
@@ -442,13 +442,18 @@ public class RepositoryManager {
     }
 
     private void deleteProblematicFile() {
-        java.io.File problematicFile = new java.io.File(repository.getWorkTree(),
+        Path problematicFile = repository.getWorkTree().toPath().resolve(
                 "openjpa-project/src/doc/manual/ref_guide_runtime.xml");
-        if (problematicFile.exists()) {
-            LOGGER.info("Eliminazione file problematico: {}", problematicFile.getPath());
-            problematicFile.delete();
+        if (Files.exists(problematicFile)) {
+            LOGGER.info("Eliminazione file problematico: {}", problematicFile);
+            try {
+                Files.delete(problematicFile);
+            } catch (IOException e) {
+                LOGGER.warn("Impossibile eliminare il file problematico: {}", e.getMessage());
+            }
         }
     }
+
 
     private void finalizeCheckout(Path commitTempDir, RevCommit commit, boolean processAllCommits) {
         ensureTempDirectoryExists(commitTempDir);

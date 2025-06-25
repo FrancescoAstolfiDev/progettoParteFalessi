@@ -1,7 +1,4 @@
 package project.utils;
-
-import project.models.MethodInstance;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 

@@ -213,9 +213,8 @@ public class JiraInfoRetrieve {
 
 
     /*This method retrieves all the versions of the project (Avro or Bookkeeper) that are released and with a release date*/
+    /*This method retrieves all the versions of the project (Avro or Bookkeeper) that are released and with a release date*/
     public List<Release> retrieveReleases() throws JSONException, IOException, ParseException {
-
-
         try {
             List<Release> allRelease = new ArrayList<>();
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -234,10 +233,8 @@ public class JiraInfoRetrieve {
                 JSONObject value = values.getJSONObject(i);
                 if (value.getBoolean("released")) {
                     String name = value.getString("name");
-                    String date = null;
-                    try {
-                        date = value.getString("releaseDate");
-                    } catch (JSONException e) {
+                    String date = value.optString("releaseDate");
+                    if (date.isEmpty()) {
                         continue;
                     }
                     Release temp = new Release(-1, name, formatter.parse(date));
@@ -253,6 +250,7 @@ public class JiraInfoRetrieve {
             throw new IOException("Richiesta interrotta", e);
         }
     }
+
 
 
 

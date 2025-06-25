@@ -10,7 +10,7 @@ public class ConstantSize {
     public static final int NUM_COMMITS = 100000;
 
     // Maximum cache file size in bytes (90MB)
-    public static final long MAX_CACHE_FILE_SIZE = 90 * 1024 * 1024;
+    public static final long MAX_CACHE_FILE_SIZE = 90L * 1024 * 1024;
 
     public static final int FREQUENCY_LOG =10;
     public static final int FREQUENCY_WRITE_CACHE =20;
