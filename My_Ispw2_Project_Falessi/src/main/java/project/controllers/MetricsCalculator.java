@@ -763,7 +763,7 @@ public class MetricsCalculator {
 
         // Process the tickets
         for (Ticket ticket : data.releaseTickets) {
-            Release checkInj = ticket.getIv() != null ? ticket.getIv() : ticket.getCalculatedIv();
+            IRelease checkInj = ticket.getIv() != null ? ticket.getIv() : ticket.getCalculatedIv();
             if (checkInj == null ) {
                 continue;
             }
@@ -775,8 +775,8 @@ public class MetricsCalculator {
 
     private void processTicketChanges(Ticket ticket,
                                       Map<Integer, Map<String, List<MethodInstance>>> methodsByRelease) {
-        Release injected = ticket.getIv() != null ? ticket.getIv() : ticket.getCalculatedIv();
-        Release fixed = ticket.getFv();
+        IRelease injected = ticket.getIv() != null ? ticket.getIv() : ticket.getCalculatedIv();
+        IRelease fixed = ticket.getFv();
 
         for (RevCommit commit : getSortedCommit(ticket.getAssociatedCommits())) {
             String commitHash = commit.getId().getName();

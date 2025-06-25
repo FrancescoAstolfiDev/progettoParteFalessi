@@ -1,7 +1,7 @@
 package project.models;
 
 public class MethodInstance {
-    private Release release;
+    private IRelease release;
     private String filePath;
     private String methodName;
     private String signature;
@@ -61,11 +61,11 @@ public class MethodInstance {
         return releaseName + "#" + filePath + "#"  + methodName;
     }
 
-    public Release getRelease() {
+    public IRelease getRelease() {
         return release;
     }
 
-    public void setRelease(Release release) {
+    public void setRelease(IRelease release) {
         this.release = release;
     }
 

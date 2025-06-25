@@ -4,7 +4,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 
 import java.util.*;
 
-public class Release {
+public class Release implements IRelease {
 
 	private int id;
 	private String name;
