@@ -60,16 +60,6 @@ public class Release {
 		this.date = date;
 	}
 
-	public List<Ticket> getAllReleaseTicket( List<Ticket> allTicket) {
-			List<Ticket> releaseTickets = new ArrayList<>();
-			for (Ticket ticket: allTicket){
-				if (ticket.getFv().getId() <= id ){
-					releaseTickets.add(ticket);
-				}
-			}
-			return releaseTickets;
-	}
-
 	public double getCurrentProportion() {
 		return this.currentProportion;
 	}

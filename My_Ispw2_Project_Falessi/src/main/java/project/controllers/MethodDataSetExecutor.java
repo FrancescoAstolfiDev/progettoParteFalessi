@@ -81,7 +81,7 @@ public class MethodDataSetExecutor {
         //scorro tutte le release e assegno i vari valori di proportion
         else {
             for (Release release:releaseList){
-                List<Ticket> ticketsWithAv = getTicketsWithAv(release.getAllReleaseTicket(allTickets));
+                List<Ticket> ticketsWithAv = getTicketsWithAv(JiraInfoRetrieve.getAllReleaseTicket(release,allTickets));
                 if (ticketsWithAv.size() < 5){
                     release.setCurrentProportion(proportion);
                 }
@@ -141,7 +141,7 @@ public class MethodDataSetExecutor {
         List<Ticket> addTickets = new ArrayList<>();
         for(int i=0; i<releaseList.size(); i++){
             Release release = releaseList.get(i);
-            releaseTickets = new ArrayList<>(release.getAllReleaseTicket(allTickets));
+            releaseTickets = new ArrayList<>(JiraInfoRetrieve.getAllReleaseTicket(release,allTickets));
             addTickets.addAll(releaseTickets);
         }
         adjustIvTickets(addTickets, releaseList.get(releaseList.size()-1).getCurrentProportion(), releaseList);
@@ -155,7 +155,7 @@ public class MethodDataSetExecutor {
         List<Ticket> tickets= new ArrayList<>();
         for(int i=0;i<curRelease.getId();i++){
             Release release=releaseList.get(i);
-            tickets.addAll(release.getAllReleaseTicket(allTickets));
+            tickets.addAll(JiraInfoRetrieve.getAllReleaseTicket(release,allTickets));
         }
         adjustIvTickets(tickets, curRelease.getCurrentProportion(), releaseList);
         if(isLastRelease){

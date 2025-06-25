@@ -271,6 +271,14 @@ public class JiraInfoRetrieve {
         for (int i = 0; i < len; i++){
             list.get(i).setId(i+1);
         }
-
+    }
+    public static  List<Ticket> getAllReleaseTicket(Release release, List<Ticket> allTicket) {
+        List<Ticket> releaseTickets = new ArrayList<>();
+        for (Ticket ticket: allTicket){
+            if (ticket.getFv().getId() <= release.getId() ){
+                releaseTickets.add(ticket);
+            }
+        }
+        return releaseTickets;
     }
 }
