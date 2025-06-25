@@ -242,7 +242,7 @@ public class MetricsCalculator {
                                 }
 
                             })
-                        ).get(); // Wait for completion
+                    ).get(); // Wait for completion
                 } catch (Exception e) {
                     LOGGER.error("Error during batch processing: {}", e.getMessage(), e);
                     customThreadPool.shutdown();
@@ -362,7 +362,7 @@ public class MetricsCalculator {
                     remainingCommits);
         }
         if ((log % ConstantSize.FREQUENCY_WRITE_CACHE) == 0) {
-           Caching.saveCommitCache(resultCommitsMethods, projectName);
+            Caching.saveCommitCache(resultCommitsMethods, projectName);
         }
         if ((log % ConstantSize.FREQUENCY_WRITE_CSV) == 0 ) {
             // Calculate buggyness for partial results
@@ -427,7 +427,7 @@ public class MetricsCalculator {
                 }
 
                 processCommits(data);
-               assignBuggyness(data);
+                assignBuggyness(data);
 
                 // If we get here, processing was completed successfully
                 LOGGER.info("Processing of release {} completed successfully", release.getName());
@@ -733,8 +733,6 @@ public class MetricsCalculator {
     }
 
 
-
-
     private void assignBuggyness(ReleaseData data) {
         if (!resultsChanged) return;
         resultsChanged = false;
@@ -754,7 +752,7 @@ public class MetricsCalculator {
         Map<Integer, Map<String, List<MethodInstance>>> methodsByRelease = new HashMap<>();
         data.releaseResults.values().forEach(method -> {
             if (method.getRelease() != null) {
-                Integer releaseId=Release.getId(method.getMethodName(),releaseList);
+                int releaseId = Release.getId(method.getRelease(), releaseList);
                 String methodKey = method.getFilePath() + "#" + method.getMethodName();
                 methodsByRelease
                         .computeIfAbsent(releaseId, k -> new HashMap<>())

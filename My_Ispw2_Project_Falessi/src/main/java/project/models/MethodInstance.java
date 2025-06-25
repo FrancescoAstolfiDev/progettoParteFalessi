@@ -4,7 +4,8 @@ public class MethodInstance {
     private String release;
     private String filePath;
     private String methodName;
-
+    private String signature;
+    private String fullSignature;
 
     // ck method metrics
     private int loc;
@@ -37,7 +38,12 @@ public class MethodInstance {
         return " sono nella method instance " + this.methodName + " con il path " + this.filePath + " e con gli smell  "+this.nSmells;
     }
 
-
+    public MethodInstance(String filePath, String methodName, String signature) {
+        this.filePath = filePath;
+        this.methodName = methodName;
+        this.signature = signature;
+        this.fullSignature = filePath + "#" + methodName + signature;
+    }
     /**
      * Crea una chiave univoca per il metodo utilizzando i metodi nativi di CK.
      *
@@ -79,6 +85,21 @@ public class MethodInstance {
         this.methodName = methodName;
     }
 
+    public String getSignature() {
+        return signature;
+    }
+
+    public void setSignature(String signature) {
+        this.signature = signature;
+    }
+
+    public String getFullSignature() {
+        return fullSignature;
+    }
+
+    public void setFullSignature(String fullSignature) {
+        this.fullSignature = fullSignature;
+    }
 
     public int getLoc() {
         return loc;
