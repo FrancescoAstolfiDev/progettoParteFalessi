@@ -88,7 +88,7 @@ public class Caching {
                     } else {
                         methodJson = new JSONObject();
                     }
-                    methodJson.put("filePath", method.getFilePath());
+                    methodJson.put("filePath", method.getClassPath());
                     methodJson.put("methodName", method.getMethodName());
                     methodJson.put("loc", method.getLoc());
                     methodJson.put("wmc", method.getWmc());
@@ -193,7 +193,7 @@ public class Caching {
 
                         // Create a method instance with optimized property setting
                         MethodInstance method = new MethodInstance();
-                        method.setFilePath(methodJson.optString("filePath", ""));
+                        method.setClassPath(methodJson.optString("filePath", ""));
                         method.setMethodName(methodJson.optString("methodName", ""));
                         method.setLoc(methodJson.optInt("loc", 0));
                         method.setWmc(methodJson.optInt("wmc", 0));

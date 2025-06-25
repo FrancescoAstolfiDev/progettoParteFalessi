@@ -1,8 +1,8 @@
 package project.models;
 
 public class MethodInstance {
-    private String release;
-    private String filePath;
+    private String releaseName;
+    private String classPath;
     private String methodName;
     private String signature;
     private String fullSignature;
@@ -35,11 +35,11 @@ public class MethodInstance {
 
     @Override
     public String toString() {
-        return " sono nella method instance " + this.methodName + " con il path " + this.filePath + " e con gli smell  "+this.nSmells;
+        return " sono nella method instance " + this.methodName + " con il path " + this.classPath + " e con gli smell  "+this.nSmells;
     }
 
     public MethodInstance(String filePath, String methodName, String signature) {
-        this.filePath = filePath;
+        this.classPath = filePath;
         this.methodName = methodName;
         this.signature = signature;
         this.fullSignature = filePath + "#" + methodName + signature;
@@ -51,30 +51,30 @@ public class MethodInstance {
      * @return Una chiave univoca per il metodo
      */
     public static String createMethodKey(MethodInstance method) {
-        String releaseName= method.getRelease() !=null?
-                method.getRelease():"0.0.0";
-        String filePath = method.getFilePath() != null ?
-                method.getFilePath() : "anonymous";
+        String releaseName= method.getReleaseName() !=null?
+                method.getReleaseName():"0.0.0";
+        String filePath = method.getClassPath() != null ?
+                method.getClassPath() : "anonymous";
         String methodName = method.getMethodName() != null ?
                 method.getMethodName() : "anonymous";
         // Use full class name + method name as key
         return releaseName + "#" + filePath + "#"  + methodName;
     }
 
-    public String getRelease() {
-        return release;
+    public String getReleaseName() {
+        return releaseName;
     }
 
-    public void setRelease(Release release) {
-        this.release = release.getName();
+    public void setReleaseName(String releaseName) {
+        this.releaseName = releaseName;
     }
 
-    public String getFilePath() {
-        return filePath;
+    public String getClassPath() {
+        return classPath;
     }
 
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
+    public void setClassPath(String classPath) {
+        this.classPath = classPath;
     }
 
     public String getMethodName() {

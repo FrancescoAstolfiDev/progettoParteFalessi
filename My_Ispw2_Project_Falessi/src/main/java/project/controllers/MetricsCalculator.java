@@ -110,7 +110,7 @@ public class MetricsCalculator {
         for(Release release :releaseList){
             int count=0;
             for(MethodInstance method: releaseData.releaseResults.values()){
-                if(method.getRelease().equals(release)){
+                if(method.getReleaseName().equals(release.getName())){
                     count++;
                 }
             }
@@ -135,8 +135,8 @@ public class MetricsCalculator {
                 }
                 Map<String,MethodInstance> commitMetrics=new HashMap<>();
                 for( MethodInstance method: commitCheck.methods){
-                    method.setRelease(release);
-                    ClassFile classFile=release.getClassFileByPath(method.getFilePath());
+                    method.setReleaseName(release.getName());
+                    ClassFile classFile=release.getClassFileByPath(method.getClassPath());
                     if(classFile!=null)classFile.addMethod(method);
                     commitMetrics.put(MethodInstance.createMethodKey(method),method);
                 }
@@ -672,7 +672,7 @@ public class MetricsCalculator {
         String methodName="anonymous";
         for(MethodInstance methodInstance: methodChanged){
             if(method.getMethodName().contains(methodInstance.getMethodName())
-                    && filledClass.getPath().equals(methodInstance.getFilePath())
+                    && filledClass.getPath().equals(methodInstance.getClassPath())
             ){
                 methodName=methodInstance.getMethodName();
                 check=true;
@@ -695,9 +695,9 @@ public class MetricsCalculator {
                                                 String methodName, Release release, int nSmell) {
 
         MethodInstance methodInstance = new MethodInstance();
-        methodInstance.setFilePath(filledClass.getPath());
+        methodInstance.setClassPath(filledClass.getPath());
         methodInstance.setMethodName(methodName);
-        methodInstance.setRelease(release);
+        methodInstance.setReleaseName(release.getName());
 
         // Imposta le metriche
         setMethodMetrics(methodInstance, method, filledClass,nSmell);
@@ -751,9 +751,9 @@ public class MetricsCalculator {
         // Create index for methods by release
         Map<Integer, Map<String, List<MethodInstance>>> methodsByRelease = new HashMap<>();
         data.releaseResults.values().forEach(method -> {
-            if (method.getRelease() != null) {
-                int releaseId = Release.getId(method.getRelease(), releaseList);
-                String methodKey = method.getFilePath() + "#" + method.getMethodName();
+            if (method.getReleaseName() != null) {
+                int releaseId = Release.getId(method.getReleaseName(), releaseList);
+                String methodKey = method.getClassPath() + "#" + method.getMethodName();
                 methodsByRelease
                         .computeIfAbsent(releaseId, k -> new HashMap<>())
                         .computeIfAbsent(methodKey, k -> new ArrayList<>())
@@ -793,8 +793,8 @@ public class MetricsCalculator {
             Set<String> modifiedMethodSignatures = new HashSet<>();
             for (MethodInstance changedMethod : methodsChanged) {
                 for (MethodInstance commitMethod : commitMethods.values()) {
-                    if (commitMethod.getMethodName().equals(changedMethod.getMethodName()) && commitMethod.getFilePath().equals(changedMethod.getFilePath())) {
-                        modifiedMethodSignatures.add(commitMethod.getFilePath() + "#" + commitMethod.getMethodName());
+                    if (commitMethod.getMethodName().equals(changedMethod.getMethodName()) && commitMethod.getClassPath().equals(changedMethod.getClassPath())) {
+                        modifiedMethodSignatures.add(commitMethod.getClassPath() + "#" + commitMethod.getMethodName());
                     }
                 }
             }

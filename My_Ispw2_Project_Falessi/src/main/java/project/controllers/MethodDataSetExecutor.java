@@ -70,7 +70,6 @@ public class MethodDataSetExecutor {
         }
 
         double proportion = coldStartProportion();
-        //jiraInfoRetrieve.assignTicketToRelease(releaseList,allTickets);
 
         //se non ho sufficienti ticket in tutto il progetto posso settare il proportion di tutte le release al valore
         //ottenuto tramite cold start
