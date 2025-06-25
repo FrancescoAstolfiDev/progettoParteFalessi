@@ -4,18 +4,17 @@ import org.eclipse.jgit.revwalk.RevCommit;
 
 import java.util.*;
 
-public class Release implements IRelease {
+public class Release {
 
 	private int id;
 	private String name;
 	private Date date;
 	private double currentProportion;
 
-	private List<Ticket> allReleaseTicket;
+
 	private List<RevCommit> allReleaseCommits;
 	private RevCommit lastCommitPreRelease;
 
-	private List<MethodInstance> releaseAllMethods;
 	private Map<String, ClassFile> classFileMap;
 
 	public Release(int id, String name, Date date) {
@@ -23,10 +22,18 @@ public class Release implements IRelease {
 		this.name = name;
 		this.date = date;
 		this.allReleaseCommits = new ArrayList<>();
-		this.releaseAllMethods = new ArrayList<>();
 		this.classFileMap = new HashMap<>();
 		this.lastCommitPreRelease = null;
-		this.allReleaseTicket = new ArrayList<>();
+	}
+	public static int getId(String releaseName, List<Release> releaseList){
+		int releaseId=-1;
+		for(Release r:releaseList){
+			if(r.getName().equals(releaseName)){
+				releaseId=r.getId();
+				break;
+			}
+		}
+		return releaseId;
 	}
 
 	public int getId() {
@@ -53,12 +60,14 @@ public class Release implements IRelease {
 		this.date = date;
 	}
 
-	public void setAllReleaseTicket(List<Ticket> tickets) {
-		this.allReleaseTicket = tickets;
-	}
-
-	public List<Ticket> getAllReleaseTicket() {
-		return this.allReleaseTicket;
+	public List<Ticket> getAllReleaseTicket( List<Ticket> allTicket) {
+			List<Ticket> releaseTickets = new ArrayList<>();
+			for (Ticket ticket: allTicket){
+				if (ticket.getFv().getId() <= id ){
+					releaseTickets.add(ticket);
+				}
+			}
+			return releaseTickets;
 	}
 
 	public double getCurrentProportion() {
@@ -87,72 +96,6 @@ public class Release implements IRelease {
 	}
 
 
-
-	public RevCommit getLastCommit() {
-		if (!this.allReleaseCommits.isEmpty()) {
-			return this.allReleaseCommits.get(this.allReleaseCommits.size() - 1);
-		}
-		return null;
-	}
-
-	public void addMethod(MethodInstance method) {
-		this.releaseAllMethods.add(method);
-	}
-
-	public List<MethodInstance> getReleaseAllMethods() {
-		return this.releaseAllMethods;
-	}
-
-	public void setReleaseAllMethods(List<MethodInstance> allMethods) {
-		this.releaseAllMethods = allMethods;
-	}
-
-	public MethodInstance getMethodByPathAndName(String classPath, String methodName) {
-		for (MethodInstance method : releaseAllMethods) {
-			if (method.getFilePath().equals(classPath) && method.getMethodName().equals(methodName)) {
-				return method;
-			}
-		}
-		return null;
-	}
-
-
-	public MethodInstance getMethodByIdentifier(String identifier) {
-		for (MethodInstance method : releaseAllMethods) {
-			if (method.getFullSignature().equals(identifier)) {
-				return method;
-			}
-		}
-		return null;
-	}
-
-	public MethodInstance getMethodBySignature(String fullSignature) {
-		for (MethodInstance method : releaseAllMethods) {
-			if (method.getFullSignature().equals(fullSignature)) {
-				return method;
-			}
-		}
-		return null;
-	}
-
-	public MethodInstance getMethodByPath(String file) {
-		for (MethodInstance method : releaseAllMethods) {
-			if (method.getFilePath().equals(file)) {
-				return method;
-			}
-		}
-		return null;
-	}
-
-	public List<MethodInstance> getMethodInstancesByFilePath(String path) {
-		List<MethodInstance> result = new ArrayList<>();
-		for (MethodInstance method : releaseAllMethods) {
-			if (method.getFilePath().equals(path)) {
-				result.add(method);
-			}
-		}
-		return result;
-	}
 
 	public void addClassFile(ClassFile classFile) {
 

@@ -733,6 +733,8 @@ public class MetricsCalculator {
     }
 
 
+
+
     private void assignBuggyness(ReleaseData data) {
         if (!resultsChanged) return;
         resultsChanged = false;
@@ -752,7 +754,7 @@ public class MetricsCalculator {
         Map<Integer, Map<String, List<MethodInstance>>> methodsByRelease = new HashMap<>();
         data.releaseResults.values().forEach(method -> {
             if (method.getRelease() != null) {
-                int releaseId = method.getRelease().getId();
+                Integer releaseId=Release.getId(method.getMethodName(),releaseList);
                 String methodKey = method.getFilePath() + "#" + method.getMethodName();
                 methodsByRelease
                         .computeIfAbsent(releaseId, k -> new HashMap<>())
@@ -763,7 +765,7 @@ public class MetricsCalculator {
 
         // Process the tickets
         for (Ticket ticket : data.releaseTickets) {
-            IRelease checkInj = ticket.getIv() != null ? ticket.getIv() : ticket.getCalculatedIv();
+            Release checkInj = ticket.getIv() != null ? ticket.getIv() : ticket.getCalculatedIv();
             if (checkInj == null ) {
                 continue;
             }
@@ -775,8 +777,8 @@ public class MetricsCalculator {
 
     private void processTicketChanges(Ticket ticket,
                                       Map<Integer, Map<String, List<MethodInstance>>> methodsByRelease) {
-        IRelease injected = ticket.getIv() != null ? ticket.getIv() : ticket.getCalculatedIv();
-        IRelease fixed = ticket.getFv();
+        Release injected = ticket.getIv() != null ? ticket.getIv() : ticket.getCalculatedIv();
+        Release fixed = ticket.getFv();
 
         for (RevCommit commit : getSortedCommit(ticket.getAssociatedCommits())) {
             String commitHash = commit.getId().getName();

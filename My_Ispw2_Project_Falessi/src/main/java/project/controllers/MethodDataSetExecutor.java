@@ -70,7 +70,7 @@ public class MethodDataSetExecutor {
         }
 
         double proportion = coldStartProportion();
-        jiraInfoRetrieve.assignTicketToRelease(releaseList,allTickets);
+        //jiraInfoRetrieve.assignTicketToRelease(releaseList,allTickets);
 
         //se non ho sufficienti ticket in tutto il progetto posso settare il proportion di tutte le release al valore
         //ottenuto tramite cold start
@@ -82,8 +82,7 @@ public class MethodDataSetExecutor {
         //scorro tutte le release e assegno i vari valori di proportion
         else {
             for (Release release:releaseList){
-                List<Ticket> ticketsWithAv = getTicketsWithAv(release.getAllReleaseTicket());
-
+                List<Ticket> ticketsWithAv = getTicketsWithAv(release.getAllReleaseTicket(allTickets));
                 if (ticketsWithAv.size() < 5){
                     release.setCurrentProportion(proportion);
                 }
@@ -105,13 +104,13 @@ public class MethodDataSetExecutor {
         for (int i = 1; i < avaiableTrainingRelease.size()-1; i++) {
             // reverse calculation for have first all the commit processed and elaborated
             Release release= avaiableTrainingRelease.get(i);
-            writeReleaseFile(release, releaseList, DataSetType.TRAINING, false);
+            writeReleaseFile(release, releaseList, DataSetType.TRAINING, false,allTickets);
         }
         for (int i=2 ; i< avaiableTrainingRelease.size();i++){
             Release release=avaiableTrainingRelease.get(i);
-            writeReleaseFile(release, releaseList, DataSetType.TEST,false);
+            writeReleaseFile(release, releaseList, DataSetType.TEST,false,allTickets);
             if(i==avaiableTrainingRelease.size()-1){
-               writeReleaseFile(release, releaseList, DataSetType.TEST,true);
+               writeReleaseFile(release, releaseList, DataSetType.TEST,true,allTickets);
             }
         }
 
@@ -138,30 +137,30 @@ public class MethodDataSetExecutor {
 
 
 
-    public List<Ticket> getAddTicket(List<Release> releaseList){
+    public List<Ticket> getAddTicket(List<Release> releaseList,List<Ticket> allTickets){
         List<Ticket> releaseTickets;
-        List<Ticket> allTickets = new ArrayList<>();
+        List<Ticket> addTickets = new ArrayList<>();
         for(int i=0; i<releaseList.size(); i++){
             Release release = releaseList.get(i);
-            releaseTickets = new ArrayList<>(release.getAllReleaseTicket());
-            allTickets.addAll(releaseTickets);
+            releaseTickets = new ArrayList<>(release.getAllReleaseTicket(allTickets));
+            addTickets.addAll(releaseTickets);
         }
-        adjustIvTickets(allTickets, releaseList.get(releaseList.size()-1).getCurrentProportion(), releaseList);
-        return allTickets;
+        adjustIvTickets(addTickets, releaseList.get(releaseList.size()-1).getCurrentProportion(), releaseList);
+        return addTickets;
     }
 
 
 
-    private void writeReleaseFile(Release curRelease, List<Release> releaseList, DataSetType datasetTipe, boolean isLastRelease) {
+    private void writeReleaseFile(Release curRelease, List<Release> releaseList, DataSetType datasetTipe, boolean isLastRelease , List<Ticket> allTickets) {
         this.currentProcessingRelease = curRelease;
         List<Ticket> tickets= new ArrayList<>();
         for(int i=0;i<curRelease.getId();i++){
             Release release=releaseList.get(i);
-            tickets.addAll(release.getAllReleaseTicket());
+            tickets.addAll(release.getAllReleaseTicket(allTickets));
         }
         adjustIvTickets(tickets, curRelease.getCurrentProportion(), releaseList);
         if(isLastRelease){
-            tickets.addAll(getAddTicket(releaseList));
+            tickets.addAll(getAddTicket(releaseList,allTickets));
         }
         try {
             writeFile(releaseList.subList(0,curRelease.getId()), curRelease, tickets, datasetTipe);

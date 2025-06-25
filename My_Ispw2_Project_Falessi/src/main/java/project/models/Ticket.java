@@ -9,13 +9,13 @@ import java.util.List;
 public class Ticket {
 
 	private String key;
-	private IRelease iv;
-	private IRelease ov;
-	private IRelease fv;
-	private IRelease calculatedIv;
+	private Release iv;
+	private Release ov;
+	private Release fv;
+	private Release calculatedIv;
 	private List<RevCommit> associatedCommits;
 
-	public Ticket(String key, IRelease ov, IRelease fv, IRelease av) {
+	public Ticket(String key, Release ov, Release fv, Release av) {
 		this.key = key;
 		this.iv = av;
 		this.ov = ov;
@@ -24,12 +24,12 @@ public class Ticket {
 
 	}
 
-	public void setCalculatedIv(IRelease calculatedIv) {
+	public void setCalculatedIv(Release calculatedIv) {
 
 		this.calculatedIv = calculatedIv;
 
 	}
-	public IRelease getCalculatedIv(){
+	public Release getCalculatedIv(){
 
 		return this.calculatedIv;
 
@@ -61,7 +61,7 @@ public class Ticket {
 	/**
 	 * @return the iv
 	 */
-	public IRelease getIv() {
+	public Release getIv() {
 		if(iv != null){
 			return iv;
 		}
@@ -71,14 +71,14 @@ public class Ticket {
 	/**
 	 * @param iv the iv to set
 	 */
-	public void setIv(IRelease iv) {
+	public void setIv(Release iv) {
 		this.iv = iv;
 	}
 
 	/**
 	 * @return the ov
 	 */
-	public IRelease getOv() {
+	public Release getOv() {
 		if(ov != null){
 			return ov;
 		}
@@ -87,14 +87,14 @@ public class Ticket {
 	/**
 	 * @param ov the ov to set
 	 */
-	public void setOv(IRelease ov) {
+	public void setOv(Release ov) {
 		this.ov = ov;
 	}
 
 	/**
 	 * @return the fv
 	 */
-	public IRelease getFv() {
+	public Release getFv() {
 		if(fv != null){
 			return fv;
 		}
@@ -104,7 +104,7 @@ public class Ticket {
 	/**
 	 * @param fv the fv to set
 	 */
-	public void setFv(IRelease fv) {
+	public void setFv(Release fv) {
 		this.fv = fv;
 	}
 	@Override

@@ -74,12 +74,12 @@ public class ClassWriter {
                         "age","nAuth", "nr", "nSmell","buggy"));
                 writer.newLine();
                 for (MethodInstance result : results.values()) {
-                    if(result.getAge()<0 || result.getRelease()==null || result.getRelease().getId()>=currRelease.getId() ){
+                    if(result.getAge()<0 || result.getRelease()==null ) {
                         continue;
                     }
 
                     String csvRow = String.join(",",
-                            escapeCsv(result.getRelease().getName()),
+                            escapeCsv(result.getRelease()),
                             escapeCsv(result.getMethodName()),
                             escapeCsv(String.valueOf(result.getFilePath())),
 

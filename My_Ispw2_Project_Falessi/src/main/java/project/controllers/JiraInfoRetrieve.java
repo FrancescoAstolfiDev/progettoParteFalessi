@@ -252,24 +252,6 @@ public class JiraInfoRetrieve {
     }
 
 
-
-
-    //assegno ad ogni release tutti i ticket risolti entro la release stessa, ovvero le fv del ticket deve essere minore
-    // o uguale alla release presa in considerazione dall'iterazione del for
-    public void assignTicketToRelease(List<Release> releaseList, List<Ticket> allTicket){
-        int len = releaseList.size()-1;
-        for (int i = len; i >= 0; i--){
-            int releaseId = releaseList.get(i).getId();
-            List<Ticket> releaseTickets = new ArrayList<>();
-            for (Ticket ticket: allTicket){
-                if (ticket.getFv().getId() <= releaseId){
-                    releaseTickets.add(ticket);
-                }
-            }
-            releaseList.get(i).setAllReleaseTicket(releaseTickets);
-        }
-    }
-
     public List<Ticket> correctTickets(List<Ticket> allTicket){
         return allTicket;
     }

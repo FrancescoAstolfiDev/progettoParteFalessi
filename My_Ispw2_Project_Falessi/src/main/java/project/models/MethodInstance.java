@@ -1,11 +1,10 @@
 package project.models;
 
 public class MethodInstance {
-    private IRelease release;
+    private String release;
     private String filePath;
     private String methodName;
-    private String signature;
-    private String fullSignature;
+
 
     // ck method metrics
     private int loc;
@@ -38,12 +37,7 @@ public class MethodInstance {
         return " sono nella method instance " + this.methodName + " con il path " + this.filePath + " e con gli smell  "+this.nSmells;
     }
 
-    public MethodInstance(String filePath, String methodName, String signature) {
-        this.filePath = filePath;
-        this.methodName = methodName;
-        this.signature = signature;
-        this.fullSignature = filePath + "#" + methodName + signature;
-    }
+
     /**
      * Crea una chiave univoca per il metodo utilizzando i metodi nativi di CK.
      *
@@ -52,7 +46,7 @@ public class MethodInstance {
      */
     public static String createMethodKey(MethodInstance method) {
         String releaseName= method.getRelease() !=null?
-                method.getRelease().getName():"0.0.0";
+                method.getRelease():"0.0.0";
         String filePath = method.getFilePath() != null ?
                 method.getFilePath() : "anonymous";
         String methodName = method.getMethodName() != null ?
@@ -61,12 +55,12 @@ public class MethodInstance {
         return releaseName + "#" + filePath + "#"  + methodName;
     }
 
-    public IRelease getRelease() {
+    public String getRelease() {
         return release;
     }
 
-    public void setRelease(IRelease release) {
-        this.release = release;
+    public void setRelease(Release release) {
+        this.release = release.getName();
     }
 
     public String getFilePath() {
@@ -85,21 +79,6 @@ public class MethodInstance {
         this.methodName = methodName;
     }
 
-    public String getSignature() {
-        return signature;
-    }
-
-    public void setSignature(String signature) {
-        this.signature = signature;
-    }
-
-    public String getFullSignature() {
-        return fullSignature;
-    }
-
-    public void setFullSignature(String fullSignature) {
-        this.fullSignature = fullSignature;
-    }
 
     public int getLoc() {
         return loc;

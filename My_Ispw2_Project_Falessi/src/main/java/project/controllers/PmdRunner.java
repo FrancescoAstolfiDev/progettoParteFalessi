@@ -79,8 +79,8 @@ public class PmdRunner {
 
         // Estrae solo il nome della classe senza package/modulo
         int lastDot = cleanName.lastIndexOf('.');
-        return  (lastDot != -1) ? cleanName.substring(lastDot + 1) : cleanName;
-
+        String classNameOnly = (lastDot != -1) ? cleanName.substring(lastDot + 1) : cleanName;
+        return classNameOnly;
     }
 
 
