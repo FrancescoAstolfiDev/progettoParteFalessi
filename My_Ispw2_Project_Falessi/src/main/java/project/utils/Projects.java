@@ -62,6 +62,7 @@ public enum Projects implements EntryProject{
     }
 
     @Override
+    @SuppressWarnings("squid:S3066")
     public void setMethods(Map<String, MethodInstance> methods) {
         entryProject.setMethods(methods);
     }

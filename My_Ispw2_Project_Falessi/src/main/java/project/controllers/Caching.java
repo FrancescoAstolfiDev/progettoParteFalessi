@@ -144,129 +144,183 @@ public class Caching {
      * @param commitHashes Set of commit hashes to load, or null to load all commits
      * @param projectName The name of the project
      */
-    public static void loadCommitCache(Map<String, Map<String, MethodInstance>> resultCommitsMethods, Set<String> commitHashes, String projectName) {
+
+    public static void loadCommitCache(Map<String, Map<String, MethodInstance>> resultCommitsMethods,
+                                       Set<String> commitHashes,
+                                       String projectName) {
         Path cacheFilePath = getCacheFilePath(projectName);
 
-        if (!Files.exists(cacheFilePath)) {
-            LOGGER.error("{} {}" ,NO_COMMIT_CACHE_FOUND , cacheFilePath);
-            // Create a new empty cache file
-            try {
-                // Ensure the directory exists
-                Files.createDirectories(cacheFilePath.getParent());
-                // Create an empty JSON object and write it to the file
-                try (java.io.BufferedWriter writer = Files.newBufferedWriter(cacheFilePath)) {
-                    writer.write("{}");
-                }
-                LOGGER.info("Created new empty cache file for project {}: {}", projectName, cacheFilePath);
-            } catch (IOException e) {
-                LOGGER.error("Error creating new cache file for project {}: {}", projectName, e.getMessage());
-            }
+        if (!handleCacheFileExistence(cacheFilePath, projectName)) {
             return;
         }
 
         long startTime = System.currentTimeMillis();
         try {
-            // Use a buffered input stream for more efficient reading
-            try (java.io.BufferedInputStream bis = new java.io.BufferedInputStream(
-                    Files.newInputStream(cacheFilePath), 8192)) {
-
-                // Create a JSON parser that doesn't load the entire file into memory
-                org.json.JSONTokener tokener = new org.json.JSONTokener(bis);
-
-                // Check if it's a JSON object
-                if (tokener.nextClean() != '{') {
-                    throw new JSONException("Expected a JSON object");
-                }
-
-                // Reset the tokener
-                tokener.back();
-
-                // Parse the JSON object
-                JSONObject cache = new JSONObject(tokener);
-
-                int commitCount = 0;
-                int methodCount = 0;
-                int skippedCommits = 0;
-
-                // For each commit in the cache
-                for (String commitHash : cache.keySet()) {
-                    // Skip commits not in the requested set (if filtering is enabled)
-                    if (commitHashes != null && !commitHashes.contains(commitHash)) {
-                        skippedCommits++;
-                        continue;
-                    }
-
-                    JSONObject commitJson = cache.getJSONObject(commitHash);
-                    Map<String, MethodInstance> methodMap = new HashMap<>();
-
-                    // For each method in the commit
-                    for (String methodKey : commitJson.keySet()) {
-                        JSONObject methodJson = commitJson.getJSONObject(methodKey);
-
-                        // Create a method instance with optimized property setting
-                        MethodInstance method = new MethodInstance();
-                        method.setClassPath(methodJson.optString("filePath", ""));
-                        method.setMethodName(methodJson.optString("methodName", ""));
-                        method.setLoc(methodJson.optInt("loc", 0));
-                        method.setWmc(methodJson.optInt("wmc", 0));
-                        method.setQtyAssigment(methodJson.optInt("qtyAssigment", 0));
-                        method.setQtyMathOperations(methodJson.optInt("qtyMathOperations", 0));
-                        method.setQtyTryCatch(methodJson.optInt("qtyTryCatch", 0));
-                        method.setQtyReturn(methodJson.optInt("qtyReturn", 0));
-                        method.setFanin(methodJson.optInt("fanin", 0));
-                        method.setFanout(methodJson.optInt("fanout", 0));
-                        method.setAge(methodJson.optInt("age", 0));
-                        method.setnAuth(methodJson.optInt("nAuth", 0));
-                        method.setNr(methodJson.optInt("nr", 0));
-                        method.setnSmells(methodJson.optInt("nSmells", 0));
-                        // Always set buggy to false when loading from cache
-                        // This ensures compatibility with the new cache format that doesn't store buggyness
-                        method.setBuggy(false);
-
-                        // Add the method to the map
-                        methodMap.put(methodKey, method);
-                        methodCount++;
-                    }
-
-                    // Add the commit to the cache
-                    resultCommitsMethods.put(commitHash, methodMap);
-                    commitCount++;
-
-                    // Log progress periodically to avoid console spam
-                    if (commitCount % 100 == 0) {
-                        LOGGER.info("Loaded {}  commits so far...", commitCount);
-                    }
-                }
-
-                long endTime = System.currentTimeMillis();
-                String filterMsg = commitHashes != null ?
-                        " (filtered " + skippedCommits + " commits)" : "";
-
-                LOGGER.info("Loaded commit cache for project {} from {} with {} commits {} and {} methods in {} ms " , projectName,  cacheFilePath,
-                        commitCount,  filterMsg ,
-                        methodCount, (endTime - startTime));
-            }
+            JSONObject cache = loadJsonCache(cacheFilePath);
+            processCommits(cache, resultCommitsMethods, commitHashes, projectName, startTime);
         } catch (IOException | JSONException e) {
-            LOGGER.error("Error loading commit cache for project {} : {} " ,  projectName , e.getMessage());
-
-            // If the cache file exists but is invalid, recreate it
-            if (e instanceof JSONException && e.getMessage().contains("Expected a JSON object")) {
-                try {
-                    // Delete the invalid cache file
-                    Files.delete(cacheFilePath);
-                    LOGGER.info("Deleted invalid cache file for project {}: {}", projectName, cacheFilePath);
-
-                    // Create a new empty cache file
-                    try (java.io.BufferedWriter writer = Files.newBufferedWriter(cacheFilePath)) {
-                        writer.write("{}");
-                    }
-                    LOGGER.info("Created new empty cache file for project {}: {}", projectName, cacheFilePath);
-                } catch (IOException ex) {
-                    LOGGER.error("Error recreating cache file for project {}: {}", projectName, ex.getMessage());
-                }
-            }
+            handleCacheError(e, cacheFilePath, projectName);
         }
     }
+
+    private static void handleCacheError(Exception e, Path cacheFilePath, String projectName) {
+        LOGGER.error("Error loading commit cache for project {} : {} ", projectName, e.getMessage());
+
+        if (e instanceof JSONException && e.getMessage().contains("Expected a JSON object")) {
+            recreateInvalidCache(cacheFilePath, projectName);
+        }
+    }
+    private static void recreateInvalidCache(Path cacheFilePath, String projectName) {
+        try {
+            Files.delete(cacheFilePath);
+            LOGGER.info("Deleted invalid cache file for project {}: {}", projectName, cacheFilePath);
+            createEmptyCacheFile(cacheFilePath, projectName);
+        } catch (IOException ex) {
+            LOGGER.error("Error recreating cache file for project {}: {}", projectName, ex.getMessage());
+        }
+    }
+
+
+
+    private static boolean handleCacheFileExistence(Path cacheFilePath, String projectName) {
+        if (Files.exists(cacheFilePath)) {
+            return true;
+        }
+
+        LOGGER.error("{} {}", NO_COMMIT_CACHE_FOUND, cacheFilePath);
+        createEmptyCacheFile(cacheFilePath, projectName);
+        return false;
+    }
+
+    private static void createEmptyCacheFile(Path cacheFilePath, String projectName) {
+        try {
+            Files.createDirectories(cacheFilePath.getParent());
+            try (java.io.BufferedWriter writer = Files.newBufferedWriter(cacheFilePath)) {
+                writer.write("{}");
+            }
+            LOGGER.info("Created new empty cache file for project {}: {}", projectName, cacheFilePath);
+        } catch (IOException e) {
+            LOGGER.error("Error creating new cache file for project {}: {}", projectName, e.getMessage());
+        }
+    }
+
+    private static JSONObject loadJsonCache(Path cacheFilePath) throws IOException, JSONException {
+        try (java.io.BufferedInputStream bis = new java.io.BufferedInputStream(
+                Files.newInputStream(cacheFilePath), 8192)) {
+            org.json.JSONTokener tokener = new org.json.JSONTokener(bis);
+            validateJsonStructure(tokener);
+            return new JSONObject(tokener);
+        }
+    }
+
+    private static void validateJsonStructure(org.json.JSONTokener tokener) throws JSONException {
+        if (tokener.nextClean() != '{') {
+            throw new JSONException("Expected a JSON object");
+        }
+        tokener.back();
+    }
+
+    private static void processCommits(JSONObject cache,
+                                       Map<String, Map<String, MethodInstance>> resultCommitsMethods,
+                                       Set<String> commitHashes,
+                                       String projectName,
+                                       long startTime) {
+        CommitProcessingStats stats = new CommitProcessingStats();
+
+        for (String commitHash : cache.keySet()) {
+            if (shouldSkipCommit(commitHash, commitHashes)) {
+                stats.incrementSkippedCommits();
+                continue;
+            }
+
+            processCommit(cache, commitHash, resultCommitsMethods, stats);
+            logProgressIfNeeded(stats.getCommitCount());
+        }
+
+        logFinalStats(stats, projectName, startTime, commitHashes);
+    }
+
+    private static void logFinalStats(CommitProcessingStats stats, String projectName, long startTime, Set<String> commitHashes) {
+        long endTime = System.currentTimeMillis();
+        String filterMsg = createFilterMessage(stats, commitHashes);
+
+        LOGGER.info("Loaded commit cache for project {} with {} commits{} and {} methods in {} ms",
+                projectName,
+                stats.getCommitCount(),
+                filterMsg,
+                stats.getMethodCount(),
+                (endTime - startTime));
+    }
+
+    private static String createFilterMessage(CommitProcessingStats stats, Set<String> commitHashes) {
+        if (commitHashes != null) {
+            return String.format(" (filtered %d commits)", stats.getSkippedCommits());
+        }
+        return "";
+    }
+
+
+    private static void logProgressIfNeeded(int commitCount) {
+        if (commitCount % 100 == 0) {
+            LOGGER.info("Loaded {} commits so far...", commitCount);
+        }
+    }
+
+
+    private static boolean shouldSkipCommit(String commitHash, Set<String> commitHashes) {
+        return commitHashes != null && !commitHashes.contains(commitHash);
+    }
+
+    private static void processCommit(JSONObject cache,
+                                      String commitHash,
+                                      Map<String, Map<String, MethodInstance>> resultCommitsMethods,
+                                      CommitProcessingStats stats) {
+        JSONObject commitJson = cache.getJSONObject(commitHash);
+        Map<String, MethodInstance> methodMap = new HashMap<>();
+
+        for (String methodKey : commitJson.keySet()) {
+            JSONObject methodJson = commitJson.getJSONObject(methodKey);
+            methodMap.put(methodKey, createMethodInstance(methodJson));
+            stats.incrementMethodCount();
+        }
+
+        resultCommitsMethods.put(commitHash, methodMap);
+        stats.incrementCommitCount();
+    }
+
+    private static MethodInstance createMethodInstance(JSONObject methodJson) {
+        MethodInstance method = new MethodInstance();
+        method.setClassPath(methodJson.optString("filePath", ""));
+        method.setMethodName(methodJson.optString("methodName", ""));
+        method.setLoc(methodJson.optInt("loc", 0));
+        method.setWmc(methodJson.optInt("wmc", 0));
+        method.setQtyAssigment(methodJson.optInt("qtyAssigment", 0));
+        method.setQtyMathOperations(methodJson.optInt("qtyMathOperations", 0));
+        method.setQtyTryCatch(methodJson.optInt("qtyTryCatch", 0));
+        method.setQtyReturn(methodJson.optInt("qtyReturn", 0));
+        method.setFanin(methodJson.optInt("fanin", 0));
+        method.setFanout(methodJson.optInt("fanout", 0));
+        method.setAge(methodJson.optInt("age", 0));
+        method.setnAuth(methodJson.optInt("nAuth", 0));
+        method.setNr(methodJson.optInt("nr", 0));
+        method.setnSmells(methodJson.optInt("nSmells", 0));
+        method.setBuggy(false);
+        return method;
+    }
+
+    private static class CommitProcessingStats {
+        private int commitCount = 0;
+        private int methodCount = 0;
+        private int skippedCommits = 0;
+
+        public void incrementCommitCount() { commitCount++; }
+        public void incrementMethodCount() { methodCount++; }
+        public void incrementSkippedCommits() { skippedCommits++; }
+        public int getCommitCount() { return commitCount; }
+        public int getMethodCount() { return methodCount; }
+        public int getSkippedCommits() { return skippedCommits; }
+    }
+
 
 
     /**
