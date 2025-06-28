@@ -1,0 +1,18 @@
+
+=== Feature Selection Results for Release 4 ===
+Selected Features (3):
+  - release
+  - loc
+  - age
+Discarded Features (10):
+  - wmc
+  - assignmentsQty
+  - mathOperationsQty
+  - qtyTryCatch
+  - qtyReturn
+  - fanin
+  - fanout
+  - nAuth
+  - nr
+  - nSmell
+

@@ -1,0 +1,18 @@
+
+=== Feature Selection Results for Release 4 ===
+Feature Selection ID: FS_R4_1
+Selected Features (2):
+  - loc
+  - age
+Discarded Features (10):
+  - wmc
+  - assignmentsQty
+  - mathOperationsQty
+  - qtyTryCatch
+  - qtyReturn
+  - fanin
+  - fanout
+  - nAuth
+  - nr
+  - nSmell
+
