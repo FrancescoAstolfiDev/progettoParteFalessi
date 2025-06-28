@@ -1,12 +1,10 @@
 
 === Feature Selection Results for Release 11 ===
-Selected Features (5):
-  - release
-  - loc
+Selected Features (2):
   - fanin
   - age
-  - nr
-Discarded Features (8):
+Discarded Features (10):
+  - loc
   - wmc
   - assignmentsQty
   - mathOperationsQty
@@ -14,5 +12,6 @@ Discarded Features (8):
   - qtyReturn
   - fanout
   - nAuth
+  - nr
   - nSmell
 

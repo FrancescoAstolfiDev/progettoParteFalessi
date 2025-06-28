@@ -1,12 +1,11 @@
 
 === Feature Selection Results for Release 9 ===
-Selected Features (5):
-  - release
-  - loc
+Selected Features (3):
   - fanin
   - age
   - nAuth
-Discarded Features (8):
+Discarded Features (9):
+  - loc
   - wmc
   - assignmentsQty
   - mathOperationsQty

@@ -1,7 +1,7 @@
 package project.models;
 
 public class ResultsHolder {
-	
+
 	private int numIteration;
 	private String classifier;
 	private boolean featureSelection;
@@ -11,7 +11,8 @@ public class ResultsHolder {
 	private double recall;
 	private double auc;
 	private double kappa;
-	
+	private String featureSelectionId;
+
 	public ResultsHolder(int index, String classifier, boolean featureSelection, boolean sampling, boolean costSensitive) {
 		this.numIteration = index;
 		this.classifier = classifier;
@@ -23,7 +24,21 @@ public class ResultsHolder {
 		this.recall = 0;
 		this.auc = 0;
 		this.kappa = 0;
-		
+		this.featureSelectionId = "";
+	}
+
+	public ResultsHolder(int index, String classifier, boolean featureSelection, boolean sampling, boolean costSensitive, String featureSelectionId) {
+		this.numIteration = index;
+		this.classifier = classifier;
+		this.featureSelection = featureSelection;
+		this.sampling = sampling;
+		this.costSensitive = costSensitive;
+		this.featureSelectionId = featureSelectionId;
+
+		this.precision = 0;
+		this.recall = 0;
+		this.auc = 0;
+		this.kappa = 0;
 	}
 
 	/**
@@ -74,7 +89,7 @@ public class ResultsHolder {
 	public void setSampling(boolean sampling) {
 		this.sampling = sampling;
 	}
-	
+
 	/**
 	 * @return the costSensitive
 	 */
@@ -136,6 +151,20 @@ public class ResultsHolder {
 	 */
 	public void setKappa(double kappa) {
 		this.kappa = kappa;
+	}
+
+	/**
+	 * @return the featureSelectionId
+	 */
+	public String getFeatureSelectionId() {
+		return featureSelectionId;
+	}
+
+	/**
+	 * @param featureSelectionId the featureSelectionId to set
+	 */
+	public void setFeatureSelectionId(String featureSelectionId) {
+		this.featureSelectionId = featureSelectionId;
 	}
 
 }

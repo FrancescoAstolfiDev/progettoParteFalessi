@@ -5,8 +5,7 @@ Selected Features (4):
   - age
   - nAuth
   - nr
-Discarded Features (9):
-  - release
+Discarded Features (8):
   - loc
   - wmc
   - assignmentsQty

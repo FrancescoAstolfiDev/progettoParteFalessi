@@ -1,15 +1,14 @@
 
 === Feature Selection Results for Release 12 ===
-Selected Features (5):
-  - release
-  - loc
+Selected Features (4):
+  - mathOperationsQty
   - fanin
   - age
   - nAuth
 Discarded Features (8):
+  - loc
   - wmc
   - assignmentsQty
-  - mathOperationsQty
   - qtyTryCatch
   - qtyReturn
   - fanout

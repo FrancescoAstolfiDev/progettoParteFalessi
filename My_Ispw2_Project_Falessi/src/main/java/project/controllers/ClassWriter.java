@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import project.models.DataSetType;
 import project.models.MethodInstance;
 import project.models.Release;
-import project.utils.ConstantsWindowsFormat;
+import project.statefull.ConstantsWindowsFormat;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -103,7 +103,7 @@ public class ClassWriter {
                     writer.newLine();
                 }
 
-                LOGGER.info("Successfully wrote {} results to {}", results.size() , path);
+                LOGGER.info("Successfully wrote {} results to {}\n\n", results.size() , path);
             }
         } catch (IOException e) {
             LOGGER.error("Error writing partial results to file: {}" , e.getMessage());

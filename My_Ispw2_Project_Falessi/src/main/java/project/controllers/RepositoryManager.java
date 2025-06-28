@@ -12,7 +12,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import project.utils.ConstantSize;
+import project.statefull.ConstantSize;
 import project.utils.CostumException;
 
 import java.io.File;

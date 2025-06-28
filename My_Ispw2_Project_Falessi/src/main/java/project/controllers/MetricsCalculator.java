@@ -6,6 +6,7 @@ import com.github.mauricioaniche.ck.CKClassResult;
 import com.github.mauricioaniche.ck.CKMethodResult;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.slf4j.LoggerFactory;
+import project.utils.Projects;
 import project.models.*;
 
 
@@ -17,8 +18,8 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import project.utils.ConstantSize;
-import project.utils.ConstantsWindowsFormat;
+import project.statefull.ConstantSize;
+import project.statefull.ConstantsWindowsFormat;
 
 import org.slf4j.Logger;
 
@@ -128,7 +129,7 @@ public class MetricsCalculator {
         for(Release release: relevantReleases){
             for( CommitCheck commitCheck: referenceMap.get(release)){
                 String commitHash = commitCheck.commit.getId().getName();
-                releaseData.commitsByHash.put(commitHash, commitCheck.commit);
+                releaseData.commitsByHash.put(commitHash, commitCheck.commit); // contains all the commits to process
                 if(commitCheck.methods==null){                  // No commit from cache i have to process it
                     releaseData.commitHashesToProcess.add(commitHash);
                     continue;
@@ -356,7 +357,8 @@ public class MetricsCalculator {
                     remainingCommits++;
                 }
             }
-            LOGGER.info("\n\n  Thread {} in progress... commits analyzed {}  commits to process {}) \n\n",
+            LOGGER.info("\n\n  Release {} Thread {} in progress... commits analyzed {}  commits to process {}) \n\n",
+                    releaseData.release.getName(),
                     log,
                     processedCommits,
                     remainingCommits);
@@ -396,10 +398,8 @@ public class MetricsCalculator {
         data.commitsAnalyzed = new HashMap<>();
         data.commitHashesToProcess = new HashSet<>();
         data.commitsByHash = new HashMap<>();
-
         getCommitsInCache(data);
         int cachedCommitsSize = data.releaseCommits.size() - data.commitHashesToProcess.size();
-
         LOGGER.info("Found {} commits in cache, need to process {} commits",
                 cachedCommitsSize,
                 data.commitHashesToProcess.size());
@@ -464,45 +464,86 @@ public class MetricsCalculator {
 
 
 
-    public  void calculateAll(List<Release> releaseList) {
+    public void calculateAll(List<Release> releaseList) {
         LOGGER.info("processing class metrics");
-        RevCommit veryFirstCommit = null;
         this.releaseList = releaseList;
-        int len = releaseList.size();
-        for(int i = 0; i < len; i++){
-            Release currRelease = releaseList.get(i);
 
-            List<ClassFile> classFiles = currRelease.getReleaseAllClass();
+        processReleases(releaseList);
 
-            List<RevCommit> revCommitList = currRelease.getAllReleaseCommits();
-            RevCommit firstCommit = revCommitList.get(0);
-
-            for(RevCommit commit:revCommitList){
-                if(veryFirstCommit == null){
-                    veryFirstCommit = commit;
-                }
-
-                List<String> modifiedFiles = gitHubInfoRetrieve.getDifference(commit,false);
-                List<String> addedFiles = gitHubInfoRetrieve.getDifference(commit,true);
-                String authorName = commit.getAuthorIdent().getName();
-                if(!modifiedFiles.isEmpty() && i == 0) {
-                    updateNr(modifiedFiles, currRelease);
-                    calculateDateOfCreation(currRelease,currRelease, Date.from(commit.getCommitterIdent().getWhenAsInstant()),addedFiles);
-                }
-                else if(!modifiedFiles.isEmpty()){
-                    updateNr(modifiedFiles, currRelease);
-                    calculateDateOfCreation(currRelease,releaseList.get(i-1),Date.from(commit.getCommitterIdent().getWhenAsInstant()),addedFiles);
-                }
-                updateNAuth(modifiedFiles,currRelease,authorName);
-            }
-
-            creationDateSetter(classFiles,firstCommit);
-
-
-
-        }
         calculateAge(releaseList);
         LOGGER.info("end of processing class metrics");
+    }
+
+    private void processReleases(List<Release> releaseList) {
+        RevCommit veryFirstCommit = null;
+        int len = releaseList.size();
+
+        for(int i = 0; i < len; i++) {
+            Release currRelease = releaseList.get(i);
+
+            copyPreviousReleaseRevisions(i, currRelease, releaseList);
+            processCommitsForRelease(i, currRelease, veryFirstCommit);
+        }
+    }
+
+    private void copyPreviousReleaseRevisions(int currentIndex, Release currentRelease, List<Release> releaseList) {
+        if (currentIndex > 0) {
+            Release prevRelease = releaseList.get(currentIndex - 1);
+            copyRevisions(currentRelease, prevRelease);
+        }
+    }
+
+    private void copyRevisions(Release currentRelease, Release previousRelease) {
+        for (ClassFile currFile : currentRelease.getReleaseAllClass()) {
+            ClassFile prevFile = previousRelease.getClassFileByPath(currFile.getPath());
+            copyFileRevisions(currFile, prevFile);
+        }
+    }
+
+    private void copyFileRevisions(ClassFile currentFile, ClassFile previousFile) {
+        if (previousFile != null) {
+            for (int j = 0; j < previousFile.getNR(); j++) {
+                currentFile.incrementNR();
+            }
+        }
+    }
+
+    private void processCommitsForRelease(int releaseIndex, Release currentRelease, RevCommit veryFirstCommit) {
+        List<RevCommit> revCommitList = currentRelease.getAllReleaseCommits();
+        RevCommit firstCommit = revCommitList.get(0);
+        sortCommits(revCommitList);
+
+        processCommits(releaseIndex, currentRelease, revCommitList, veryFirstCommit);
+        creationDateSetter(currentRelease.getReleaseAllClass(), firstCommit);
+    }
+
+    private void processCommits(int releaseIndex, Release currentRelease, List<RevCommit> commits, RevCommit veryFirstCommit) {
+        for(RevCommit commit : commits) {
+            if(veryFirstCommit == null) {
+                veryFirstCommit = commit;
+            }
+
+            processCommitChanges(releaseIndex, currentRelease, commit);
+        }
+    }
+
+    private void processCommitChanges(int releaseIndex, Release currentRelease, RevCommit commit) {
+        List<String> modifiedFiles = gitHubInfoRetrieve.getDifference(commit, false);
+        List<String> addedFiles = gitHubInfoRetrieve.getDifference(commit, true);
+        Date commitDate = Date.from(commit.getCommitterIdent().getWhenAsInstant());
+        String authorName = commit.getAuthorIdent().getName();
+
+        updateChangesForRelease(releaseIndex, currentRelease, modifiedFiles, addedFiles, commitDate);
+        updateNAuth(modifiedFiles, currentRelease, authorName);
+    }
+
+    private void updateChangesForRelease(int releaseIndex, Release currentRelease,
+                                         List<String> modifiedFiles, List<String> addedFiles, Date commitDate) {
+        if(!modifiedFiles.isEmpty()) {
+            updateNr(modifiedFiles, currentRelease);
+            Release previousRelease = (releaseIndex > 0) ? releaseList.get(releaseIndex - 1) : currentRelease;
+            calculateDateOfCreation(currentRelease, previousRelease, commitDate, addedFiles);
+        }
     }
 
     private void calculateAge(List<Release> releaseList){
@@ -640,8 +681,25 @@ public class MetricsCalculator {
         Map<String,MethodInstance> methodInstanceResults = new HashMap<>();
         List<MethodInstance> methodsChanged = fillMethodsBuggy(commit);
         CK ck = new CK();
+        // POX implementation by removing the methods in CKRESULT SO THAT
+        // THE PROCESS IS ONLY FOR THE CHANGED METHOD
         ck.calculate(sourcePath, classResult -> processClassResult(
                 classResult, release, sourcePath, methodsChanged, methodInstanceResults));
+        return methodInstanceResults;
+    }
+    private Map<String, MethodInstance> processRefactoredMethods(){
+        Map<String,MethodInstance> methodInstanceResults = new HashMap<>();
+        Projects project= Projects.fromString(projectName);
+        if(project.isRefactoredMethodsFilled()){
+            return project.getFilledRefactoredMethods();
+        }
+        List<MethodInstance> methodsChanged=project.getInitializedRefactoredMethods();
+        Path sourcePath=project.getRefactoredSourcePath();
+        Release release=project.getRefactoredRelease(releaseList);
+        CK ck = new CK();
+        ck.calculate(sourcePath, classResult -> processClassResult(
+                classResult, release, sourcePath, methodsChanged, methodInstanceResults));
+        project.setMethods(methodInstanceResults);
         return methodInstanceResults;
     }
 
@@ -652,37 +710,50 @@ public class MetricsCalculator {
             return;
         }
 
+
         ClassFile filledClass = release.findClassFileByApproxName(classResult.getClassName());
         if (filledClass == null) {
             return;
         }
 
-
-        classResult.getMethods().forEach(method ->{
-                    int nSmell=PmdRunner.collectCodeSmellMetricsClass(classResult.getClassName(),sourcePath.toString(),method.getStartLine(),method.getStartLine()+method.getLoc());
-                    processMethod(method, filledClass, changedMethod, release, methodInstanceResults, nSmell);
-                }
-        );
+        // Filter methods before processing to improve performance
+        classResult.getMethods().forEach(method -> {
+            // Check if this method is in the list of changed methods before collecting metrics
+            MethodInstance methodInstance = isMethodChanged(method, filledClass, changedMethod);
+            if (methodInstance!=null) {
+                // Only collect metrics for methods that have changed
+                int nSmell = PmdRunner.collectCodeSmellMetricsClass(classResult.getClassName(), sourcePath.toString(),
+                        method.getStartLine(), method.getStartLine() + method.getLoc());
+                processMethod(method, filledClass, methodInstance, release, methodInstanceResults, nSmell);
+            }
+        });
     }
 
-    private void processMethod(CKMethodResult method, ClassFile filledClass, List<MethodInstance> methodChanged,
-                               Release release, Map<String,MethodInstance> methodInstanceResults, int nSmell) {
-
-        boolean check=false;
-        String methodName="anonymous";
+    /**
+     * Checks if a method is in the list of changed methods
+     * @param method The method to check
+     * @param filledClass The class containing the method
+     * @param methodChanged The list of changed methods
+     * @return true if the method is in the list of changed methods, false otherwise
+     */
+    private MethodInstance isMethodChanged(CKMethodResult method, ClassFile filledClass, List<MethodInstance> methodChanged) {
+        String methodName = MethodInstance.cleanMethodName(method.getMethodName());
         for(MethodInstance methodInstance: methodChanged){
-            if(method.getMethodName().contains(methodInstance.getMethodName())
-                    && filledClass.getPath().equals(methodInstance.getClassPath())
+            if(methodName.equals(methodInstance.getMethodName())
+                    && filledClass.getPath().contains(methodInstance.getClassPath())
             ){
-                methodName=methodInstance.getMethodName();
-                check=true;
-                break;
+                return methodInstance;
             }
         }
-        if (!check) return;
+        return null;
+    }
 
+    private void processMethod(CKMethodResult method, ClassFile filledClass, MethodInstance filledMethod,
+                               Release release, Map<String,MethodInstance> methodInstanceResults, int nSmell) {
+        // We already checked if the method is in the list of changed methods in processClassResult
+        // This is just to get the method name
         try {
-            MethodInstance methodInstance = createMethodInstance(method, filledClass, methodName, release, nSmell);
+            MethodInstance methodInstance = createMethodInstance(method, filledClass, filledMethod, release, nSmell);
 
             methodInstanceResults.put(MethodInstance.createMethodKey(methodInstance), methodInstance);
         } catch (Exception e) {
@@ -692,11 +763,11 @@ public class MetricsCalculator {
     }
 
     private MethodInstance createMethodInstance(CKMethodResult method, ClassFile filledClass ,
-                                                String methodName, Release release, int nSmell) {
+                                                MethodInstance filledMethod, Release release, int nSmell) {
 
         MethodInstance methodInstance = new MethodInstance();
         methodInstance.setClassPath(filledClass.getPath());
-        methodInstance.setMethodName(methodName);
+        methodInstance.setMethodName(filledMethod.getMethodName());
         methodInstance.setReleaseName(release.getName());
 
         // Imposta le metriche
@@ -725,28 +796,42 @@ public class MetricsCalculator {
 
 
     Map<RevCommit, List<MethodInstance>> changedMethods=new ConcurrentHashMap<>();
-
-
-
     List<MethodInstance> fillMethodsBuggy(RevCommit commit) {
         return changedMethods.computeIfAbsent(commit, gitHubInfoRetrieve::getChangedMethodInstances);
     }
-
+    private void reorderReleaseResults(ReleaseData releaseData){
+        String methodKey;
+        for(String  commitHash: releaseData.commitsByHash.keySet()){ // iterate on only the commit for the actual release
+            Map<String,MethodInstance> methods=resultCommitsMethods.get(commitHash);
+            for(MethodInstance method: methods.values()){
+                methodKey=MethodInstance.createMethodKey(method);
+                if(releaseData.releaseResults.containsKey(methodKey) && releaseData.releaseResults.get(methodKey).getAge()<method.getAge()){
+                    releaseData.releaseResults.put(methodKey,method);
+                }
+            }
+        }
+    }
 
     private void assignBuggyness(ReleaseData data) {
+        reorderReleaseResults(data);
+        Projects project=Projects.fromString(projectName);
+        if(project.afterRefactoredRelease(data.release,releaseList)){
+            Map<String,MethodInstance> refactoredMethods=processRefactoredMethods();
+            data.releaseResults.putAll(refactoredMethods);
+        }
         if (!resultsChanged) return;
         resultsChanged = false;
 
         LOGGER.info("Initializing buggyness assignment");
-
         // Reset buggyness for all methods
         data.releaseResults.values().forEach(method -> method.setBuggy(false));
-
         // If there are no tickets, terminate
         if (data.releaseTickets == null || data.releaseTickets.isEmpty()) {
             LOGGER.info("No tickets found for this release");
             return;
         }
+
+
 
         // Create index for methods by release
         Map<Integer, Map<String, List<MethodInstance>>> methodsByRelease = new HashMap<>();

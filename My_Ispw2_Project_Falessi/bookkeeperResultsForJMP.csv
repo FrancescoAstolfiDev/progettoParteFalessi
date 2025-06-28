@@ -1,7 +1,0 @@
-Classifier,feature selection,sampling,cost sensitive,precision,recall,auc,kappa
-rf,false,false,false,0.0,0.0,0.0,0.0
-rf,false,false,true,0.0,0.0,0.0,0.0
-mlp,false,false,false,0.0,0.0,0.0,0.0
-mlp,false,false,true,0.0,0.0,0.0,0.0
-sgd,false,false,false,0.0,0.0,0.0,0.0
-sgd,false,false,true,0.0,0.0,0.0,0.0

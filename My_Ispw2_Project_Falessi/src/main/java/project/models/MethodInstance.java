@@ -65,6 +65,23 @@ public class MethodInstance {
         return releaseName;
     }
 
+    public static String cleanMethodName(String methodName) {
+        if (methodName == null || methodName.isEmpty()) {
+            return "";
+        }
+
+        // Trova l'indice del carattere '/'
+        int slashIndex = methodName.indexOf('/');
+
+        // Se trova il carattere '/', restituisce la parte prima di esso
+        if (slashIndex != -1) {
+            return methodName.substring(0, slashIndex);
+        }
+
+        // Se non trova il carattere '/', restituisce il nome originale
+        return methodName;
+    }
+
     public void setReleaseName(String releaseName) {
         this.releaseName = releaseName;
     }
@@ -78,6 +95,7 @@ public class MethodInstance {
     }
 
     public String getMethodName() {
+
         return methodName;
     }
 

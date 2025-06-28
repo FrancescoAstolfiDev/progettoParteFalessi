@@ -1,16 +1,15 @@
 
 === Feature Selection Results for Release 7 ===
 Selected Features (4):
-  - qtyTryCatch
+  - wmc
   - age
   - nAuth
   - nr
-Discarded Features (9):
-  - release
+Discarded Features (8):
   - loc
-  - wmc
   - assignmentsQty
   - mathOperationsQty
+  - qtyTryCatch
   - qtyReturn
   - fanin
   - fanout

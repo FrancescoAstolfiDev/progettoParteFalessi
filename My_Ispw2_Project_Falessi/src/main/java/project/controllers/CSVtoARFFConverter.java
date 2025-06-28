@@ -2,6 +2,7 @@ package project.controllers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import project.statefull.ConstantsWindowsFormat;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
 import weka.core.converters.CSVLoader;
@@ -19,9 +20,9 @@ public class CSVtoARFFConverter {
     }
 
     public static void executeConversion(String projectName, int numOFRelease) {
-        Path csvPath = project.utils.ConstantsWindowsFormat.CSV_PATH;
-        Path testCsvPath = project.utils.ConstantsWindowsFormat.TEST_CSV_PATH;
-        Path arffCsvPath=  project.utils.ConstantsWindowsFormat.ARFF_PATH;
+        Path csvPath = ConstantsWindowsFormat.CSV_PATH;
+        Path testCsvPath = ConstantsWindowsFormat.TEST_CSV_PATH;
+        Path arffCsvPath=  ConstantsWindowsFormat.ARFF_PATH;
 
         for (int i = 2; i < numOFRelease; i++) {
             try {
@@ -73,7 +74,7 @@ public class CSVtoARFFConverter {
 
         // Rimuoviamo solo method e path (colonne 2-3)
         Remove removeFilter = new Remove();
-        removeFilter.setAttributeIndices("2-3");
+        removeFilter.setAttributeIndices("1-3");
         removeFilter.setInputFormat(data);
         Instances filteredData = Filter.useFilter(data, removeFilter);
 

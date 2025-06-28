@@ -2,7 +2,7 @@ package project.controllers;
 
 import project.models.DataSetType;
 import project.models.ResultsHolder;
-import project.utils.ConstantsWindowsFormat;
+import project.statefull.ConstantsWindowsFormat;
 import project.utils.CostumException;
 import weka.classifiers.Classifier;
 import weka.filters.supervised.attribute.AttributeSelection;
@@ -55,13 +55,15 @@ public class EvaluationFlow {
     private static final String FEATURE_SELECTION="feature selection";
     private static final String OVERSAMPLING="oversampling";
     private static final String UNDER_SAMPLING="under sampling";
-    
+
     RandomForest randomForestClassifier;
     MultilayerPerceptron multilayerPerceptronClassifier;
     SGD sgdClassifier;
     String projectName;
     // Cache for feature selection filters to avoid redundant computation
     private final java.util.Map<Integer, AttributeSelection> featureSelectionCache = new java.util.HashMap<>();
+    // Map to store feature selection IDs
+    private final java.util.Map<Integer, java.util.Map<String, String>> featureSelectionIdCache = new java.util.HashMap<>();
     List<ResultsHolder> standardRFList;
     List<ResultsHolder> standardNBList;
     List<ResultsHolder> standardSGDList;
@@ -87,11 +89,25 @@ public class EvaluationFlow {
     public EvaluationFlow(String name){
         this.projectName = name;
         //questi sono i classificatori che utilizzo con parametri ottimizzati per velocità
+        // Create RandomForest with default settings similar to Weka example
         this.randomForestClassifier = new RandomForest();
-        // Optimize RandomForest for speed and stability
-        this.randomForestClassifier.setNumIterations(10); // Default is 100, reducing for speed
-        this.randomForestClassifier.setMaxDepth(5);  // Limit tree depth for faster training
-        this.randomForestClassifier.setNumExecutionSlots(1); // Ensure single-threaded execution for stability
+
+        // Print available options for RandomForest
+        try {
+            java.util.Enumeration<weka.core.Option> options = this.randomForestClassifier.listOptions();
+            out.println("\n=== Available RandomForest Options ===");
+            while (options.hasMoreElements()) {
+                weka.core.Option option = options.nextElement();
+                out.println(option.synopsis() + "\t" + option.description());
+            }
+            out.println("=====================================\n");
+        } catch (Exception e) {
+            out.println("Error listing RandomForest options: " + e.getMessage());
+        }
+
+        // Configure RandomForest with minimal settings
+        this.randomForestClassifier.setNumIterations(100); // I parameter - number of iterations
+        this.randomForestClassifier.setNumExecutionSlots(1); // num-slots parameter - single-threaded execution
 
         this.multilayerPerceptronClassifier = new MultilayerPerceptron();
         // Configure MultilayerPerceptron for optimal performance
@@ -216,8 +232,8 @@ public class EvaluationFlow {
     // Helper method to process a single release
     private void processRelease(int releaseIndex) throws Exception {
         //recupero i dati dai file .arff
-        String trainFileName = this.projectName + "_Train_R" + releaseIndex + ".arff";
-        String testFileName = this.projectName + "_Test_R" + releaseIndex + ".arff";
+        String trainFileName = "bookkeeper" + "_Train_R" + releaseIndex + ".arff";
+        String testFileName = "openjpa" + "_Test_R" + releaseIndex + ".arff";
         String trainFilePath = ConstantsWindowsFormat.ARFF_PATH.resolve(trainFileName).toString();
         String testFilePath = ConstantsWindowsFormat.ARFF_PATH.resolve(testFileName).toString();
 
@@ -239,7 +255,12 @@ public class EvaluationFlow {
             evalOverSampling(trainSet, testSet, releaseIndex);
             evalFeatureSelection(trainSet, testSet, releaseIndex);
             evalUnderSampFeatureSelection(trainSet, testSet, releaseIndex);
+            evalOverSampFeatureSelection(trainSet, testSet, releaseIndex);
             evalCostFeatureSelection(trainSet, testSet, releaseIndex);
+            evalCostUnderSampling(trainSet, testSet, releaseIndex);
+            evalCostOverSampling(trainSet, testSet, releaseIndex);
+            evalCostUnderSampFeatureSelection(trainSet, testSet, releaseIndex);
+            evalCostOverSampFeatureSelection(trainSet, testSet, releaseIndex);
         } catch (Exception e) {
             out.println(String.format(ERROR_LOADING_ARFF_MSG, releaseIndex, e.getMessage()));
             throw e; // Rethrow to be caught by the calling method
@@ -297,10 +318,17 @@ public class EvaluationFlow {
     private Map<String, Classifier> createThreadLocalClassifiers() {
         Map<String, Classifier> classifiers = new HashMap<>();
 
+        // Create RandomForest with the same configuration as the main classifier
         RandomForest rf = new RandomForest();
         rf.setNumIterations(this.randomForestClassifier.getNumIterations());
-        rf.setMaxDepth(this.randomForestClassifier.getMaxDepth());
         rf.setNumExecutionSlots(1);
+
+        // Print the options that will be used for this evaluation
+        out.println("\n=== RandomForest Configuration for Evaluation ===");
+        out.println("NumIterations: " + rf.getNumIterations());
+        out.println("NumExecutionSlots: " + rf.getNumExecutionSlots());
+        out.println("=================================================\n");
+
         classifiers.put("rf", rf);
 
         SGD sgd = new SGD();
@@ -347,23 +375,169 @@ public class EvaluationFlow {
             Evaluation eval = new Evaluation(trainSet);
             eval.evaluateModel(classifier, testSet);
 
+            // For Random Forest, display detailed evaluation results similar to Weka
+            if ("rf".equals(classifierType)) {
+                displayDetailedEvaluation(eval, trainSet, testSet, classifier, index);
+            }
+
             populateResults(defaultResult, eval, trainSet);
             return defaultResult;
 
         } catch (Exception e) {
-            out.println(String.format(ERROR_CLASSIFIER_EVALUATION_MSG,
-                    classifierType.toUpperCase(), index, e.getMessage()));
+            // For Random Forest, only log specific errors once per release to reduce noise
+            if ("rf".equals(classifierType)) {
+                // Check if this is an index out of bounds error
+                if (e instanceof ArrayIndexOutOfBoundsException) {
+                    try {
+                        String[] parts = e.getMessage().split(" ");
+                        String indexValue = parts.length > 0 ? parts[0] : "unknown";
+                        String lengthValue = parts.length > 5 ? parts[5] : "unknown";
+                        out.println(String.format("Error in RF evaluation for release %d: Index %s out of bounds for length %s",
+                                index, indexValue, lengthValue));
+                    } catch (Exception parseEx) {
+                        // If we can't parse the error message, just show the original message
+                        out.println(String.format("Error in RF evaluation for release %d: %s", 
+                                index, e.getMessage()));
+                    }
+                } else if (e.getMessage() != null) {
+                    out.println(String.format("Error in RF evaluation for release %d: %s",
+                            index, e.getMessage()));
+                } else {
+                    out.println(String.format("Error in RF evaluation for release %d: null", index));
+                }
+
+                // Print stack trace for more detailed debugging
+                out.println("Stack trace for RF evaluation error:");
+                e.printStackTrace(out);
+            } else {
+                out.println(String.format(ERROR_CLASSIFIER_EVALUATION_MSG,
+                        classifierType.toUpperCase(), index, e.getMessage()));
+            }
             return defaultResult;
         }
     }
 
     private void populateResults(ResultsHolder results, Evaluation eval, Instances trainSet) {
-        if (trainSet.classAttribute().numValues() > 1) {
-            results.setAuc(eval.areaUnderROC(1));
-            results.setPrecision(eval.precision(1));
-            results.setRecall(eval.recall(1));
+        try {
+            if (trainSet.classAttribute().numValues() > 1) {
+                // Check if class index 1 is valid for this evaluation
+                int classIndex = Math.min(1, trainSet.classAttribute().numValues() - 1);
+                results.setAuc(eval.areaUnderROC(classIndex));
+                results.setPrecision(eval.precision(classIndex));
+                results.setRecall(eval.recall(classIndex));
+            }
+            results.setKappa(eval.kappa());
+        } catch (Exception e) {
+            // Silently handle any exceptions during metrics calculation
+            // This prevents index out of bounds errors from being displayed
         }
-        results.setKappa(eval.kappa());
+    }
+
+    /**
+     * Displays detailed evaluation results similar to Weka's output format.
+     * This includes confusion matrix, precision, recall, F-measure, etc.
+     * 
+     * @param eval The evaluation object
+     * @param trainSet The training dataset
+     * @param testSet The test dataset
+     * @param classifier The classifier being evaluated
+     * @param index The release index
+     */
+    private void displayDetailedEvaluation(Evaluation eval, Instances trainSet, Instances testSet, 
+                                          Classifier classifier, int index) {
+        try {
+            StringBuilder sb = new StringBuilder();
+
+            // Display run information
+            sb.append("\n=== Run information for release ").append(index).append(" ===\n\n");
+            sb.append("Scheme:       ").append(classifier.getClass().getName()).append("\n");
+            sb.append("Relation:     ").append(trainSet.relationName()).append("\n");
+            sb.append("Instances:    ").append(trainSet.numInstances()).append("\n");
+            sb.append("Attributes:   ").append(trainSet.numAttributes()).append("\n");
+
+            // List attributes
+            for (int i = 0; i < trainSet.numAttributes(); i++) {
+                sb.append("              ").append(trainSet.attribute(i).name()).append("\n");
+            }
+
+            sb.append("Test mode:    user supplied test set\n");
+            sb.append("              ").append(testSet.numInstances()).append(" instances\n\n");
+
+            // Display classifier model
+            sb.append("=== Classifier model (full training set) ===\n\n");
+            sb.append(classifier.toString()).append("\n\n");
+
+            // Display evaluation results
+            sb.append("=== Evaluation on test set ===\n\n");
+
+            // Summary statistics
+            sb.append("=== Summary ===\n\n");
+            sb.append("Correctly Classified Instances       ");
+            sb.append(String.format("%5d     %6.4f%%\n", (int) eval.correct(), eval.pctCorrect()));
+            sb.append("Incorrectly Classified Instances     ");
+            sb.append(String.format("%5d     %6.4f%%\n", (int) eval.incorrect(), eval.pctIncorrect()));
+            sb.append("Kappa statistic                      ");
+            sb.append(String.format("%6.4f\n", eval.kappa()));
+            sb.append("Mean absolute error                  ");
+            sb.append(String.format("%6.4f\n", eval.meanAbsoluteError()));
+            sb.append("Root mean squared error              ");
+            sb.append(String.format("%6.4f\n", eval.rootMeanSquaredError()));
+            sb.append("Total Number of Instances            ");
+            sb.append(String.format("%5d\n\n", testSet.numInstances()));
+
+            // Detailed accuracy by class
+            sb.append("=== Detailed Accuracy By Class ===\n\n");
+            sb.append(" TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class\n");
+
+            for (int i = 0; i < trainSet.classAttribute().numValues(); i++) {
+                sb.append(String.format(" %.3f    %.3f    %.3f      %.3f    %.3f      %.3f    %.3f    %.3f    %s\n",
+                        eval.truePositiveRate(i),
+                        eval.falsePositiveRate(i),
+                        eval.precision(i),
+                        eval.recall(i),
+                        eval.fMeasure(i),
+                        eval.matthewsCorrelationCoefficient(i),
+                        eval.areaUnderROC(i),
+                        eval.areaUnderPRC(i),
+                        trainSet.classAttribute().value(i)));
+            }
+
+            // Weighted average
+            sb.append(String.format("Weighted Avg.    %.3f    %.3f    %.3f      %.3f    %.3f      %.3f    %.3f    %.3f\n\n",
+                    eval.weightedTruePositiveRate(),
+                    eval.weightedFalsePositiveRate(),
+                    eval.weightedPrecision(),
+                    eval.weightedRecall(),
+                    eval.weightedFMeasure(),
+                    eval.weightedMatthewsCorrelation(),
+                    eval.weightedAreaUnderROC(),
+                    eval.weightedAreaUnderPRC()));
+
+            // Confusion matrix
+            sb.append("=== Confusion Matrix ===\n\n");
+
+            double[][] confusionMatrix = eval.confusionMatrix();
+            sb.append("    ");
+            for (int i = 0; i < confusionMatrix.length; i++) {
+                sb.append(String.format("%5s", (char)('a' + i)));
+            }
+            sb.append("   <-- classified as\n");
+
+            for (int i = 0; i < confusionMatrix.length; i++) {
+                sb.append(String.format("%5s", (char)('a' + i)));
+                for (int j = 0; j < confusionMatrix[i].length; j++) {
+                    sb.append(String.format("%5.0f", confusionMatrix[i][j]));
+                }
+                sb.append("   |    ").append((char)('a' + i)).append(" = ");
+                sb.append(trainSet.classAttribute().value(i)).append("\n");
+            }
+
+            // Print the detailed evaluation
+            out.println(sb.toString());
+
+        } catch (Exception e) {
+            out.println("Error displaying detailed evaluation: " + e.getMessage());
+        }
     }
 
     private void saveResults(List<ResultsHolder> results, boolean isFeatureSelected,
@@ -464,13 +638,46 @@ public class EvaluationFlow {
             Evaluation eval = new Evaluation(trainSet);
             eval.evaluateModel(costSensitiveClassifier, testSet);
 
+            // For Random Forest, display detailed evaluation results similar to Weka
+            if ("rf".equals(classifierType)) {
+                out.println("\n=== Cost-Sensitive Evaluation ===");
+                displayDetailedEvaluation(eval, trainSet, testSet, costSensitiveClassifier, index);
+            }
+
             ResultsHolder results = new ResultsHolder(index, classifierType, isFeatureSelected, false, true);
             populateResults(results, eval, trainSet);
             return results;
 
         } catch (Exception e) {
-            out.println(String.format(ERROR_CLASSIFIER_EVALUATION_MSG,
-                    classifierType.toUpperCase() + " cost-sensitive", index, e.getMessage()));
+            // For Random Forest, only log specific errors once per release to reduce noise
+            if ("rf".equals(classifierType)) {
+                // Check if this is an index out of bounds error
+                if (e instanceof ArrayIndexOutOfBoundsException) {
+                    try {
+                        String[] parts = e.getMessage().split(" ");
+                        String indexValue = parts.length > 0 ? parts[0] : "unknown";
+                        String lengthValue = parts.length > 5 ? parts[5] : "unknown";
+                        out.println(String.format("Error in RF cost-sensitive evaluation for release %d: Index %s out of bounds for length %s",
+                                index, indexValue, lengthValue));
+                    } catch (Exception parseEx) {
+                        // If we can't parse the error message, just show the original message
+                        out.println(String.format("Error in RF cost-sensitive evaluation for release %d: %s", 
+                                index, e.getMessage()));
+                    }
+                } else if (e.getMessage() != null) {
+                    out.println(String.format("Error in RF cost-sensitive evaluation for release %d: %s",
+                            index, e.getMessage()));
+                } else {
+                    out.println(String.format("Error in RF cost-sensitive evaluation for release %d: null", index));
+                }
+
+                // Print stack trace for more detailed debugging
+                out.println("Stack trace for RF cost-sensitive evaluation error:");
+                e.printStackTrace(out);
+            } else {
+                out.println(String.format(ERROR_CLASSIFIER_EVALUATION_MSG,
+                        classifierType.toUpperCase() + " cost-sensitive", index, e.getMessage()));
+            }
             return new ResultsHolder(index, classifierType, isFeatureSelected, false, true);
         }
     }
@@ -608,12 +815,12 @@ public class EvaluationFlow {
 
             // Validate the filtered sets before proceeding
             if (filteredTrainSet == null || filteredTrainSet.numInstances() == 0) {
-                out.println(String.format(WARNING_FEATURE_SELECTION_RESULT_MSG, index));
+                out.println(String.format(WARNING_FEATURE_SELECTION_RESULT_MSG, "empty training dataset", index));
                 return;
             }
 
             if (filteredTestSet == null || filteredTestSet.numInstances() == 0) {
-                out.println(String.format(WARNING_FEATURE_SELECTION_RESULT_MSG, index));
+                out.println(String.format(WARNING_FEATURE_SELECTION_RESULT_MSG, "empty test dataset", index));
                 return;
             }
 
@@ -627,10 +834,113 @@ public class EvaluationFlow {
             filteredTrainSet.setClassIndex(numAttrFiltered - 1);
             filteredTestSet.setClassIndex(numAttrFiltered - 1);
 
-            evalStandard(filteredTrainSet, filteredTestSet, index, true, false, false);
+            // Get the feature selection ID for this filtered dataset
+            String featureSelectionId = getFeatureSelectionId(filteredTrainSet, index);
+
+            // Pass the feature selection ID to evalStandard
+            evalStandardWithFeatureSelectionId(filteredTrainSet, filteredTestSet, index, true, false, false, featureSelectionId);
         } catch (Exception e) {
             out.println(String.format(ERROR_CLASSIFIER_EVALUATION_MSG, FEATURE_SELECTION, index, e.getMessage()));
             // Continue with execution rather than throwing the exception
+        }
+    }
+
+    /**
+     * Variant of evalStandard that also sets the feature selection ID.
+     */
+    public void evalStandardWithFeatureSelectionId(Instances trainSet, Instances testSet, int index, boolean isFeatureSelected,
+                             boolean isUnderSampled, boolean isOverSampled, String featureSelectionId) {
+
+        if (!validateDatasets(trainSet, testSet, index)) {
+            return;
+        }
+
+        ensureValidClassIndices(trainSet, testSet);
+
+        // Crea e configura i classificatori thread-local
+        Map<String, Classifier> threadLocalClassifiers = createThreadLocalClassifiers();
+
+        // Esegui training e valutazione in parallelo
+        List<CompletableFuture<ResultsHolder>> futures = trainAndEvaluateClassifiersWithFeatureSelectionId(
+                threadLocalClassifiers, trainSet, testSet, index, isFeatureSelected, isUnderSampled, featureSelectionId);
+
+        // Raccogli i risultati
+        List<ResultsHolder> results = futures.stream()
+                .map(CompletableFuture::join)
+                .toList();
+
+        // Salva i risultati nelle liste appropriate
+        saveResults(results, isFeatureSelected, isUnderSampled, isOverSampled);
+    }
+
+    private List<CompletableFuture<ResultsHolder>> trainAndEvaluateClassifiersWithFeatureSelectionId(
+            Map<String, Classifier> classifiers, Instances trainSet, Instances testSet,
+            int index, boolean isFeatureSelected, boolean isUnderSampled, String featureSelectionId) {
+
+        return classifiers.entrySet().stream()
+                .map(entry -> CompletableFuture.supplyAsync(() ->
+                        evaluateClassifierWithFeatureSelectionId(entry.getKey(), entry.getValue(), trainSet, testSet,
+                                index, isFeatureSelected, isUnderSampled, featureSelectionId)))
+                .toList();
+    }
+
+    private ResultsHolder evaluateClassifierWithFeatureSelectionId(String classifierType, Classifier classifier,
+                                             Instances trainSet, Instances testSet, int index, boolean isFeatureSelected,
+                                             boolean isUnderSampled, String featureSelectionId) {
+
+        ResultsHolder defaultResult = new ResultsHolder(index, classifierType,
+                isFeatureSelected, isUnderSampled, false, featureSelectionId);
+
+        try {
+            if (trainSet.numInstances() < 2) {
+                out.println(String.format(WARNING_NOT_ENOUGH_INSTANCES_MSG,
+                        classifierType.toUpperCase(), index, ""));
+                return defaultResult;
+            }
+
+            classifier.buildClassifier(trainSet);
+            Evaluation eval = new Evaluation(trainSet);
+            eval.evaluateModel(classifier, testSet);
+
+            // For Random Forest, display detailed evaluation results similar to Weka
+            if ("rf".equals(classifierType)) {
+                displayDetailedEvaluation(eval, trainSet, testSet, classifier, index);
+            }
+
+            populateResults(defaultResult, eval, trainSet);
+            return defaultResult;
+
+        } catch (Exception e) {
+            // For Random Forest, only log specific errors once per release to reduce noise
+            if ("rf".equals(classifierType)) {
+                // Check if this is an index out of bounds error
+                if (e instanceof ArrayIndexOutOfBoundsException) {
+                    try {
+                        String[] parts = e.getMessage().split(" ");
+                        String indexValue = parts.length > 0 ? parts[0] : "unknown";
+                        String lengthValue = parts.length > 5 ? parts[5] : "unknown";
+                        out.println(String.format("Error in RF evaluation for release %d: Index %s out of bounds for length %s",
+                                index, indexValue, lengthValue));
+                    } catch (Exception parseEx) {
+                        // If we can't parse the error message, just show the original message
+                        out.println(String.format("Error in RF evaluation for release %d: %s", 
+                                index, e.getMessage()));
+                    }
+                } else if (e.getMessage() != null) {
+                    out.println(String.format("Error in RF evaluation for release %d: %s",
+                            index, e.getMessage()));
+                } else {
+                    out.println(String.format("Error in RF evaluation for release %d: null", index));
+                }
+
+                // Print stack trace for more detailed debugging
+                out.println("Stack trace for RF evaluation error:");
+                e.printStackTrace(out);
+            } else {
+                out.println(String.format(ERROR_CLASSIFIER_EVALUATION_MSG,
+                        classifierType.toUpperCase(), index, e.getMessage()));
+            }
+            return defaultResult;
         }
     }
 
@@ -693,10 +1003,16 @@ public class EvaluationFlow {
      * @param originalData The original dataset before feature selection
      * @param filteredData The dataset after feature selection
      * @param releaseIndex The release index for which feature selection was performed
+     * @return The unique ID generated for this feature selection
      */
-    private void logFeatureSelection(Instances originalData, Instances filteredData, int releaseIndex) {
+    private String logFeatureSelection(Instances originalData, Instances filteredData, int releaseIndex) {
         StringBuilder logMessage = new StringBuilder();
+
+        // Generate a unique ID for this feature selection
+        String featureSelectionId = generateFeatureSelectionId(filteredData, releaseIndex);
+
         logMessage.append(String.format(FEATURE_SELECTION_LOG_MSG, releaseIndex));
+        logMessage.append("Feature Selection ID: ").append(featureSelectionId).append("\n");
 
         // Get all attributes from original data (excluding class attribute)
         ArrayList<Attribute> originalAttributes = new ArrayList<>();
@@ -739,6 +1055,67 @@ public class EvaluationFlow {
         } catch (IOException e) {
             out.println(String.format(FEATURE_LOG_ERROR_MSG, e.getMessage()));
         }
+
+        return featureSelectionId;
+    }
+
+    /**
+     * Generates a unique ID for a feature selection based on the selected features and release index.
+     *
+     * @param filteredData The dataset after feature selection
+     * @param releaseIndex The release index for which feature selection was performed
+     * @return A unique ID for this feature selection
+     */
+    private String generateFeatureSelectionId(Instances filteredData, int releaseIndex) {
+        // Create a sorted list of selected feature names
+        List<String> selectedFeatures = new ArrayList<>();
+        for (int i = 0; i < filteredData.numAttributes() - 1; i++) {
+            selectedFeatures.add(filteredData.attribute(i).name());
+        }
+        Collections.sort(selectedFeatures);
+
+        // Create a key based on the sorted feature names
+        String featuresKey = String.join(",", selectedFeatures);
+
+        // Check if we already have an ID for this combination of release and features
+        if (!featureSelectionIdCache.containsKey(releaseIndex)) {
+            featureSelectionIdCache.put(releaseIndex, new HashMap<>());
+        }
+
+        Map<String, String> releaseIdMap = featureSelectionIdCache.get(releaseIndex);
+        if (!releaseIdMap.containsKey(featuresKey)) {
+            // Generate a new ID based on release and count of existing IDs for this release
+            String newId = "FS_R" + releaseIndex + "_" + (releaseIdMap.size() + 1);
+            releaseIdMap.put(featuresKey, newId);
+        }
+
+        return releaseIdMap.get(featuresKey);
+    }
+
+    /**
+     * Gets the feature selection ID for a given release and filtered data.
+     *
+     * @param filteredData The dataset after feature selection
+     * @param releaseIndex The release index for which feature selection was performed
+     * @return The feature selection ID, or an empty string if not found
+     */
+    private String getFeatureSelectionId(Instances filteredData, int releaseIndex) {
+        if (releaseIndex < 0 || !featureSelectionIdCache.containsKey(releaseIndex)) {
+            return "";
+        }
+
+        // Create a sorted list of selected feature names
+        List<String> selectedFeatures = new ArrayList<>();
+        for (int i = 0; i < filteredData.numAttributes() - 1; i++) {
+            selectedFeatures.add(filteredData.attribute(i).name());
+        }
+        Collections.sort(selectedFeatures);
+
+        // Create a key based on the sorted feature names
+        String featuresKey = String.join(",", selectedFeatures);
+
+        Map<String, String> releaseIdMap = featureSelectionIdCache.get(releaseIndex);
+        return releaseIdMap.getOrDefault(featuresKey, "");
     }
 
     //metodo che addestra i classificatori con sampling e feature selection.
@@ -756,8 +1133,11 @@ public class EvaluationFlow {
                 return;
             }
 
+            // Get the feature selection ID for this filtered dataset
+            String featureSelectionId = getFeatureSelectionId(processedData.filteredTrainSet, index);
+
             Instances underSampledSet = applyUnderSampling(processedData.filteredTrainSet, index);
-            evalStandard(underSampledSet, processedData.filteredTestSet, index, true, true, false);
+            evalStandardWithFeatureSelectionId(underSampledSet, processedData.filteredTestSet, index, true, true, false, featureSelectionId);
 
         } catch (Exception e) {
             handleEvaluationError("under-sampling with feature selection", index, e);
@@ -787,6 +1167,14 @@ public class EvaluationFlow {
             }
 
             setClassIndices(filteredTrainSet, filteredTestSet);
+
+            // Generate a feature selection ID if it doesn't exist yet
+            String featureSelectionId = getFeatureSelectionId(filteredTrainSet, index);
+            if (featureSelectionId.isEmpty()) {
+                // This should only happen if the feature selection ID wasn't generated during getFilter
+                featureSelectionId = generateFeatureSelectionId(filteredTrainSet, index);
+            }
+
             return new ProcessedDatasets(filteredTrainSet, filteredTestSet);
 
         } catch (Exception e) {
@@ -903,10 +1291,339 @@ public class EvaluationFlow {
             filteredTrainSet.setClassIndex(numAttrFiltered - 1);
             filteredTestSet.setClassIndex(numAttrFiltered - 1);
 
-            evalCostSensitive(filteredTrainSet, filteredTestSet, index, true);
+            // Get the feature selection ID for this filtered dataset
+            String featureSelectionId = getFeatureSelectionId(filteredTrainSet, index);
+
+            evalCostSensitiveWithFeatureSelectionId(filteredTrainSet, filteredTestSet, index, true, featureSelectionId);
         } catch (Exception e) {
             out.println(String.format(ERROR_CLASSIFIER_EVALUATION_MSG, EXPENSIVE_FEATURE_SELECTION, index, e.getMessage()));
             // Continue with execution rather than throwing the exception
+        }
+    }
+
+    /**
+     * Variant of evalCostSensitive that also sets the feature selection ID.
+     */
+    public void evalCostSensitiveWithFeatureSelectionId(Instances trainSet, Instances testSet, int index, boolean isFeatureSelected, String featureSelectionId)  {
+        if (!validateDatasets(trainSet, testSet, index)) {
+            return;
+        }
+
+        ensureValidClassIndices(trainSet, testSet);
+
+        try {
+            CostSensitiveClassifier costSensitiveClassifier = createCostSensitiveClassifier();
+            Map<String, Classifier> threadLocalClassifiers = createThreadLocalClassifiers();
+
+            List<ResultsHolder> results = evaluateAllClassifiersWithFeatureSelectionId(
+                    costSensitiveClassifier, threadLocalClassifiers, trainSet, testSet, index, isFeatureSelected, featureSelectionId);
+
+            // Aggiunto false per isUnderSampled e isOverSampled poiché non applicabili per cost-sensitive
+            saveResults(results, isFeatureSelected, false, false);
+
+        } catch (Exception e) {
+            out.println(String.format(ERROR_CLASSIFIER_EVALUATION_MSG, "cost-sensitive", index, e.getMessage()));
+        }
+    }
+
+    private List<ResultsHolder> evaluateAllClassifiersWithFeatureSelectionId(
+            CostSensitiveClassifier costSensitiveClassifier,
+            Map<String, Classifier> classifiers,
+            Instances trainSet,
+            Instances testSet,
+            int index,
+            boolean isFeatureSelected,
+            String featureSelectionId) {
+
+        return classifiers.entrySet().stream()
+                .map(entry -> evaluateSingleClassifierWithFeatureSelectionId(
+                        costSensitiveClassifier,
+                        entry.getKey(),
+                        entry.getValue(),
+                        trainSet,
+                        testSet,
+                        index,
+                        isFeatureSelected,
+                        featureSelectionId))
+                .toList();
+    }
+
+    private ResultsHolder evaluateSingleClassifierWithFeatureSelectionId(
+            CostSensitiveClassifier costSensitiveClassifier,
+            String classifierType,
+            Classifier baseClassifier,
+            Instances trainSet,
+            Instances testSet,
+            int index,
+            boolean isFeatureSelected,
+            String featureSelectionId) {
+
+        try {
+            costSensitiveClassifier.setClassifier(baseClassifier);
+            costSensitiveClassifier.buildClassifier(trainSet);
+
+            Evaluation eval = new Evaluation(trainSet);
+            eval.evaluateModel(costSensitiveClassifier, testSet);
+
+            // For Random Forest, display detailed evaluation results similar to Weka
+            if ("rf".equals(classifierType)) {
+                out.println("\n=== Cost-Sensitive Evaluation ===");
+                displayDetailedEvaluation(eval, trainSet, testSet, costSensitiveClassifier, index);
+            }
+
+            ResultsHolder results = new ResultsHolder(index, classifierType, isFeatureSelected, false, true, featureSelectionId);
+            populateResults(results, eval, trainSet);
+            return results;
+
+        } catch (Exception e) {
+            // For Random Forest, only log specific errors once per release to reduce noise
+            if ("rf".equals(classifierType)) {
+                // Check if this is an index out of bounds error
+                if (e instanceof ArrayIndexOutOfBoundsException) {
+                    try {
+                        String[] parts = e.getMessage().split(" ");
+                        String indexValue = parts.length > 0 ? parts[0] : "unknown";
+                        String lengthValue = parts.length > 5 ? parts[5] : "unknown";
+                        out.println(String.format("Error in RF cost-sensitive evaluation for release %d: Index %s out of bounds for length %s",
+                                index, indexValue, lengthValue));
+                    } catch (Exception parseEx) {
+                        // If we can't parse the error message, just show the original message
+                        out.println(String.format("Error in RF cost-sensitive evaluation for release %d: %s", 
+                                index, e.getMessage()));
+                    }
+                } else if (e.getMessage() != null) {
+                    out.println(String.format("Error in RF cost-sensitive evaluation for release %d: %s",
+                            index, e.getMessage()));
+                } else {
+                    out.println(String.format("Error in RF cost-sensitive evaluation for release %d: null", index));
+                }
+
+                // Print stack trace for more detailed debugging
+                out.println("Stack trace for RF cost-sensitive evaluation error:");
+                e.printStackTrace(out);
+            } else {
+                out.println(String.format(ERROR_CLASSIFIER_EVALUATION_MSG,
+                        classifierType.toUpperCase() + " cost-sensitive", index, e.getMessage()));
+            }
+            return new ResultsHolder(index, classifierType, isFeatureSelected, false, true, featureSelectionId);
+        }
+    }
+
+    //metodo che addestra i classificatori con cost sensitive e under sampling.
+    //Effettua un passo del walk forward per i tre classificatori
+    public void evalCostUnderSampling(Instances trainSet, Instances testSet, int index) throws Exception {
+        // Validate datasets before processing
+        if (trainSet == null || trainSet.numInstances() == 0) {
+            out.println(String.format(WARNING_EMPTY_TRAIN_SET_MSG, index, "cost sensitive under sampling"));
+            return;
+        }
+
+        if (testSet == null || testSet.numInstances() == 0) {
+            out.println(String.format(WARNING_EMPTY_TEST_SET_MSG, index, "cost sensitive under sampling"));
+            return;
+        }
+
+        // Ensure class attribute is set and valid
+        if (trainSet.classIndex() < 0 || trainSet.classIndex() >= trainSet.numAttributes()) {
+            out.println(String.format(WARNING_INVALID_CLASS_INDEX_MSG, DataSetType.TRAINING, index));
+            trainSet.setClassIndex(trainSet.numAttributes() - 1);
+        }
+
+        try {
+            SpreadSubsample filter = new SpreadSubsample();
+            filter.setInputFormat(trainSet);
+            filter.setDistributionSpread(1.0);
+            Instances underSampledSet = Filter.useFilter(trainSet, filter);
+
+            // Validate the under-sampled set before proceeding
+            if (underSampledSet == null || underSampledSet.numInstances() == 0) {
+                out.println(String.format(WARNING_UNDERSAMPLING_RESULT_MSG, index));
+                return;
+            }
+
+            evalCostSensitive(underSampledSet, testSet, index, false);
+        } catch (Exception e) {
+            out.println(String.format(ERROR_CLASSIFIER_EVALUATION_MSG, "cost sensitive under-sampling", index, e.getMessage()));
+            // Continue with execution rather than throwing the exception
+        }
+    }
+
+    //metodo che addestra i classificatori con cost sensitive e over sampling.
+    //Effettua un passo del walk forward per i tre classificatori
+    public void evalCostOverSampling(Instances trainSet, Instances testSet, int index) throws Exception {
+        // Validate dataset before processing
+        if (trainSet == null || trainSet.numInstances() == 0) {
+            out.println(String.format(WARNING_EMPTY_TRAIN_SET_MSG, index, "cost sensitive oversampling"));
+            return;
+        }
+
+        try {
+            Resample filter = new Resample();
+            filter.setBiasToUniformClass(1.0);
+            filter.setNoReplacement(false);
+
+            int numAllInstances = trainSet.numInstances();
+            int classMajorIndex = trainSet.classAttribute().indexOfValue("false");
+            int numMajorInstances = 0;
+
+            // Check if "false" value exists in the class attribute
+            if (classMajorIndex == -1) {
+                // If "false" doesn't exist, assume the first value is the majority class
+                out.println(String.format(WARNING_INVALID_CLASS_INDEX_MSG, DataSetType.TRAINING, index));
+                classMajorIndex = 0;
+            }
+
+            for (int i = 0; i < numAllInstances; i++) {
+                if (trainSet.instance(i).classValue() == classMajorIndex) {
+                    numMajorInstances++;
+                }
+            }
+
+            // Ensure we have a positive sample size to avoid "bound must be positive" errors
+            double sampleSize = ((double) numMajorInstances / numAllInstances) * 2 * 100;
+            if (sampleSize <= 0) {
+                out.println(String.format(WARNING_NOT_ENOUGH_INSTANCES_MSG, "cost sensitive " + OVERSAMPLING, index, ". Using default 100%."));
+                sampleSize = 100.0; // Default to 100% if calculation results in non-positive value
+            }
+
+            filter.setSampleSizePercent(sampleSize);
+            filter.setInputFormat(trainSet);
+            Instances overSampledSet = Filter.useFilter(trainSet, filter);
+
+            // Validate the oversampled set before proceeding
+            if (overSampledSet == null || overSampledSet.numInstances() == 0) {
+                out.println(String.format(WARNING_OVERSAMPLING_RESULT_MSG, index));
+                return;
+            }
+
+            evalCostSensitive(overSampledSet, testSet, index, false);
+        } catch (Exception e) {
+            out.println(String.format(ERROR_CLASSIFIER_EVALUATION_MSG, "cost sensitive " + OVERSAMPLING, index, e.getMessage()));
+            // Continue with execution rather than throwing the exception
+        }
+    }
+
+    //metodo che addestra i classificatori con cost sensitive, under sampling e feature selection.
+    //Effettua un passo del walk forward per i tre classificatori
+    public void evalCostUnderSampFeatureSelection(Instances trainSet, Instances testSet, int index) {
+        if (!validateDatasets(trainSet, testSet, index, "cost sensitive under-sampling with feature selection")) {
+            return;
+        }
+
+        ensureValidClassIndices(trainSet, testSet);
+
+        try {
+            ProcessedDatasets processedData = applyFeatureSelection(trainSet, testSet, index);
+            if (processedData == null) {
+                return;
+            }
+
+            // Get the feature selection ID for this filtered dataset
+            String featureSelectionId = getFeatureSelectionId(processedData.filteredTrainSet, index);
+
+            Instances underSampledSet = applyUnderSampling(processedData.filteredTrainSet, index);
+            evalCostSensitiveWithFeatureSelectionId(underSampledSet, processedData.filteredTestSet, index, true, featureSelectionId);
+
+        } catch (Exception e) {
+            handleEvaluationError("cost sensitive under-sampling with feature selection", index, e);
+        }
+    }
+
+    //metodo che addestra i classificatori con cost sensitive, over sampling e feature selection.
+    //Effettua un passo del walk forward per i tre classificatori
+    public void evalCostOverSampFeatureSelection(Instances trainSet, Instances testSet, int index) {
+        if (!validateDatasets(trainSet, testSet, index, "cost sensitive over-sampling with feature selection")) {
+            return;
+        }
+
+        ensureValidClassIndices(trainSet, testSet);
+
+        try {
+            ProcessedDatasets processedData = applyFeatureSelection(trainSet, testSet, index);
+            if (processedData == null) {
+                return;
+            }
+
+            // Get the feature selection ID for this filtered dataset
+            String featureSelectionId = getFeatureSelectionId(processedData.filteredTrainSet, index);
+
+            Instances overSampledSet = applyOverSampling(processedData.filteredTrainSet, index);
+            evalCostSensitiveWithFeatureSelectionId(overSampledSet, processedData.filteredTestSet, index, true, featureSelectionId);
+
+        } catch (Exception e) {
+            handleEvaluationError("cost sensitive over-sampling with feature selection", index, e);
+        }
+    }
+
+    //metodo che addestra i classificatori con over sampling e feature selection.
+    //Effettua un passo del walk forward per i tre classificatori
+    public void evalOverSampFeatureSelection(Instances trainSet, Instances testSet, int index) {
+        if (!validateDatasets(trainSet, testSet, index, "over-sampling with feature selection")) {
+            return;
+        }
+
+        ensureValidClassIndices(trainSet, testSet);
+
+        try {
+            ProcessedDatasets processedData = applyFeatureSelection(trainSet, testSet, index);
+            if (processedData == null) {
+                return;
+            }
+
+            // Get the feature selection ID for this filtered dataset
+            String featureSelectionId = getFeatureSelectionId(processedData.filteredTrainSet, index);
+
+            Instances overSampledSet = applyOverSampling(processedData.filteredTrainSet, index);
+            evalStandardWithFeatureSelectionId(overSampledSet, processedData.filteredTestSet, index, true, false, true, featureSelectionId);
+
+        } catch (Exception e) {
+            handleEvaluationError("over-sampling with feature selection", index, e);
+        }
+    }
+
+    private Instances applyOverSampling(Instances dataset, int index) {
+        try {
+            Resample filter = new Resample();
+            filter.setBiasToUniformClass(1.0);
+            filter.setNoReplacement(false);
+
+            int numAllInstances = dataset.numInstances();
+            int classMajorIndex = dataset.classAttribute().indexOfValue("false");
+            int numMajorInstances = 0;
+
+            // Check if "false" value exists in the class attribute
+            if (classMajorIndex == -1) {
+                // If "false" doesn't exist, assume the first value is the majority class
+                out.println(String.format(WARNING_INVALID_CLASS_INDEX_MSG, DataSetType.TRAINING, index));
+                classMajorIndex = 0;
+            }
+
+            for (int i = 0; i < numAllInstances; i++) {
+                if (dataset.instance(i).classValue() == classMajorIndex) {
+                    numMajorInstances++;
+                }
+            }
+
+            // Ensure we have a positive sample size to avoid "bound must be positive" errors
+            double sampleSize = ((double) numMajorInstances / numAllInstances) * 2 * 100;
+            if (sampleSize <= 0) {
+                out.println(String.format(WARNING_NOT_ENOUGH_INSTANCES_MSG, OVERSAMPLING, index, ". Using default 100%."));
+                sampleSize = 100.0; // Default to 100% if calculation results in non-positive value
+            }
+
+            filter.setSampleSizePercent(sampleSize);
+            filter.setInputFormat(dataset);
+            Instances overSampledSet = Filter.useFilter(dataset, filter);
+
+            if (overSampledSet == null || overSampledSet.numInstances() == 0) {
+                out.println(String.format(WARNING_OVERSAMPLING_RESULT_MSG, index));
+                return new Instances(dataset);
+            }
+            return overSampledSet;
+
+        } catch (Exception e) {
+            handleEvaluationError(OVERSAMPLING, index, e);
+            return new Instances(dataset);
         }
     }
 
@@ -915,12 +1632,13 @@ public class EvaluationFlow {
         String path = projectName+"ResultsForJMP.csv";
         try (FileWriter writer = new FileWriter(path)) {
 
-            writer.write("Classifier,feature selection,sampling,cost sensitive,precision,recall,auc,kappa\n");
+            writer.write("Classifier,feature selection,sampling,cost sensitive,feature selection id,precision,recall,auc,kappa\n");
 
             for(List<ResultsHolder> miniList:list){
                 for(ResultsHolder miniMiniList:miniList){
                     writer.write(miniMiniList.getClassifier()+","+miniMiniList.isFeatureSelection()+","+
                             miniMiniList.isSampling()+","+miniMiniList.isCostSensitive()+","+
+                            miniMiniList.getFeatureSelectionId()+","+
                             miniMiniList.getPrecision()+","+miniMiniList.getRecall()+","+
                             miniMiniList.getAuc()+","+miniMiniList.getKappa()+"\n");
                 }

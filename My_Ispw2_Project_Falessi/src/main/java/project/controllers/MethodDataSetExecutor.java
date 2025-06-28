@@ -5,12 +5,11 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import project.Projects;
+import project.utils.Projects;
 import project.models.DataSetType;
 import project.models.Release;
 import project.models.Ticket;
-import project.utils.ConstantSize;
-import project.utils.ConstantsWindowsFormat;
+import project.statefull.ConstantsWindowsFormat;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -69,7 +68,8 @@ public class MethodDataSetExecutor {
             return;
         }
 
-        double proportion = coldStartProportion();
+        //double proportion = coldStartProportion();// 2.15
+        double proportion=2.15;
 
         //se non ho sufficienti ticket in tutto il progetto posso settare il proportion di tutte le release al valore
         //ottenuto tramite cold start
@@ -90,7 +90,7 @@ public class MethodDataSetExecutor {
                 }
             }
         }
-        Projects curProject=Projects.valueOf(this.currentProject.toUpperCase());
+        Projects curProject = Projects.fromString(currentProject);
         int split=Math.max(1, (int) (releaseList.size() * curProject.getSplit()));
 
         List<Release> avaiableTrainingRelease = releaseList.subList(0, split);
@@ -98,10 +98,8 @@ public class MethodDataSetExecutor {
         // Initialize the metrics calculator with only the needed commits and the current project name
         this.metricsCalculator = new MetricsCalculator(this.gitHubInfoRetrieve, this.currentProject);
         metricsCalculator.calculateAll(avaiableTrainingRelease);
-        LOGGER.info("Iterating through release {} " , avaiableTrainingRelease.size());
 
         for (int i = 1; i < avaiableTrainingRelease.size()-1; i++) {
-            LOGGER.info("Iterating through release {} " , releaseList.get(i).getName());
             // reverse calculation for have first all the commit processed and elaborated
             Release release= avaiableTrainingRelease.get(i);
 
@@ -157,7 +155,6 @@ public class MethodDataSetExecutor {
         this.currentProcessingRelease = curRelease;
         List<Ticket> tickets= new ArrayList<>();
         for(int i=0;i<curRelease.getId();i++){
-            LOGGER.info("Iterating through release {} " , releaseList.get(i).getName());
             Release release=releaseList.get(i);
             tickets.addAll(JiraInfoRetrieve.getAllReleaseTicket(release,allTickets));
         }
@@ -207,7 +204,7 @@ public class MethodDataSetExecutor {
 
     private void writeFile(List<Release> incrementalReleaseList, Release currRelease, List<Ticket> tickets , DataSetType dataSetType) throws IOException {
         // I need to discard the calculation if I already find completed files
-        LOGGER.info("currently analyzing release {} " , currRelease.getName());
+        LOGGER.info("\n\ncurrently analyzing release {} " , currRelease.getName());
         String outPath = currentProject.toUpperCase() + dataSetType + currentProcessingRelease.getId() + ".csv";
         Path outputFilePath= dataSetType==DataSetType.TEST?ConstantsWindowsFormat.TEST_CSV_PATH.resolve(outPath):ConstantsWindowsFormat.CSV_PATH.resolve(outPath);
         if ( Files.exists(outputFilePath) ) {

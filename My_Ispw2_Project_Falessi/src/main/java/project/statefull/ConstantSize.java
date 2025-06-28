@@ -1,4 +1,4 @@
-package project.utils;
+package project.statefull;
 
 public class ConstantSize {
 

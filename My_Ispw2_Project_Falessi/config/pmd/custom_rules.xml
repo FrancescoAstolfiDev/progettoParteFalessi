@@ -35,10 +35,7 @@
     <rule ref="category/java/errorprone.xml/EqualsNull"/>
     <rule ref="category/java/errorprone.xml/ReturnFromFinallyBlock"/>
 
-    <!-- Problemi di performance -->
-    <rule ref="category/java/performance.xml/StringInstantiation"/>
-    <rule ref="category/java/performance.xml/InefficientStringBuffering"/>
-    <rule ref="category/java/performance.xml/UseStringBufferForStringAppends"/>
+
 
     <!-- Problemi di accoppiamento -->
     <rule ref="category/java/design.xml/LawOfDemeter"/>
