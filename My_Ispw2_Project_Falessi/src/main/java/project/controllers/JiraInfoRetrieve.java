@@ -274,7 +274,9 @@ public class JiraInfoRetrieve {
     public static  List<Ticket> getAllReleaseTicket(Release release, List<Ticket> allTicket) {
         List<Ticket> releaseTickets = new ArrayList<>();
         for (Ticket ticket: allTicket){
-            if (ticket.getFv().getId() <= release.getId() ){
+            if (ticket.getOv().getId() <= release.getId()
+            && ticket.getFv().getId()>=ticket.getOv().getId()
+            ){
                 releaseTickets.add(ticket);
             }
         }

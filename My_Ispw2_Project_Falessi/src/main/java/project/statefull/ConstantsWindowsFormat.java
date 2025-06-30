@@ -21,6 +21,6 @@ public class ConstantsWindowsFormat {
     // depends where is loaded the refactored methods
     public static final Path REFACTOR_BASE_PATH = Paths.get("C:\\isw2\\refactoring");
     public static final Path REFACTOR_BASE_BOOKKEEPER_PATH=REFACTOR_BASE_PATH.resolve("bookkeeper").resolve("bookkeeper-release-4.1.0");
-    public static final Path REFACTOR_BASE_OPENJPA_PATH=REFACTOR_BASE_PATH.resolve("openjpa").resolve("openjpa");
-    public static final Path REFACTORED_CLASS_BOOKKEEPER= Path.of("src/main/java/org/apache/hedwig/admin/console/HedwigConsole.java");
+    public static final Path REFACTOR_BASE_OPENJPA_PATH=REFACTOR_BASE_PATH.resolve("openjpa").resolve("openjpa-0.9.7").resolve("openjpa-0.9.7");
+
 }

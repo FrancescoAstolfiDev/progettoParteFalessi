@@ -3,6 +3,7 @@ package project.models;
 public class MethodInstance {
     private String releaseName;
     private String classPath;
+    private String className;
     private String methodName;
     private String signature;
     private String fullSignature;
@@ -55,10 +56,11 @@ public class MethodInstance {
                 method.getReleaseName():"0.0.0";
         String filePath = method.getClassPath() != null ?
                 method.getClassPath() : "anonymous";
+        String className=method.getClassName() != null ? method.getClassName():"anonymous";
         String methodName = method.getMethodName() != null ?
                 method.getMethodName() : "anonymous";
         // Use full class name + method name as key
-        return releaseName + "#" + filePath + "#"  + methodName;
+        return releaseName + "#" + filePath +"#"+ className+ "#"  + methodName;
     }
 
     public String getReleaseName() {
@@ -102,6 +104,16 @@ public class MethodInstance {
     public void setMethodName(String methodName) {
         this.methodName = methodName;
     }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
+
 
     public String getSignature() {
         return signature;

@@ -3,6 +3,7 @@ package project.utils;
 
 import project.models.MethodInstance;
 import project.models.Release;
+import project.models.Ticket;
 import project.statefull.BookkeeperEntry;
 import project.statefull.OpenjpaEntry;
 
@@ -19,8 +20,11 @@ public enum Projects implements EntryProject{
         this.entryProject=entryProject;
     }
     public static Projects fromString(String projectName) {
+        // Convert input to uppercase as required
+        String upperCaseProjectName = projectName.toUpperCase();
         for (Projects project : Projects.values()) {
-            if (project.getProjectName().equalsIgnoreCase(projectName)) {
+            // Compare with enum name directly since we've already converted to uppercase
+            if (project.name().equals(upperCaseProjectName)) {
                 return project;
             }
         }
@@ -68,6 +72,26 @@ public enum Projects implements EntryProject{
     }
 
     @Override
+    public MethodInstance getMethodToRefactor() {
+        return entryProject.getMethodToRefactor();
+    }
+
+    @Override
+    public void setTickets(Release release, List<Ticket> tickets) {
+         entryProject.setTickets(release,tickets);
+    }
+
+    @Override
+    public Map<String,List<Ticket>> getTickets() {
+        return entryProject.getTickets();
+    }
+
+    @Override
+    public void setRefactoredClass(List<Release> releaseList) {
+        entryProject.setRefactoredClass(releaseList);
+    }
+
+    @Override
     public String getProjectName(){
         return entryProject.getProjectName();
     }
@@ -88,4 +112,5 @@ public enum Projects implements EntryProject{
         }
         return null;
     }
+
 }

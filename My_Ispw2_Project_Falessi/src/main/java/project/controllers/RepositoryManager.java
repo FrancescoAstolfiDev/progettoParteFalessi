@@ -21,11 +21,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 
@@ -358,20 +354,27 @@ public class RepositoryManager {
         }
     }
 
+
+
+
+
     protected void checkoutRelease(RevCommit commit, Path commitTempDir, boolean processAllCommits) {
         try {
+            // Prima prova un checkout pulito
             if (tryCheckout(commit, CheckoutStrategy.CLEAN)) {
-                finalizeCheckout(commitTempDir, commit, processAllCommits);
+                finalizeCheckoutWithNestedClasses(commitTempDir, commit, processAllCommits);
                 return;
             }
 
+            // Se fallisce, prova con stash
             if (tryCheckout(commit, CheckoutStrategy.STASH)) {
-                finalizeCheckout(commitTempDir, commit, processAllCommits);
+                finalizeCheckoutWithNestedClasses(commitTempDir, commit, processAllCommits);
                 return;
             }
 
+            // Ultima risorsa: elimina i file problematici
             if (tryCheckout(commit, CheckoutStrategy.DELETE_PROBLEMATIC)) {
-                finalizeCheckout(commitTempDir, commit, processAllCommits);
+                finalizeCheckoutWithNestedClasses(commitTempDir, commit, processAllCommits);
                 return;
             }
 
@@ -383,9 +386,103 @@ public class RepositoryManager {
             };
 
         } catch (GitAPIException e) {
-            throw new CostumException("failed to checkout commit " + commit.getName(),e);
+            throw new CostumException("failed to checkout commit " + commit.getName(), e);
         }
     }
+    private void finalizeCheckoutWithNestedClasses(Path commitTempDir, RevCommit commit, boolean processAllCommits) {
+        ensureTempDirectoryExists(commitTempDir);
+        // Modifica qui per gestire le classi annidate
+        exportCodeToDirectoryWithNested(commit, commitTempDir, processAllCommits);
+    }
+
+    private void exportCodeToDirectoryWithNested(RevCommit commit, Path targetDir, boolean processAllCommits) {
+        try {
+            int processedFilesCount = handleCachedFile(targetDir);
+            int maxFilesToProcess = ConstantSize.MAX_CLASSES_PER_COMMIT;
+
+            if (processedFilesCount < maxFilesToProcess) {
+                // Modifica per gestire le classi annidate
+                processCommitFilesWithNested(commit, targetDir, processAllCommits, processedFilesCount, maxFilesToProcess);
+            }
+
+            logProcessedFilesCount(targetDir);
+        } catch (Exception e) {
+            LOGGER.error("Error during export of commit files: {} ", commit.getName(), e);
+        }
+    }
+
+    private void processCommitFilesWithNested(RevCommit commit, Path targetDir, boolean processAllCommits,
+                                              int processedFilesCount, int maxFilesToProcess) throws IOException {
+        try (RevWalk revWalk = new RevWalk(repository);
+             DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE)) {
+
+            df.setRepository(repository);
+            df.setDiffComparator(RawTextComparator.DEFAULT);
+            df.setDetectRenames(true);
+
+            RevCommit parent = commit.getParentCount() > 0 ? revWalk.parseCommit(commit.getParent(0).getId()) : null;
+            List<DiffEntry> diffs = df.scan(parent == null ? null : parent.getTree(), commit.getTree());
+
+            Map<String, Set<String>> nestedClassesMap = new HashMap<>();
+            List<DiffEntry> javaFiles = filterJavaFilesWithNested(diffs, nestedClassesMap);
+            LOGGER.info("Found {} Java files in commit (including nested classes)", javaFiles.size());
+
+            processJavaFilesWithNested(javaFiles, commit, targetDir, processAllCommits,
+                    processedFilesCount, maxFilesToProcess, nestedClassesMap);
+        }
+    }
+    private List<DiffEntry> filterJavaFilesWithNested(List<DiffEntry> diffs, Map<String, Set<String>> nestedClassesMap) {
+        List<DiffEntry> javaFiles = new ArrayList<>();
+        for (DiffEntry entry : diffs) {
+            if (entry.getChangeType() != DiffEntry.ChangeType.DELETE) {
+                String path = entry.getNewPath();
+                if (path.endsWith(".java") && !isTestFile(path)) {
+                    javaFiles.add(entry);
+                    // Aggiungi un set vuoto per ogni file Java per le sue classi annidate
+                    nestedClassesMap.put(path, new HashSet<>());
+                }
+            }
+        }
+        return javaFiles;
+    }
+
+    private void processJavaFilesWithNested(List<DiffEntry> javaFiles, RevCommit commit, Path targetDir,
+                                            boolean processAllCommits, int processedFilesCount, int maxFilesToProcess,
+                                            Map<String, Set<String>> nestedClassesMap) throws IOException {
+        for (DiffEntry entry : javaFiles) {
+            String path = entry.getNewPath();
+            try (TreeWalk treeWalk = TreeWalk.forPath(repository, path, commit.getTree())) {
+                if (treeWalk != null) {
+                    byte[] content = repository.open(treeWalk.getObjectId(0)).getBytes();
+
+                    if (processAllCommits || processedFilesCount < maxFilesToProcess) {
+                        writeFileToTarget(targetDir, path, content);
+                        processedFilesCount++;
+
+                        // Processa le classi annidate del file
+                        Set<String> nestedClasses = nestedClassesMap.get(path);
+                        if (nestedClasses != null && !nestedClasses.isEmpty()) {
+                            for (String nestedClass : nestedClasses) {
+                                if (processedFilesCount < maxFilesToProcess) {
+                                    // Le classi annidate sono già incluse nel file principale
+                                    processedFilesCount++;
+                                } else {
+                                    // Cache the nested class information
+                                    cachedFiles.put(path + "$" + nestedClass, content);
+                                }
+                            }
+                        }
+                    } else {
+                        cachedFiles.put(path, content);
+                    }
+                }
+            }
+        }
+    }
+
+
+
+
 
     private enum CheckoutStrategy {
         CLEAN,
@@ -455,10 +552,7 @@ public class RepositoryManager {
     }
 
 
-    private void finalizeCheckout(Path commitTempDir, RevCommit commit, boolean processAllCommits) {
-        ensureTempDirectoryExists(commitTempDir);
-        exportCodeToDirectory(commit, commitTempDir, processAllCommits);
-    }
+
 
 
     public  int  handleCachedFile(Path targetDir) throws IOException {

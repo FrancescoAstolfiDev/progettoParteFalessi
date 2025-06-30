@@ -16,3 +16,39 @@ Discarded Features (10):
   - nr
   - nSmell
 
+
+=== Feature Selection Results for Release 4 ===
+Feature Selection ID: FS_R4_1
+Selected Features (1):
+  - age
+Discarded Features (11):
+  - loc
+  - wmc
+  - assignmentsQty
+  - mathOperationsQty
+  - qtyTryCatch
+  - qtyReturn
+  - fanin
+  - fanout
+  - nAuth
+  - nr
+  - nSmell
+
+
+=== Feature Selection Results for Release 4 ===
+Feature Selection ID: FS_R4_1
+Selected Features (2):
+  - loc
+  - age
+Discarded Features (10):
+  - wmc
+  - assignmentsQty
+  - mathOperationsQty
+  - qtyTryCatch
+  - qtyReturn
+  - fanin
+  - fanout
+  - nAuth
+  - nr
+  - nSmell
+

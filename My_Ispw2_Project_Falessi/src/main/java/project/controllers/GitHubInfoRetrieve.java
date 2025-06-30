@@ -1,5 +1,7 @@
 package project.controllers;
 
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -141,22 +143,41 @@ public class GitHubInfoRetrieve {
     }
 
 
-    private List<MethodInstance> extractMethodsFromFile(String fileContent, String filePath) {
+    private List<MethodInstance> extractMethodsFromFile(String fileContent, String filePath, String className) {
         List<MethodInstance> methods = new ArrayList<>();
         JavaParser javaParser = new JavaParser();
 
-        // Parse the file content directly into a CompilationUnit
-        CompilationUnit compilationUnit = javaParser.parse(fileContent).getResult()
+        CompilationUnit cu = javaParser.parse(fileContent).getResult()
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Java code"));
 
-        // Extract methods from the CompilationUnit
-        compilationUnit.findAll(MethodDeclaration.class).forEach(methodDeclaration -> {
-            // Use the constructor with parameters to create a MethodInstance instance
-            MethodInstance methodInstance = new MethodInstance(filePath, methodDeclaration.getNameAsString(), methodDeclaration.getSignature().toString());
+        // Cerca tutti i metodi nel file, tenendo traccia della gerarchia delle classi
+        cu.findAll(MethodDeclaration.class).forEach(methodDecl -> {
+            String containingClassName = getContainingClassName(methodDecl);
+            String fullClassName = className != null ? className : containingClassName;
+
+            MethodInstance methodInstance = new MethodInstance();
+            methodInstance.setClassPath(filePath);
+            methodInstance.setClassName(fullClassName);
+            methodInstance.setMethodName(methodDecl.getNameAsString());
+            methodInstance.setSignature(methodDecl.getSignature().toString());
+
             methods.add(methodInstance);
         });
+
         return methods;
     }
+    private String getContainingClassName(MethodDeclaration methodDecl) {
+        List<String> classNames = new ArrayList<>();
+
+        methodDecl.walk(Node.TreeTraversal.PARENTS, node -> {
+            if (node instanceof ClassOrInterfaceDeclaration classDecl) {
+                classNames.add(0, classDecl.getNameAsString());
+            }
+        });
+        return String.join("$", classNames);
+    }
+
+
 
 
 
@@ -266,7 +287,6 @@ public class GitHubInfoRetrieve {
     }
 
     public void getClassFilesOfCommit(Release release) throws IOException {
-
         TreeWalk treeWalk = new TreeWalk(repo);
         RevCommit commit = release.getLastCommitPreRelease();
         RevTree tree = commit.getTree();
@@ -277,7 +297,6 @@ public class GitHubInfoRetrieve {
             String filePath = treeWalk.getPathString();
 
             if (filePath.contains(SUFFIX) && !filePath.contains(PREFIX)) {
-
                 ObjectId objectId = treeWalk.getObjectId(0);
                 ObjectLoader loader = null;
                 try {
@@ -285,15 +304,64 @@ public class GitHubInfoRetrieve {
                 } catch (MissingObjectException e) {
                     continue;
                 }
+
                 byte[] fileContentBytes = loader.getBytes();
                 String fileContent = new String(fileContentBytes);
-                ClassFile classFile = new ClassFile(fileContent, filePath);
-                release.addClassFile(classFile);
+
+                // Analizza il contenuto per trovare tutte le classi e i metodi
+                extractClassesAndMethods(fileContent, filePath, release);
             }
         }
         treeWalk.close();
-
     }
+
+
+    private void extractClassesAndMethods(String fileContent, String filePath, Release release) {
+        JavaParser javaParser = new JavaParser();
+        CompilationUnit cu = javaParser.parse(fileContent).getResult()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Java code"));
+
+        // Estrai tutte le classi (principali e annidate)
+        cu.findAll(ClassOrInterfaceDeclaration.class).forEach(classDecl -> {
+            String className = getFullClassName(classDecl);
+
+            // Crea un nuovo ClassFile per ogni classe (principale o annidata)
+            ClassFile classFile = new ClassFile(fileContent, filePath);
+            classFile.setClassName(className); // Aggiungiamo il nome completo della classe
+
+            // Estrai i metodi della classe
+            classDecl.getMethods().forEach(methodDecl -> {
+                MethodInstance methodInstance = new MethodInstance();
+                methodInstance.setClassPath(filePath);
+                methodInstance.setClassName(className); // Usa il nome completo della classe
+                methodInstance.setMethodName(methodDecl.getNameAsString());
+                methodInstance.setSignature(methodDecl.getSignature().toString());
+                methodInstance.setReleaseName(release.getName());
+
+                // Aggiungi il metodo alla classe
+                classFile.addMethod(methodInstance);
+            });
+
+            // Aggiungi la classe alla release
+            release.addClassFile(classFile);
+        });
+    }
+
+    private String getFullClassName(ClassOrInterfaceDeclaration classDecl) {
+        // Ottieni il nome completo della classe includendo le classi annidate
+        List<String> classNames = new ArrayList<>();
+        classNames.add(classDecl.getNameAsString());
+
+        // Risali l'albero dei nodi per trovare le classi contenitori
+        classDecl.walk(Node.TreeTraversal.PARENTS, node -> {
+            if (node instanceof ClassOrInterfaceDeclaration parentClass) {
+                classNames.add(0, parentClass.getNameAsString());
+            }
+        });
+
+        return String.join("$", classNames);
+    }
+
 
     /**
      * Ottiene il contenuto di un file a un commit specifico
@@ -348,7 +416,20 @@ public class GitHubInfoRetrieve {
 
         try (DiffFormatter diffFormatter = setupDiffFormatter()) {
             List<DiffEntry> diffs = diffFormatter.scan(parent.getTree(), commit.getTree());
-            processChangedFiles(diffs, parent, commit, changedMethods);
+
+            for (DiffEntry diff : diffs) {
+                if (isRelevantJavaFile(diff)) {
+                    String oldContent = getFileContentAtCommit(diff.getOldPath(), parent);
+
+                    if (diff.getChangeType() == DiffEntry.ChangeType.DELETE) {
+                        // Per i file cancellati, estrai tutti i metodi come modificati
+                        changedMethods.addAll(extractMethodsFromFile(oldContent, diff.getOldPath(), null));
+                    } else if (diff.getChangeType() == DiffEntry.ChangeType.MODIFY) {
+                        String newContent = getFileContentAtCommit(diff.getNewPath(), commit);
+                        processModifiedFile(oldContent, newContent, diff.getOldPath(), changedMethods);
+                    }
+                }
+            }
         } catch (IOException e) {
             LOGGER.error("Errore nell'analisi delle modifiche del commit: {}", e.getMessage());
         }
@@ -356,7 +437,8 @@ public class GitHubInfoRetrieve {
         return changedMethods;
     }
 
-private RevCommit getParentCommit(RevCommit commit) {
+
+    private RevCommit getParentCommit(RevCommit commit) {
     try {
         return commit.getParent(0);
     } catch (Exception e) {
@@ -372,59 +454,51 @@ private DiffFormatter setupDiffFormatter() {
     return diffFormatter;
 }
 
-private void processChangedFiles(List<DiffEntry> diffs, RevCommit parent, RevCommit commit, 
-                               List<MethodInstance> changedMethods) throws IOException {
-    for (DiffEntry diff : diffs) {
-        if (isRelevantFile(diff)) {
-            processFileChange(diff, parent, commit, changedMethods);
-        }
-    }
-}
 
-private boolean isRelevantFile(DiffEntry diff) {
-    return (diff.getChangeType() == DiffEntry.ChangeType.MODIFY ||
-            diff.getChangeType() == DiffEntry.ChangeType.DELETE) &&
-            diff.getOldPath().endsWith(SUFFIX) &&
-            !diff.getOldPath().contains(PREFIX);
-}
 
-private void processFileChange(DiffEntry diff, RevCommit parent, RevCommit commit, 
-                             List<MethodInstance> changedMethods) throws IOException {
-    String oldContent = getFileContentAtCommit(diff.getOldPath(), parent);
-    List<MethodInstance> oldMethods = extractMethodsFromFile(oldContent, diff.getOldPath());
 
-    if (diff.getChangeType() == DiffEntry.ChangeType.DELETE) {
-        changedMethods.addAll(oldMethods);
-    } else {
-        processModifiedFile(diff, commit, oldContent, oldMethods, changedMethods);
-    }
-}
 
-private void processModifiedFile(DiffEntry diff, RevCommit commit, String oldContent, 
-                               List<MethodInstance> oldMethods, List<MethodInstance> changedMethods) throws IOException {
-    String newContent = getFileContentAtCommit(diff.getNewPath(), commit);
-    List<MethodInstance> newMethods = extractMethodsFromFile(newContent, diff.getNewPath());
 
-    for (MethodInstance oldMethod : oldMethods) {
-        processMethod(oldMethod, newMethods, oldContent, newContent, changedMethods);
-    }
-}
 
-private void processMethod(MethodInstance oldMethod, List<MethodInstance> newMethods, 
-                         String oldContent, String newContent, List<MethodInstance> changedMethods) {
-    boolean found = false;
-    for (MethodInstance newMethod : newMethods) {
-        if (oldMethod.getMethodName().equals(newMethod.getMethodName())) {
-            found = true;
-            if (!oldContent.equals(newContent)) {
-                changedMethods.add(newMethod);
+    private void processModifiedFile(String oldContent, String newContent, String filePath, List<MethodInstance> changedMethods) {
+        // Estrai i metodi da entrambe le versioni del file
+        List<MethodInstance> oldMethods = extractMethodsFromFile(oldContent, filePath, null);
+        List<MethodInstance> newMethods = extractMethodsFromFile(newContent, filePath, null);
+
+        // Confronta i metodi per trovare quelli modificati o rimossi
+        for (MethodInstance oldMethod : oldMethods) {
+            boolean found = false;
+            for (MethodInstance newMethod : newMethods) {
+                if (isSameMethod(oldMethod, newMethod)) {
+                    found = true;
+                    if (!oldContent.equals(newContent)) {
+                        // Il metodo è stato modificato
+                        changedMethods.add(newMethod);
+                    }
+                    break;
+                }
             }
-            break;
+            if (!found) {
+                // Il metodo è stato rimosso
+                changedMethods.add(oldMethod);
+            }
         }
     }
-    if (!found) {
-        changedMethods.add(oldMethod);
+
+    private boolean isSameMethod(MethodInstance method1, MethodInstance method2) {
+        return method1.getClassName().equals(method2.getClassName()) &&
+                method1.getMethodName().equals(method2.getMethodName()) &&
+                method1.getSignature().equals(method2.getSignature());
     }
-}
+
+    private boolean isRelevantJavaFile(DiffEntry diff) {
+        return (diff.getChangeType() == DiffEntry.ChangeType.MODIFY ||
+                diff.getChangeType() == DiffEntry.ChangeType.DELETE) &&
+                diff.getOldPath().endsWith(SUFFIX) &&
+                !diff.getOldPath().contains(PREFIX);
+    }
+
+
+
 
 }

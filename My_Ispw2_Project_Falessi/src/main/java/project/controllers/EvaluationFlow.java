@@ -239,8 +239,8 @@ public class EvaluationFlow {
     // Helper method to process a single release
     private void processRelease(int releaseIndex) throws Exception {
         //recupero i dati dai file .arff
-        String trainFileName = "bookkeeper" + "_Train_R" + releaseIndex + ".arff";
-        String testFileName = "openjpa" + "_Test_R" + releaseIndex + ".arff";
+        String trainFileName = projectName + "_Train_R" + releaseIndex + ".arff";
+        String testFileName = projectName + "_Test_R" + releaseIndex + ".arff";
         String trainFilePath = ConstantsWindowsFormat.ARFF_PATH.resolve(trainFileName).toString();
         String testFilePath = ConstantsWindowsFormat.ARFF_PATH.resolve(testFileName).toString();
 

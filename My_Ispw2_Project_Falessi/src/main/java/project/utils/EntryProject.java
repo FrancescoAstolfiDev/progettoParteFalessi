@@ -1,6 +1,8 @@
 package project.utils;
 
 import project.models.MethodInstance;
+import project.models.Release;
+import project.models.Ticket;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -16,4 +18,8 @@ public interface EntryProject {
     Map<String,MethodInstance> getFilledRefactoredMethods();
     boolean isRefactoredMethodsFilled();
     void setMethods(Map<String,MethodInstance> methods);
+    MethodInstance getMethodToRefactor();
+    void setTickets (Release release, List<Ticket> tickets);
+    Map<String,List<Ticket>> getTickets();
+    void setRefactoredClass(List<Release> releaseList);
 }

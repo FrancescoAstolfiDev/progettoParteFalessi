@@ -33,12 +33,12 @@ public class MetricsCalculator {
     private final RepositoryManager repositoryManager;
     private boolean resultsChanged;
     private final Map <String,Map<String,MethodInstance>> resultCommitsMethods=new ConcurrentHashMap<>();
-
+    private final Projects project;
 
     /**
      * Constructor that takes a GitHubInfoRetrieve object and a project name
      */
-    public MetricsCalculator(GitHubInfoRetrieve gitHubInfoRetrieve, String projectName) throws IOException {
+    public MetricsCalculator(GitHubInfoRetrieve gitHubInfoRetrieve, String projectName, Projects project) throws IOException {
         this.gitHubInfoRetrieve = gitHubInfoRetrieve;
         this.projectName = projectName;
         Files.createDirectories(Paths.get(String.valueOf(tempDirPath)));
@@ -48,7 +48,9 @@ public class MetricsCalculator {
         // Initialize the repository manager
         this.repositoryManager = new RepositoryManager(gitHubInfoRetrieve);
         this.resultsChanged=false;
+        this.project=project;
         // Load the commit cache using the optimized method
+        //Caching.removeOldestCommitsFromCache(projectName,100);
         Caching.loadCommitCache(resultCommitsMethods, null,projectName);
     }
     /**
@@ -137,7 +139,8 @@ public class MetricsCalculator {
                 Map<String,MethodInstance> commitMetrics=new HashMap<>();
                 for( MethodInstance method: commitCheck.methods){
                     method.setReleaseName(release.getName());
-                    ClassFile classFile=release.getClassFileByPath(method.getClassPath());
+                    String classKey=ClassFile.getKey(method.getClassPath(),method.getClassName());
+                    ClassFile classFile=release.getClassFileByKey(classKey);
                     if(classFile!=null)classFile.addMethod(method);
                     commitMetrics.put(MethodInstance.createMethodKey(method),method);
                 }
@@ -495,7 +498,8 @@ public class MetricsCalculator {
 
     private void copyRevisions(Release currentRelease, Release previousRelease) {
         for (ClassFile currFile : currentRelease.getReleaseAllClass()) {
-            ClassFile prevFile = previousRelease.getClassFileByPath(currFile.getPath());
+            String classKey=ClassFile.getKey(currFile);
+            ClassFile prevFile = previousRelease.getClassFileByKey(classKey);
             copyFileRevisions(currFile, prevFile);
         }
     }
@@ -562,9 +566,13 @@ public class MetricsCalculator {
             for(ClassFile file:allReleaseFiles){
                 ClassFile preFile;
                 try{
-                    preFile = precRelease.getClassFileByPath(file.getPath());
+                    preFile = precRelease.getClassFileByKey(ClassFile.getKey(file));
                     int age = (int) ((file.getCreationDate().getTime() - preFile.getCreationDate().getTime()) /86400000);
                     age = age + preFile.getAge();
+                    // Ensure age is never less than the previous age
+                    if (age < preFile.getAge()) {
+                        age = preFile.getAge();
+                    }
                     file.setAge(age);
                 }
                 catch(Exception e){
@@ -584,58 +592,79 @@ public class MetricsCalculator {
         }
     }
 
-    private void updateNAuth(List<String> modifiedFiles,Release release,String authName){
-        for(String path:modifiedFiles){
-            ClassFile file = release.getClassFileByPath(path);
-            if (file != null){
-                file.addAuthor(authName);
-            }
-        }
-    }
-    private void updateNr(List<String> modifiedFiles,Release release){
-        for(String path:modifiedFiles){
-            ClassFile file = release.getClassFileByPath(path);
-            if(file != null){
-                file.incrementNR();
+    private void updateNAuth(List<String> modifiedFiles, Release release, String authName) {
+        for (String path : modifiedFiles) {
+            List<ClassFile> classFiles = release.getClassFileByPath(path);
+            for (ClassFile file : classFiles) {
+                if (file != null) {
+                    file.addAuthor(authName);
+                }
             }
         }
     }
 
-    private void calculateDateOfCreation(Release currentRelease, Release precRelease, Date commitDate, List<String> addedFiles){
-        if(currentRelease.getId() == precRelease.getId()){
-            for(String file:addedFiles){
-                ClassFile currFile = currentRelease.getClassFileByPath(file);
-                if(currFile != null && (currFile.getCreationDate() == null || currFile.getCreationDate().after(commitDate))){
-                    currFile.setCreationDate(commitDate);
+    private void updateNr(List<String> modifiedFiles, Release release) {
+        for (String path : modifiedFiles) {
+            List<ClassFile> classFiles = release.getClassFileByPath(path);
+            for (ClassFile file : classFiles) {
+                if (file != null) {
+                    file.incrementNR();
+                }
+            }
+        }
+    }
+
+
+
+    private void calculateDateOfCreation(Release currentRelease, Release precRelease, Date commitDate, List<String> addedFiles) {
+        if (currentRelease.getId() == precRelease.getId()) {
+            for (String file : addedFiles) {
+                List<ClassFile> currFiles = currentRelease.getClassFileByPath(file);
+                for (ClassFile currFile : currFiles) {
+                    if (currFile != null && (currFile.getCreationDate() == null || currFile.getCreationDate().after(commitDate))) {
+                        currFile.setCreationDate(commitDate);
+                    }
                 }
             }
             return;
         }
-        parserFiles(addedFiles,precRelease,currentRelease,commitDate);
+        parserFiles(addedFiles, precRelease, currentRelease, commitDate);
     }
 
-    private void parserFiles(List<String> addedFiles,Release precRelease,Release currentRelease,Date commitDate){
-        for(String file:addedFiles){
-            ClassFile precFile = precRelease.getClassFileByPath(file);
-            //precFile == null se nella release precedente era presente la classe java in questione
-            if(precFile == null){
-                ClassFile currFile = currentRelease.getClassFileByPath(file);
-                if(currFile != null && currFile.getCreationDate() != null){
-                    if(commitDate.before(currFile.getCreationDate())){
-                        currFile.setCreationDate(commitDate);
-                    }
-                }
-                else if(currFile != null){
-                    currFile.setCreationDate(commitDate);
-                }
-            }
-            //qui la classe java è stata introdotta nella più recente release
-            else if(currentRelease.getClassFileByPath(file) != null){
-                currentRelease.getClassFileByPath(file).setCreationDate(commitDate);
-            }
+
+    private void parserFiles(List<String> addedFiles, Release precRelease, Release currentRelease, Date commitDate) {
+        addedFiles.forEach(file ->
+                processFile(file, precRelease, currentRelease, commitDate));
+    }
+
+    private void processFile(String file, Release precRelease, Release currentRelease, Date commitDate) {
+        List<ClassFile> precFiles = precRelease.getClassFileByPath(file);
+        List<ClassFile> currFiles = currentRelease.getClassFileByPath(file);
+
+        if (precFiles.isEmpty()) {
+            updateNewClassFiles(currFiles, commitDate);
+        } else {
+            updateExistingClassFiles(currFiles, commitDate);
         }
     }
 
+    private void updateNewClassFiles(List<ClassFile> currFiles, Date commitDate) {
+        currFiles.stream()
+                .filter(Objects::nonNull)
+                .forEach(currFile -> updateFileCreationDate(currFile, commitDate));
+    }
+
+    private void updateExistingClassFiles(List<ClassFile> currFiles, Date commitDate) {
+        currFiles.stream()
+                .filter(Objects::nonNull)
+                .forEach(currFile -> currFile.setCreationDate(commitDate));
+    }
+
+    private void updateFileCreationDate(ClassFile currFile, Date commitDate) {
+        if (currFile.getCreationDate() == null || commitDate.before(currFile.getCreationDate())) {
+            currFile.setCreationDate(commitDate);
+        }
+    }
 
     // Possibile correzione nel filterCommitsByRelease
     Map<RevCommit,Release> filterCommitsByRelease(Release targetRelease) {
@@ -689,7 +718,6 @@ public class MetricsCalculator {
     }
     private Map<String, MethodInstance> processRefactoredMethods(){
         Map<String,MethodInstance> methodInstanceResults = new HashMap<>();
-        Projects project= Projects.fromString(projectName);
         if(project.isRefactoredMethodsFilled()){
             return project.getFilledRefactoredMethods();
         }
@@ -701,6 +729,7 @@ public class MetricsCalculator {
                 classResult, release, sourcePath, methodsChanged, methodInstanceResults));
         project.setMethods(methodInstanceResults);
         return methodInstanceResults;
+
     }
 
     private void processClassResult(CKClassResult classResult, Release release, Path sourcePath,
@@ -709,8 +738,6 @@ public class MetricsCalculator {
         if (classResult.getMethods() == null || classResult.getMethods().isEmpty()) {
             return;
         }
-
-
         ClassFile filledClass = release.findClassFileByApproxName(classResult.getClassName());
         if (filledClass == null) {
             return;
@@ -767,6 +794,7 @@ public class MetricsCalculator {
 
         MethodInstance methodInstance = new MethodInstance();
         methodInstance.setClassPath(filledClass.getPath());
+        methodInstance.setClassName(filledClass.getClassName());
         methodInstance.setMethodName(filledMethod.getMethodName());
         methodInstance.setReleaseName(release.getName());
 
@@ -803,6 +831,9 @@ public class MetricsCalculator {
         String methodKey;
         for(String  commitHash: releaseData.commitsByHash.keySet()){ // iterate on only the commit for the actual release
             Map<String,MethodInstance> methods=resultCommitsMethods.get(commitHash);
+            if(methods==null){
+                continue;
+            }
             for(MethodInstance method: methods.values()){
                 methodKey=MethodInstance.createMethodKey(method);
                 if(releaseData.releaseResults.containsKey(methodKey) && releaseData.releaseResults.get(methodKey).getAge()<method.getAge()){
@@ -814,14 +845,13 @@ public class MetricsCalculator {
 
     private void assignBuggyness(ReleaseData data) {
         reorderReleaseResults(data);
-        Projects project=Projects.fromString(projectName);
+        List<Ticket> refactoredTickets=new ArrayList<>();
         if(project.afterRefactoredRelease(data.release,releaseList)){
             Map<String,MethodInstance> refactoredMethods=processRefactoredMethods();
             data.releaseResults.putAll(refactoredMethods);
         }
         if (!resultsChanged) return;
         resultsChanged = false;
-
         LOGGER.info("Initializing buggyness assignment");
         // Reset buggyness for all methods
         data.releaseResults.values().forEach(method -> method.setBuggy(false));
@@ -852,40 +882,90 @@ public class MetricsCalculator {
             if (checkInj == null ) {
                 continue;
             }
-            processTicketChanges(ticket, methodsByRelease);
+            processTicketChanges(ticket, methodsByRelease ,refactoredTickets,data.commitsByHash );
         }
-
+        project.setTickets(data.release,refactoredTickets );
         LOGGER.info("Buggyness assignment completed");
     }
 
+
     private void processTicketChanges(Ticket ticket,
-                                      Map<Integer, Map<String, List<MethodInstance>>> methodsByRelease) {
+                                      Map<Integer, Map<String, List<MethodInstance>>> methodsByRelease,
+                                      List<Ticket> refactoredTickets,
+                                      Map<String, RevCommit> commitsByHash) {
         Release injected = ticket.getIv() != null ? ticket.getIv() : ticket.getCalculatedIv();
         Release fixed = ticket.getFv();
 
-        for (RevCommit commit : getSortedCommit(ticket.getAssociatedCommits())) {
-            String commitHash = commit.getId().getName();
+        getSortedCommit(ticket.getAssociatedCommits()).stream()
+                .map(commit -> processCommitMethods(commit, commitsByHash))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .forEach(methodData -> {
+                    updateRefactoredTickets(ticket, methodData.changedMethods, refactoredTickets);
+                    updateBuggyness(methodsByRelease, methodData.modifiedSignatures, injected.getId(), fixed.getId());
+                });
+    }
 
-            // Get the methods modified by the commit
-            List<MethodInstance> methodsChanged = fillMethodsBuggy(commit);
-            Map<String, MethodInstance> commitMethods = resultCommitsMethods.get(commitHash);
+    private Optional<MethodData> processCommitMethods(RevCommit commit, Map<String, RevCommit> commitsByHash) {
+        String commitHash = commit.getId().getName();
+        List<MethodInstance> methodsChanged = fillMethodsBuggy(commit);
+        Map<String, MethodInstance> commitMethods = resultCommitsMethods.get(commitHash);
 
-            if (commitMethods == null || methodsChanged.isEmpty()) {
-                continue;
-            }
+        if (!isValidCommit(commitMethods, methodsChanged, commitsByHash.get(commitHash))) {
+            return Optional.empty();
+        }
 
-            // Create set of actually modified methods
-            Set<String> modifiedMethodSignatures = new HashSet<>();
-            for (MethodInstance changedMethod : methodsChanged) {
-                for (MethodInstance commitMethod : commitMethods.values()) {
-                    if (commitMethod.getMethodName().equals(changedMethod.getMethodName()) && commitMethod.getClassPath().equals(changedMethod.getClassPath())) {
-                        modifiedMethodSignatures.add(commitMethod.getClassPath() + "#" + commitMethod.getMethodName());
-                    }
+        Set<String> modifiedSignatures = extractModifiedSignatures(methodsChanged, commitMethods);
+        return Optional.of(new MethodData(methodsChanged, modifiedSignatures));
+    }
+
+    private boolean isValidCommit(Map<String, MethodInstance> commitMethods,
+                                  List<MethodInstance> methodsChanged,
+                                  RevCommit commit) {
+        return commitMethods != null && !methodsChanged.isEmpty() && commit != null;
+    }
+
+    private Set<String> extractModifiedSignatures(List<MethodInstance> methodsChanged,
+                                                  Map<String, MethodInstance> commitMethods) {
+        Set<String> signatures = new HashSet<>();
+        for (MethodInstance changedMethod : methodsChanged) {
+            for (MethodInstance commitMethod : commitMethods.values()) {
+                if (isSameMethod(commitMethod, changedMethod)) {
+                    signatures.add(commitMethod.getClassPath() + "#" + commitMethod.getMethodName());
                 }
             }
+        }
+        return signatures;
+    }
 
-            // Update buggyness for the affected releases
-            updateBuggyness(methodsByRelease, modifiedMethodSignatures, injected.getId(), fixed.getId());
+    private boolean isSameMethod(MethodInstance method1, MethodInstance method2) {
+        return method1.getMethodName().equals(method2.getMethodName()) &&
+                method1.getClassPath().equals(method2.getClassPath());
+    }
+
+    private void updateRefactoredTickets(Ticket ticket,
+                                         List<MethodInstance> changedMethods,
+                                         List<Ticket> refactoredTickets) {
+        boolean shouldAdd = changedMethods.stream()
+                .anyMatch(this::isMethodToRefactor);
+
+        if (shouldAdd && !refactoredTickets.contains(ticket)) {
+            refactoredTickets.add(ticket);
+        }
+    }
+
+    private boolean isMethodToRefactor(MethodInstance method) {
+        return project.getMethodToRefactor().getMethodName().contains(method.getMethodName()) &&
+                method.getClassPath().contains(project.getMethodToRefactor().getClassPath());
+    }
+
+    private static class MethodData {
+        final List<MethodInstance> changedMethods;
+        final Set<String> modifiedSignatures;
+
+        MethodData(List<MethodInstance> changedMethods, Set<String> modifiedSignatures) {
+            this.changedMethods = changedMethods;
+            this.modifiedSignatures = modifiedSignatures;
         }
     }
 
@@ -912,8 +992,6 @@ public class MetricsCalculator {
             }
         }
     }
-
-
 
     //un metodo utile per ordinare i commit in ordine temporale
     private void sortCommits(List<RevCommit> commits){

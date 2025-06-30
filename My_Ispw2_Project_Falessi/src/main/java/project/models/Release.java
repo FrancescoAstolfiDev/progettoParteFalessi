@@ -85,46 +85,40 @@ public class Release {
 		return this.allReleaseCommits;
 	}
 
-
-
 	public void addClassFile(ClassFile classFile) {
-
-		this.classFileMap.put(classFile.getPath(), classFile);
+		this.classFileMap.put(ClassFile.getKey(classFile), classFile);
 	}
 
-	public ClassFile getClassFileByPath(String path) {
-
-		return this.classFileMap.get(path);
-	}
-	public static  String normalizeToModuleAndClass(String fullClassName) {
-		// Rimuove eventuali classi interne o anonime (es. $Anonymous4)
-		int dollarIndex = fullClassName.indexOf('$');
-		String cleanName = (dollarIndex != -1) ? fullClassName.substring(0, dollarIndex) : fullClassName;
-
-		// Trova l'indice del modulo (es. "benchmark")
-		String[] parts = cleanName.split("\\.");
-		for (int i = 0; i < parts.length; i++) {
-			if (parts[i].equals("benchmark")) {
-				// Restituisce da "benchmark" in poi, unito con slash
-				return String.join("/", Arrays.copyOfRange(parts, i, parts.length));
+	public List<ClassFile> getClassFileByPath(String path) {
+		List<ClassFile> classFiles = new ArrayList<>();
+		for (Map.Entry<String, ClassFile> entry : this.classFileMap.entrySet()) {
+			if (entry.getKey().startsWith(path)) {
+				classFiles.add(entry.getValue());
 			}
 		}
-
-		// Se "benchmark" non viene trovato, restituisci solo il nome della classe
-		int lastDot = cleanName.lastIndexOf('.');
-		return  (lastDot != -1) ? cleanName.substring(lastDot + 1) : cleanName;
+		return classFiles;
 	}
 
-	public  ClassFile findClassFileByApproxName(String className) {
-		String normalizedTarget = normalizeToModuleAndClass(className);
+	public ClassFile getClassFileByKey(String keyClass) {
+		return classFileMap.get(keyClass);
+	}
 
+
+
+
+
+
+
+	public  ClassFile findClassFileByApproxName(String classNameToNormalize) {
+		String normalizedClassName = ClassFile.getNameClass(classNameToNormalize);
+		String normalizedPath = ClassFile.extractPath(classNameToNormalize);
 		for (Map.Entry<String, ClassFile> entry : classFileMap.entrySet()) {
-			String normalizedKey = entry.getKey();
-			if (normalizedKey.contains(normalizedTarget)) {
+			ClassFile classFile = entry.getValue();
+			String className=classFile.getClassName();
+			if (className.equals(normalizedClassName) && classFile.getPath().contains(normalizedPath) ) {
 				return entry.getValue();
 			}
 		}
-
 		return null; // Nessuna corrispondenza trovata
 	}
 

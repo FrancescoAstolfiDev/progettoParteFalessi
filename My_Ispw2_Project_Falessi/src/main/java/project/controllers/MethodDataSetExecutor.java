@@ -56,8 +56,7 @@ public class MethodDataSetExecutor {
         List<Ticket> allTickets = jiraInfoRetrieve.retrieveTickets(releaseList);
         LOGGER.info("Retrieved {} tickets" , allTickets.size());
 
-        getAllClassesByRelease(releaseList);
-        LOGGER.info("Retrieved {} classes from all the release " , releaseList.get(releaseList.size()-1).getReleaseAllClass().size() );
+
 
         associateCommitsToTicket(allCommits, allTickets);
         allTickets.removeIf(t -> t.getAssociatedCommits().isEmpty());
@@ -68,8 +67,8 @@ public class MethodDataSetExecutor {
             return;
         }
 
-        double proportion = coldStartProportion();// 2.15
-
+       // double proportion = coldStartProportion();// 2.15
+        double proportion =2.15;// 2.15
 
         //se non ho sufficienti ticket in tutto il progetto posso settare il proportion di tutte le release al valore
         //ottenuto tramite cold start
@@ -90,13 +89,17 @@ public class MethodDataSetExecutor {
                 }
             }
         }
+
         Projects curProject = Projects.fromString(currentProject);
         int split=Math.max(1, (int) (releaseList.size() * curProject.getSplit()));
-
         List<Release> avaiableTrainingRelease = releaseList.subList(0, split);
 
+        curProject.setRefactoredClass(releaseList);
+        getAllClassesByRelease(avaiableTrainingRelease);
+        LOGGER.info("Retrieved {} classes from all the release " , avaiableTrainingRelease.get(avaiableTrainingRelease.size()-1).getReleaseAllClass().size() );
+
         // Initialize the metrics calculator with only the needed commits and the current project name
-        this.metricsCalculator = new MetricsCalculator(this.gitHubInfoRetrieve, this.currentProject);
+        this.metricsCalculator = new MetricsCalculator(this.gitHubInfoRetrieve, this.currentProject , curProject);
         metricsCalculator.calculateAll(avaiableTrainingRelease);
 
         for (int i = 1; i < avaiableTrainingRelease.size()-1; i++) {
@@ -112,7 +115,7 @@ public class MethodDataSetExecutor {
                writeReleaseFile(release, releaseList, DataSetType.TEST,true,allTickets);
             }
         }
-
+        Map<String,List<Ticket>> refactoredTickets=curProject.getTickets();
         CSVtoARFFConverter.executeConversion(currentProject,avaiableTrainingRelease.size());
 
     }
@@ -153,19 +156,13 @@ public class MethodDataSetExecutor {
 
     private void writeReleaseFile(Release curRelease, List<Release> releaseList, DataSetType datasetTipe, boolean isLastRelease , List<Ticket> allTickets) {
         this.currentProcessingRelease = curRelease;
-        List<Ticket> tickets= new ArrayList<>();
-        for(int i=0;i<curRelease.getId();i++){
-            Release release=releaseList.get(i);
-            tickets.addAll(JiraInfoRetrieve.getAllReleaseTicket(release,allTickets));
-        }
-
+        List<Ticket> tickets = new ArrayList<>(JiraInfoRetrieve.getAllReleaseTicket(curRelease, allTickets));
         adjustIvTickets(tickets, curRelease.getCurrentProportion(), releaseList);
         if(isLastRelease){
             tickets.addAll(getAddTicket(releaseList,allTickets));
         }
         try {
-
-            writeFile(releaseList.subList(0,curRelease.getId()), curRelease, tickets, datasetTipe);
+            writeFile( curRelease, tickets, datasetTipe);
         } catch (IOException e) {
             LOGGER.error("Error writing release file: {}" , e.getMessage());
         }
@@ -202,7 +199,7 @@ public class MethodDataSetExecutor {
 
 
 
-    private void writeFile(List<Release> incrementalReleaseList, Release currRelease, List<Ticket> tickets , DataSetType dataSetType) throws IOException {
+    private void writeFile(Release currRelease, List<Ticket> tickets , DataSetType dataSetType) throws IOException {
         // I need to discard the calculation if I already find completed files
         LOGGER.info("\n\ncurrently analyzing release {} " , currRelease.getName());
         String outPath = currentProject.toUpperCase() + dataSetType + currentProcessingRelease.getId() + ".csv";
@@ -223,15 +220,23 @@ public class MethodDataSetExecutor {
         // filtering from all the tickets avaiable the tickets that a release could use
 
        List<Ticket> usableTicket = new ArrayList<>();
-        for (Release release : incrementalReleaseList) {
-            LOGGER.debug("Iterating through release {} " , release.getName());
-            if (release == currRelease) continue;
-            for (Ticket ticket : tickets) {
-                if (ticket.getCalculatedIv().getId() <= release.getId()
-                        && ticket.getCalculatedIv().getId() < ticket.getFv().getId()) {
-                    usableTicket.add(ticket);
-                }
+        Release injectVersion;
+        for (Ticket ticket : tickets) {
+            injectVersion=ticket.getIv()==null?ticket.getCalculatedIv():ticket.getIv();
+            // 1. il bug esiste prima della fine della release
+            // 2. il bug viene iniettato e poi viene aperto
+            // 3. il bug viene prima iniettato e poi fixato
+            // 4. il bug viene fixato prima della fine della release[ se no non so che farmene per la buggyness]
+            // 5. per ottimizzare il processo e diminuire i ticket iv! fv!= iv non ha influenza ai fini della chiusura della release
+            if (injectVersion.getId() <= currRelease.getId() &&
+                    injectVersion.getId() <= ticket.getOv().getId() &&
+                    ticket.getFv().getId() <= currRelease.getId() &&
+                    injectVersion.getId() < ticket.getFv().getId()
+
+            ) {
+                usableTicket.add(ticket);
             }
+
         }
 
         LOGGER.info ("Usable: {}" , usableTicket.size());

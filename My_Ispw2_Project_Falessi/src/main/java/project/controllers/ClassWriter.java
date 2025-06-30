@@ -69,7 +69,7 @@ public class ClassWriter {
             ) {
                 // Header
                 writer.write(String.join(",",
-                        "release", "method", "path",
+                        "release", "method", "path","className",
                         "loc", "wmc", "assignmentsQty", "mathOperationsQty", "qtyTryCatch", "qtyReturn", "fanin", "fanout",
                         "age","nAuth", "nr", "nSmell","buggy"));
                 writer.newLine();
@@ -82,6 +82,7 @@ public class ClassWriter {
                             escapeCsv(result.getReleaseName()),
                             escapeCsv(result.getMethodName()),
                             escapeCsv(String.valueOf(result.getClassPath())),
+                            escapeCsv(String.valueOf(result.getClassName())),
 
                             String.valueOf(result.getLoc()),
                             String.valueOf(result.getWmc()),
