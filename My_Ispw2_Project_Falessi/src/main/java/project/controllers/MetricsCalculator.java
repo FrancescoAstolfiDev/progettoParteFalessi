@@ -402,7 +402,7 @@ public class MetricsCalculator {
         data.commitHashesToProcess = new HashSet<>();
         data.commitsByHash = new HashMap<>();
         getCommitsInCache(data);
-        int cachedCommitsSize = data.releaseCommits.size() - data.commitHashesToProcess.size();
+        int cachedCommitsSize = data.commitsAnalyzed.size();
         LOGGER.info("Found {} commits in cache, need to process {} commits",
                 cachedCommitsSize,
                 data.commitHashesToProcess.size());

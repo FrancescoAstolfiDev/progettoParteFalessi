@@ -26,7 +26,6 @@ public class OpenjpaEntry implements EntryProject {
     private  Map<String,List<Ticket>> ticketsOfInterest = new HashMap<>();
     private   final String refactoredMethodClassPath = "openjpa-kernel/src/main/java/org/apache/openjpa/kernel/jpql/JPQLExpressionBuilder.java";
 
-
     public  void analyzeJavaFile() {
         try {
             Path path = Paths.get("C:\\isw2\\refactoring\\openjpa\\openjpa-0.9.7\\JPQLExpressionBuilder.java");
@@ -102,6 +101,10 @@ public class OpenjpaEntry implements EntryProject {
         return "0.9.7";
     }
 
+    public int getNumStepDataset() {
+        return 12;
+    }
+
     @Override
     public List<MethodInstance> getInitializedRefactoredMethods(){
        return methods;
@@ -135,11 +138,13 @@ public class OpenjpaEntry implements EntryProject {
 
     @Override
     public void setTickets(Release release, List<Ticket> tickets) {
+
         ticketsOfInterest.put(release.getName(), tickets);
     }
 
     @Override
     public Map<String, List<Ticket>> getTickets() {
+
         return ticketsOfInterest;
     }
 

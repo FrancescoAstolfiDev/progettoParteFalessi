@@ -2,8 +2,10 @@ package project.controllers;
 
 import project.models.DataSetType;
 import project.models.ResultsHolder;
+import project.statefull.ConstantSize;
 import project.statefull.ConstantsWindowsFormat;
 import project.utils.CostumException;
+import project.utils.Projects;
 import weka.classifiers.Classifier;
 import weka.filters.supervised.attribute.AttributeSelection;
 import weka.attributeSelection.CfsSubsetEval;
@@ -66,7 +68,6 @@ public class EvaluationFlow {
     RandomForest randomForestClassifier;
     MultilayerPerceptron multilayerPerceptronClassifier;
     SGD sgdClassifier;
-    String projectName;
     // Cache for feature selection filters to avoid redundant computation
     private final java.util.Map<Integer, AttributeSelection> featureSelectionCache = new java.util.HashMap<>();
     // Map to store feature selection IDs
@@ -93,12 +94,10 @@ public class EvaluationFlow {
     List<ResultsHolder> featSelCostSensSGDList;
     List<ResultsHolder> featSelCostSensNBList;
 
-    public EvaluationFlow(String name){
-        this.projectName = name;
+    public EvaluationFlow(){
         //questi sono i classificatori che utilizzo con parametri ottimizzati per velocità
         // Create RandomForest with default settings similar to Weka example
         this.randomForestClassifier = new RandomForest();
-
         // Print available options for RandomForest
         try {
             java.util.Enumeration<weka.core.Option> options = this.randomForestClassifier.listOptions();
@@ -173,11 +172,11 @@ public class EvaluationFlow {
 
 
     private int determineNumRelease() {
-        return Objects.equals(this.projectName, "bookkeeper") ? 4 : 12;
+        return Projects.getNumStepDatasetStatic();
     }
 
     private int determineThreadPoolSize() {
-        int processors = Runtime.getRuntime().availableProcessors();
+        int processors = Math.min(ConstantSize.NUM_THREADS,Runtime.getRuntime().availableProcessors()) ;
         return Math.max(2, processors - 1);
     }
 
@@ -239,8 +238,8 @@ public class EvaluationFlow {
     // Helper method to process a single release
     private void processRelease(int releaseIndex) throws Exception {
         //recupero i dati dai file .arff
-        String trainFileName = projectName + "_Train_R" + releaseIndex + ".arff";
-        String testFileName = projectName + "_Test_R" + releaseIndex + ".arff";
+        String trainFileName = Projects.getTrainProject() + "_Train_R" + releaseIndex + ".arff";
+        String testFileName =Projects.getTestProject() + "_Test_R" + releaseIndex + ".arff";
         String trainFilePath = ConstantsWindowsFormat.ARFF_PATH.resolve(trainFileName).toString();
         String testFilePath = ConstantsWindowsFormat.ARFF_PATH.resolve(testFileName).toString();
 
@@ -1812,7 +1811,7 @@ public class EvaluationFlow {
 
     //metodo che prende i risultati e li salva su un csv
     public void csvWriter(List<List<ResultsHolder>> list){
-        String path = projectName+"ResultsForJMP.csv";
+        String path =Projects.getTrainProject()+"ResultsForJMP.csv";
         try (FileWriter writer = new FileWriter(path)) {
 
             writer.write("Classifier,feature selection,sampling,cost sensitive,feature selection id,precision,recall,auc,kappa\n");
@@ -1829,7 +1828,7 @@ public class EvaluationFlow {
 
             out.println(CSV_SUCCESS_MSG);
         } catch (IOException e) {
-            out.println(String.format(CSV_ERROR_MSG, e.getMessage()));
+            out.printf((CSV_ERROR_MSG) + "%n", e.getMessage());
         }
     }
 

@@ -14,7 +14,7 @@ public class ConstantSize {
 
     public static final int FREQUENCY_LOG =10;
     public static final int FREQUENCY_WRITE_CACHE =20;
-    public static final int FREQUENCY_WRITE_CSV =50;
+    public static final int FREQUENCY_WRITE_CSV =100;
     public static final int NUM_THREADS =6;
 
 

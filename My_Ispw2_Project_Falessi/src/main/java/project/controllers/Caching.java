@@ -90,6 +90,7 @@ public class Caching {
                     }
                     methodJson.put("filePath", method.getClassPath());
                     methodJson.put("methodName", method.getMethodName());
+                    methodJson.put("className",method.getClassName());
                     methodJson.put("loc", method.getLoc());
                     methodJson.put("wmc", method.getWmc());
                     methodJson.put("qtyAssigment", method.getQtyAssigment());
@@ -292,6 +293,7 @@ public class Caching {
         MethodInstance method = new MethodInstance();
         method.setClassPath(methodJson.optString("filePath", ""));
         method.setMethodName(methodJson.optString("methodName", ""));
+        method.setClassName(methodJson.optString("className", ""));
         method.setLoc(methodJson.optInt("loc", 0));
         method.setWmc(methodJson.optInt("wmc", 0));
         method.setQtyAssigment(methodJson.optInt("qtyAssigment", 0));

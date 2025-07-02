@@ -72,9 +72,8 @@ public class CSVtoARFFConverter {
         Instances data = csvLoader.getDataSet();
         data.setRelationName(relationName);
 
-        // Rimuoviamo solo method e path (colonne 2-3)
         Remove removeFilter = new Remove();
-        removeFilter.setAttributeIndices("1-3");
+        removeFilter.setAttributeIndices("1-4");
         removeFilter.setInputFormat(data);
         Instances filteredData = Filter.useFilter(data, removeFilter);
 

@@ -12,13 +12,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public enum Projects implements EntryProject{
+public enum Projects implements EntryProject {
     BOOKKEEPER(new BookkeeperEntry()),
     OPENJPA(new OpenjpaEntry());
+
     private EntryProject entryProject;
     Projects(EntryProject entryProject){
-        this.entryProject=entryProject;
+        this.entryProject = entryProject;
     }
+    Projects(){}
     public static Projects fromString(String projectName) {
         // Convert input to uppercase as required
         String upperCaseProjectName = projectName.toUpperCase();
@@ -87,9 +89,16 @@ public enum Projects implements EntryProject{
     }
 
     @Override
+    @SuppressWarnings("squid:S3066")
     public void setRefactoredClass(List<Release> releaseList) {
         entryProject.setRefactoredClass(releaseList);
     }
+
+    @Override
+    public int getNumStepDataset() {
+        return entryProject.getNumStepDataset();
+    }
+
 
     @Override
     public String getProjectName(){
@@ -111,6 +120,27 @@ public enum Projects implements EntryProject{
             }
         }
         return null;
+    }
+    public static String getTrainProject(){
+        return Projects.BOOKKEEPER.getProjectName();
+    }
+    public static String getTestProject(){
+        return Projects.OPENJPA.getProjectName();
+    }
+    public static int getNumStepDatasetStatic() {
+        String trainSet=getTrainProject();
+        String testSet=getTestProject();
+        int stepTrain = Projects.valueOf(trainSet.toUpperCase()).getNumStepDataset();
+        int stepTest = Projects.valueOf(testSet.toUpperCase()).getNumStepDataset();
+        if(stepTrain==0){
+            throw new IllegalArgumentException("Progetto non valido: " + trainSet +
+                    ". Progetti validi: " + Arrays.toString(Projects.values()));
+        }
+        if(stepTest==0){
+            throw new IllegalArgumentException("Progetto non valido: " + trainSet +
+                    ". Progetti validi: " + Arrays.toString(Projects.values()));
+        }
+        return Math.min(stepTrain,stepTest);
     }
 
 }

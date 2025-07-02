@@ -17,7 +17,7 @@ public class BookkeeperEntry implements EntryProject {
     private  Map<String,MethodInstance> filledMethods;
     private  Map<String,List<Ticket>> ticketsOfInterest = new HashMap<>();
     private  List<ClassFile> refactoredClass = new ArrayList<>();
-    private  final String refactoredClassPath ="src/main/java/org/apache/hedwig/admin/console/HedwigConsole.java";
+    private  final String refactoredClassPath ="hedwig-server/src/main/java/org/apache/hedwig/admin/console/HedwigConsole.java";
     @Override
     public String getProjectName() {
         return "bookkeeper";
@@ -26,6 +26,7 @@ public class BookkeeperEntry implements EntryProject {
     public double getSplit() {
         return 50/100.0;
     }
+
     @Override
     public Path getRefactoredSourcePath() {
         return ConstantsWindowsFormat.REFACTOR_BASE_BOOKKEEPER_PATH.resolve("hedwig-server");
@@ -38,6 +39,11 @@ public class BookkeeperEntry implements EntryProject {
     public String getRefactoredReleaseName() {
         return "4.1.0";
     }
+
+    public int getNumStepDataset() {
+        return 4;
+    }
+
     @Override
     public List<MethodInstance> getInitializedRefactoredMethods(){
         List<MethodInstance> methods = new ArrayList<>();
@@ -108,6 +114,7 @@ public class BookkeeperEntry implements EntryProject {
 
         return methods;
     }
+    @Override
     public void  setRefactoredClass(List<Release> releaseList){
         int idRelease=Release.getId(getRefactoredReleaseName(),releaseList);
         Release release=releaseList.get(idRelease-1);
@@ -124,6 +131,8 @@ public class BookkeeperEntry implements EntryProject {
         refactoredClass=classFiles;
         release.addClassFile(classFile);
     }
+
+
     @Override
     public Map<String, MethodInstance> getFilledRefactoredMethods() {
        return this.filledMethods;

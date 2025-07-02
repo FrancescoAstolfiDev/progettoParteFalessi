@@ -22,4 +22,5 @@ public interface EntryProject {
     void setTickets (Release release, List<Ticket> tickets);
     Map<String,List<Ticket>> getTickets();
     void setRefactoredClass(List<Release> releaseList);
+    int getNumStepDataset();
 }
