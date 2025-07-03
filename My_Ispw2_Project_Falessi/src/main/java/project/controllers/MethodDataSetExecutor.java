@@ -67,9 +67,7 @@ public class MethodDataSetExecutor {
             return;
         }
 
-       // double proportion = coldStartProportion();// 2.15
-        double proportion =2.15;// 2.15
-
+        double proportion = coldStartProportion();// 2.15
         //se non ho sufficienti ticket in tutto il progetto posso settare il proportion di tutte le release al valore
         //ottenuto tramite cold start
         if (jiraInfoRetrieve.getTicketsWithValidAV().size() < 5) {
@@ -114,7 +112,6 @@ public class MethodDataSetExecutor {
                writeReleaseFile(release, releaseList, DataSetType.TEST,true,allTickets);
             }
         }
-        Map<String,List<Ticket>> refactoredTickets=curProject.getTickets();
         CSVtoARFFConverter.executeConversion(currentProject,avaiableTrainingRelease.size());
 
     }

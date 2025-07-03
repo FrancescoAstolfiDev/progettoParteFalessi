@@ -4,6 +4,8 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import project.models.ClassFile;
 import project.models.MethodInstance;
 import project.models.Release;
@@ -22,55 +24,61 @@ public class OpenjpaEntry implements EntryProject {
     private  List<ClassFile> classFiles;
     private  boolean methodsSetted = false;
     private  Map<String,MethodInstance> filledMethods;
-    private List<MethodInstance> methodsToFill = new ArrayList<>();
     private  Map<String,List<Ticket>> ticketsOfInterest = new HashMap<>();
-    private   final String refactoredMethodClassPath = "openjpa-kernel/src/main/java/org/apache/openjpa/kernel/jpql/JPQLExpressionBuilder.java";
-
-    public  void analyzeJavaFile() {
+    private static  final String REFACTORED_METHODS_CLASS_PATH = "openjpa-kernel/src/main/java/org/apache/openjpa/kernel/jpql/JPQLExpressionBuilder.java";
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenjpaEntry.class);
+    public void analyzeJavaFile() {
         try {
             Path path = Paths.get("C:\\isw2\\refactoring\\openjpa\\openjpa-0.9.7\\JPQLExpressionBuilder.java");
             JavaParser parser = new JavaParser();
             ParseResult<CompilationUnit> parseResult = parser.parse(path);
 
-            if (parseResult.isSuccessful() && parseResult.getResult().isPresent()) {
-                CompilationUnit cu = parseResult.getResult().get();
-                methods = new ArrayList<>();
-                classFiles = new ArrayList<>();
+            parseResult.getResult().ifPresent(cu -> {
+                if (parseResult.isSuccessful()) {
+                    methods = new ArrayList<>();
+                    classFiles = new ArrayList<>();
 
-                cu.findAll(ClassOrInterfaceDeclaration.class).forEach(classDecl -> {
-                    // Costruisce il nome completo della classe includendo la gerarchia
-                    String className = getFullClassName(classDecl);
-                    ClassFile filledClass = new ClassFile();
-                    filledClass.setClassName(className);
-                    filledClass.setPath(refactoredMethodClassPath);
+                    cu.findAll(ClassOrInterfaceDeclaration.class).forEach(classDecl -> {
+                        // Costruisce il nome completo della classe includendo la gerarchia
+                        String className = getFullClassName(classDecl);
+                        ClassFile filledClass = new ClassFile();
+                        filledClass.setClassName(className);
+                        filledClass.setPath(REFACTORED_METHODS_CLASS_PATH);
 
-                    // Per ogni metodo nella classe
-                    classDecl.getMethods().forEach(methodDecl -> {
-                        MethodInstance method = new MethodInstance();
-                        method.setMethodName(methodDecl.getNameAsString());
-                        method.setClassName(className);  // Usa il nome completo della classe
-                        method.setClassPath(refactoredMethodClassPath);
-                        method.setSignature(methodDecl.getSignature().asString());
-                        methods.add(method);
-                        filledClass.addMethod(method);
+                        // Per ogni metodo nella classe
+                        classDecl.getMethods().forEach(methodDecl -> {
+                            MethodInstance method = new MethodInstance();
+                            method.setMethodName(methodDecl.getNameAsString());
+                            method.setClassName(className);  // Usa il nome completo della classe
+                            method.setClassPath(REFACTORED_METHODS_CLASS_PATH);
+                            method.setSignature(methodDecl.getSignature().asString());
+                            methods.add(method);
+                            filledClass.addMethod(method);
+                        });
+                        classFiles.add(filledClass);
                     });
-                    classFiles.add(filledClass);
-                });
-            } else {
-                System.err.println("Errore durante il parsing del file");
+                } else {
+                    LOGGER.error("Errore durante il parsing del file");
+                }
+            });
+
+            if (!parseResult.isSuccessful() || parseResult.getResult().isEmpty()) {
+                LOGGER.error("Errore durante il parsing del file");
             }
         } catch (Exception e) {
-            System.err.println("Errore durante l'analisi del file: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.error("Errore durante l'analisi del file: {}", e.getMessage());
         }
     }
 
+
     private static String getFullClassName(ClassOrInterfaceDeclaration classDecl) {
         // Se la classe ha un genitore ed è una classe interna
-        if (classDecl.getParentNode().isPresent() &&
-                classDecl.getParentNode().get() instanceof ClassOrInterfaceDeclaration) {
-            ClassOrInterfaceDeclaration parent = (ClassOrInterfaceDeclaration) classDecl.getParentNode().get();
-            return getFullClassName(parent) + "$" + classDecl.getNameAsString();
+        var parentNode = classDecl.getParentNode();
+        if (parentNode.isPresent()) {
+            var parent = parentNode.get();
+            if (parent instanceof ClassOrInterfaceDeclaration parentClass) {
+                return getFullClassName(parentClass) + "$" + classDecl.getNameAsString();
+            }
         }
         return classDecl.getNameAsString();
     }
@@ -93,7 +101,7 @@ public class OpenjpaEntry implements EntryProject {
 
     @Override
     public Path getRefactoredClassPath() {
-        return Path.of(refactoredMethodClassPath);
+        return Path.of(REFACTORED_METHODS_CLASS_PATH);
     }
 
     @Override
@@ -131,7 +139,7 @@ public class OpenjpaEntry implements EntryProject {
         MethodInstance methodToRefactor = new MethodInstance();
         methodToRefactor.setMethodName("eval");
         methodToRefactor.setSignature("eval(JPQLNode node)");
-        methodToRefactor.setClassPath(refactoredMethodClassPath);
+        methodToRefactor.setClassPath(REFACTORED_METHODS_CLASS_PATH);
         methodToRefactor.setFullSignature(methodToRefactor.getMethodName() + "#" + methodToRefactor.getSignature());
         return methodToRefactor;
     }

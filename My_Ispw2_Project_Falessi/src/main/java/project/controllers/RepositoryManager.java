@@ -35,6 +35,7 @@ public class RepositoryManager {
     private String originalRepoPath;
     private String backupRepoPath;
     private final GitHubInfoRetrieve gitHubInfoRetrieve;
+    private static final String JAVA=".java";
 
     // Cache for storing excess files from commits
     private final Map<String, byte[]> cachedFiles = new HashMap<>();
@@ -60,7 +61,7 @@ public class RepositoryManager {
         }
     }
 
-    
+
 
     /**
      * Copies a directory and its contents to a target directory
@@ -436,7 +437,7 @@ public class RepositoryManager {
         for (DiffEntry entry : diffs) {
             if (entry.getChangeType() != DiffEntry.ChangeType.DELETE) {
                 String path = entry.getNewPath();
-                if (path.endsWith(".java") && !isTestFile(path)) {
+                if (path.endsWith(JAVA) && !isTestFile(path)) {
                     javaFiles.add(entry);
                     // Aggiungi un set vuoto per ogni file Java per le sue classi annidate
                     nestedClassesMap.put(path, new HashSet<>());
@@ -446,44 +447,56 @@ public class RepositoryManager {
         return javaFiles;
     }
 
+
+
     private void processJavaFilesWithNested(List<DiffEntry> javaFiles, RevCommit commit, Path targetDir,
                                             boolean processAllCommits, int processedFilesCount, int maxFilesToProcess,
                                             Map<String, Set<String>> nestedClassesMap) throws IOException {
         for (DiffEntry entry : javaFiles) {
             String path = entry.getNewPath();
-            try (TreeWalk treeWalk = TreeWalk.forPath(repository, path, commit.getTree())) {
-                if (treeWalk != null) {
-                    byte[] content = repository.open(treeWalk.getObjectId(0)).getBytes();
+            byte[] content = retrieveContent(path, commit);
 
-                    if (processAllCommits || processedFilesCount < maxFilesToProcess) {
-                        writeFileToTarget(targetDir, path, content);
-                        processedFilesCount++;
+            if (content != null && !shouldCacheFile(processAllCommits, processedFilesCount, maxFilesToProcess)) {
+                writeFileToTarget(targetDir, path, content);
+                processedFilesCount++;
 
-                        // Processa le classi annidate del file
-                        Set<String> nestedClasses = nestedClassesMap.get(path);
-                        if (nestedClasses != null && !nestedClasses.isEmpty()) {
-                            for (String nestedClass : nestedClasses) {
-                                if (processedFilesCount < maxFilesToProcess) {
-                                    // Le classi annidate sono già incluse nel file principale
-                                    processedFilesCount++;
-                                } else {
-                                    // Cache the nested class information
-                                    cachedFiles.put(path + "$" + nestedClass, content);
-                                }
-                            }
-                        }
-                    } else {
-                        cachedFiles.put(path, content);
-                    }
-                }
+                processedFilesCount = processNestedClasses(path, content, nestedClassesMap,
+                        processedFilesCount, maxFilesToProcess);
+            } else if (content != null) {
+                cachedFiles.put(path, content);
             }
+        }
+    }
+
+    private boolean shouldCacheFile(boolean processAllCommits, int processedFilesCount, int maxFilesToProcess) {
+        return !processAllCommits && processedFilesCount >= maxFilesToProcess;
+    }
+
+
+    private byte[] retrieveContent(String path, RevCommit commit) throws IOException {
+        try (TreeWalk treeWalk = TreeWalk.forPath(repository, path, commit.getTree())) {
+            if (treeWalk == null) return new byte[0];
+            return repository.open(treeWalk.getObjectId(0)).getBytes();
         }
     }
 
 
 
 
+    private int processNestedClasses(String path, byte[] content, Map<String, Set<String>> nestedClassesMap,
+                                     int processedFilesCount, int maxFilesToProcess) {
+        Set<String> nestedClasses = nestedClassesMap.get(path);
+        if (nestedClasses == null || nestedClasses.isEmpty()) return processedFilesCount;
 
+        for (String nestedClass : nestedClasses) {
+            if (processedFilesCount >= maxFilesToProcess) {
+                cachedFiles.put(path + "$" + nestedClass, content);
+                continue;
+            }
+            processedFilesCount++;
+        }
+        return processedFilesCount;
+    }
     private enum CheckoutStrategy {
         CLEAN,
         STASH,
@@ -592,67 +605,6 @@ public class RepositoryManager {
         return processedFilesCount;
     }
 
-    private void exportCodeToDirectory(RevCommit commit, Path targetDir, boolean processAllCommits) {
-        try {
-            int processedFilesCount = handleCachedFile(targetDir);
-            int maxFilesToProcess = ConstantSize.MAX_CLASSES_PER_COMMIT;
-
-            if (processedFilesCount < maxFilesToProcess) {
-                processCommitFiles(commit, targetDir, processAllCommits, processedFilesCount, maxFilesToProcess);
-            }
-
-            logProcessedFilesCount(targetDir);
-        } catch (Exception e) {
-            LOGGER.error("Error during export of commit files: {} ", commit.getName(), e);
-        }
-    }
-    private void processCommitFiles(RevCommit commit, Path targetDir, boolean processAllCommits,
-                                    int processedFilesCount, int maxFilesToProcess) throws IOException {
-        try (RevWalk revWalk = new RevWalk(repository);
-             DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE)) {
-
-            df.setRepository(repository);
-            df.setDiffComparator(RawTextComparator.DEFAULT);
-            df.setDetectRenames(true);
-
-            RevCommit parent = commit.getParentCount() > 0 ? revWalk.parseCommit(commit.getParent(0).getId()) : null;
-            List<DiffEntry> diffs = df.scan(parent == null ? null : parent.getTree(), commit.getTree());
-
-            List<DiffEntry> javaFiles = filterJavaFiles(diffs);
-            LOGGER.info("Found {} Java files in commit", javaFiles.size());
-
-            processJavaFiles(javaFiles, commit, targetDir, processAllCommits, processedFilesCount, maxFilesToProcess);
-        }
-    }
-    private List<DiffEntry> filterJavaFiles(List<DiffEntry> diffs) {
-        List<DiffEntry> javaFiles = new ArrayList<>();
-        for (DiffEntry entry : diffs) {
-            if (entry.getChangeType() != DiffEntry.ChangeType.DELETE) {
-                String path = entry.getNewPath();
-                if (path.endsWith(".java") && !isTestFile(path)) {
-                    javaFiles.add(entry);
-                }
-            }
-        }
-        return javaFiles;
-    }
-    private void processJavaFiles(List<DiffEntry> javaFiles, RevCommit commit, Path targetDir,
-                                  boolean processAllCommits, int processedFilesCount, int maxFilesToProcess) throws IOException {
-        for (DiffEntry entry : javaFiles) {
-            String path = entry.getNewPath();
-            try (TreeWalk treeWalk = TreeWalk.forPath(repository, path, commit.getTree())) {
-                if (treeWalk != null) {
-                    byte[] content = repository.open(treeWalk.getObjectId(0)).getBytes();
-                    if (processAllCommits || processedFilesCount < maxFilesToProcess) {
-                        writeFileToTarget(targetDir, path, content);
-                        processedFilesCount++;
-                    } else {
-                        cachedFiles.put(path, content);
-                    }
-                }
-            }
-        }
-    }
     private void writeFileToTarget(Path targetDir, String path, byte[] content) throws IOException {
         Path targetFilePath = targetDir.resolve(path);
         Files.createDirectories(targetFilePath.getParent());
@@ -663,7 +615,7 @@ public class RepositoryManager {
         long count = 0;
         if (Files.exists(targetDir)) {
             try (Stream<Path> stream = Files.walk(targetDir)) {
-                count = stream.filter(p -> p.toString().endsWith(".java")).count();
+                count = stream.filter(p -> p.toString().endsWith(JAVA)).count();
             }
         }
         LOGGER.info("Classes to process: {}, Remaining in cache: {}", count, cachedFiles.size());

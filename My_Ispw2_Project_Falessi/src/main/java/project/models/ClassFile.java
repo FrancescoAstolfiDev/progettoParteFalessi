@@ -154,7 +154,7 @@ public class ClassFile {
         if (dollarIndex != -1) {
             // Controlla se dopo il $ c'è un numero o la parola "Anonymous" seguita da numeri
             String afterDollar = fullClassName.substring(dollarIndex + 1);
-            if (afterDollar.matches("\\d+.*") || afterDollar.matches("Anonymous\\d+.*")) {
+            if (afterDollar.matches("\\d+") || afterDollar.matches("Anonymous\\d+")){
                 // È una classe anonima, rimuovi tutto dopo $
                 cleanName = fullClassName.substring(0, dollarIndex);
             } else {

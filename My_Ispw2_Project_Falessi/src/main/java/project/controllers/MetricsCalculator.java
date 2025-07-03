@@ -50,7 +50,6 @@ public class MetricsCalculator {
         this.resultsChanged=false;
         this.project=project;
         // Load the commit cache using the optimized method
-        //Caching.removeOldestCommitsFromCache(projectName,100);
         Caching.loadCommitCache(resultCommitsMethods, null,projectName);
     }
     /**
