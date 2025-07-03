@@ -17,7 +17,7 @@ public class BookkeeperEntry implements EntryProject {
     private  Map<String,MethodInstance> filledMethods;
     private  Map<String,List<Ticket>> ticketsOfInterest = new HashMap<>();
     private  List<ClassFile> refactoredClass = new ArrayList<>();
-    private  final String refactoredClassPath ="hedwig-server/src/main/java/org/apache/hedwig/admin/console/HedwigConsole.java";
+    private  static final String REFACTORED_CLASS_PATH ="hedwig-server/src/main/java/org/apache/hedwig/admin/console/HedwigConsole.java";
     @Override
     public String getProjectName() {
         return "bookkeeper";
@@ -33,7 +33,7 @@ public class BookkeeperEntry implements EntryProject {
     }
     @Override
     public Path getRefactoredClassPath() {
-        return Path.of(refactoredClassPath);
+        return Path.of(REFACTORED_CLASS_PATH);
     }
     @Override
     public String getRefactoredReleaseName() {
@@ -121,12 +121,12 @@ public class BookkeeperEntry implements EntryProject {
         List<ClassFile> classFiles = new ArrayList<>();
         ClassFile classFile = new ClassFile();
         classFile.setClassName("HedwigConsole");
-        classFile.setPath(refactoredClassPath);
+        classFile.setPath(REFACTORED_CLASS_PATH);
         classFiles.add(classFile);
         release.addClassFile(classFile);
         classFile = new ClassFile();
         classFile.setClassName("HedwigConsole$ConsoleHandler");
-        classFile.setPath(refactoredClassPath);
+        classFile.setPath(REFACTORED_CLASS_PATH);
         classFiles.add(classFile);
         refactoredClass=classFiles;
         release.addClassFile(classFile);

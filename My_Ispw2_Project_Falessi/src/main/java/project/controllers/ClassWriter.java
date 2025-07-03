@@ -85,16 +85,16 @@ public class ClassWriter {
                         "age","nAuth", "nr", "nSmell","buggy"));
                 writer.newLine();
                 int writtenResults = 0;
-                int value_smell;
+                int valueSmell;
                 for (MethodInstance result : results.values()) {
                     if(shouldSkipResult(result,path) ) {
                         continue;
                     }
-                    value_smell=result.getnSmells();
+                    valueSmell=result.getnSmells();
                     // For B matrix, set nSmells to 0 but keep the original instances
                     // For B_PLUS matrix, keep nSmells > 0
                     if (path.contains(WhatIf.B_MATRIX.getName()) && !path.contains(WhatIf.B_PLUS_MATRIX.getName())) {
-                       value_smell=0;
+                       valueSmell=0;
                     }
 
                     String csvRow = String.join(",",
@@ -115,7 +115,7 @@ public class ClassWriter {
                             String.valueOf(result.getAge()),
                             String.valueOf(result.getnAuth()),
                             String.valueOf(result.getNr()),
-                            String.valueOf(value_smell),
+                            String.valueOf(valueSmell),
                             String.valueOf(result.isBuggy())
                     );
 

@@ -1,7 +1,6 @@
 package project;
 
 import project.controllers.EvaluationFlow;
-import project.utils.Projects;
 
 public class EvaluationMain {
     public static void main(String[] args) {

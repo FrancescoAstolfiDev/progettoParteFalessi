@@ -1,6 +1,8 @@
 package project.models;
 
 public class MethodInstance {
+
+    private static final String ANONYMOUS="anonymous";
     private String releaseName;
     private String classPath;
     private String className;
@@ -55,10 +57,10 @@ public class MethodInstance {
         String releaseName= method.getReleaseName() !=null?
                 method.getReleaseName():"0.0.0";
         String filePath = method.getClassPath() != null ?
-                method.getClassPath() : "anonymous";
-        String className=method.getClassName() != null ? method.getClassName():"anonymous";
+                method.getClassPath() :ANONYMOUS;
+        String className=method.getClassName() != null ? method.getClassName():ANONYMOUS;
         String methodName = method.getMethodName() != null ?
-                method.getMethodName() : "anonymous";
+                method.getMethodName() : ANONYMOUS;
         // Use full class name + method name as key
         return releaseName + "#" + filePath +"#"+ className+ "#"  + methodName;
     }
