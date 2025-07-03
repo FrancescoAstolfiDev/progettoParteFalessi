@@ -105,7 +105,6 @@ public class MethodDataSetExecutor {
         for (int i = 1; i < avaiableTrainingRelease.size()-1; i++) {
             // reverse calculation for have first all the commit processed and elaborated
             Release release= avaiableTrainingRelease.get(i);
-
             writeReleaseFile(release, releaseList, DataSetType.TRAINING, false,allTickets);
         }
         for (int i=2 ; i< avaiableTrainingRelease.size();i++){
