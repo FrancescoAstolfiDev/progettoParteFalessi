@@ -225,6 +225,7 @@ public class MethodInstance {
     }
 
     public void setnSmells(int nSmells) {
+
         this.nSmells = nSmells;
     }
 

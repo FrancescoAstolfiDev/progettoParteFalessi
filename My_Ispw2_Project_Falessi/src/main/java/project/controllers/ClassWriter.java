@@ -6,6 +6,8 @@ import project.models.DataSetType;
 import project.models.MethodInstance;
 import project.models.Release;
 import project.statefull.ConstantsWindowsFormat;
+import project.utils.Projects;
+import project.utils.WhatIf;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -13,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Objects;
 
 public class ClassWriter {
     ClassWriter(){
@@ -30,6 +33,8 @@ public class ClassWriter {
         return field;
     }
 
+
+
     public static void writeResultsToFile(Release actRelease, String projectName, Map<String, MethodInstance> partialResults, DataSetType dataType) {
         if (actRelease == null) {
             LOGGER.error("Received partial results but currentProcessingRelease is null");
@@ -37,10 +42,15 @@ public class ClassWriter {
         }
         String outPath;
         try {
-            outPath=projectName.toUpperCase()+dataType+ actRelease.getId() + ".csv";
+            outPath=projectName.toUpperCase()+dataType+ actRelease.getId() ;
             LOGGER.info("Writing  results to {}" , outPath);
             writeResultsToFile(outPath, partialResults,dataType);
-
+            Projects projects=  Projects.fromString(projectName);
+            if(actRelease.getId()==projects.getNumStepDataset()+1){
+                for(String matrix: Objects.requireNonNull(WhatIf.getListMatrix())){
+                    writeResultsToFile(outPath+ matrix, partialResults,dataType);
+                }
+            }
         } catch (Exception e) {
             LOGGER.error("Error writing results: {}" , e.getMessage());
         }
@@ -48,6 +58,7 @@ public class ClassWriter {
 
     static void writeResultsToFile(String path, Map<String, MethodInstance> results, DataSetType dataSetType) {
         Path outputFilePath;
+        path=path+".csv";
 
         if (dataSetType== DataSetType.PARTIAL){
             outputFilePath = ConstantsWindowsFormat.PARTIALS_CSV_PATH.resolve(path);
@@ -73,9 +84,17 @@ public class ClassWriter {
                         "loc", "wmc", "assignmentsQty", "mathOperationsQty", "qtyTryCatch", "qtyReturn", "fanin", "fanout",
                         "age","nAuth", "nr", "nSmell","buggy"));
                 writer.newLine();
+                int writtenResults = 0;
+                int value_smell;
                 for (MethodInstance result : results.values()) {
-                    if(result.getAge()<0 || result.getReleaseName()==null ) {
+                    if(shouldSkipResult(result,path) ) {
                         continue;
+                    }
+                    value_smell=result.getnSmells();
+                    // For B matrix, set nSmells to 0 but keep the original instances
+                    // For B_PLUS matrix, keep nSmells > 0
+                    if (path.contains(WhatIf.B_MATRIX.getName()) && !path.contains(WhatIf.B_PLUS_MATRIX.getName())) {
+                       value_smell=0;
                     }
 
                     String csvRow = String.join(",",
@@ -96,18 +115,39 @@ public class ClassWriter {
                             String.valueOf(result.getAge()),
                             String.valueOf(result.getnAuth()),
                             String.valueOf(result.getNr()),
-                            String.valueOf(result.getnSmells()),
+                            String.valueOf(value_smell),
                             String.valueOf(result.isBuggy())
                     );
 
                     writer.write(csvRow);
                     writer.newLine();
+                    writtenResults++;
                 }
-
-                LOGGER.info("Successfully wrote {} results to {}\n\n", results.size() , path);
+                LOGGER.info("Successfully wrote {} results to {}\n\n", writtenResults, path);
             }
         } catch (IOException e) {
             LOGGER.error("Error writing partial results to file: {}" , e.getMessage());
         }
     }
+    private static boolean shouldSkipResult(MethodInstance result, String path) {
+        // Verifica condizioni base
+        if (result.getAge() < 0 || result.getReleaseName() == null) {
+            return true;
+        }
+        // Gestione matrice B - include instances with nSmells > 0, then set nSmells to 0
+        if (path.contains(WhatIf.B_MATRIX.getName()) && !path.contains(WhatIf.B_PLUS_MATRIX.getName())) {
+            return result.getnSmells() == 0;
+        }
+        // Gestione matrice B_PLUS - include all instances and keep nSmells as is
+        if (path.contains(WhatIf.B_PLUS_MATRIX.getName())) {
+            return result.getnSmells() == 0;
+        }
+        // Gestione matrice C - include only instances with nSmells == 0
+        if (path.contains(WhatIf.C_MATRIX.getName())) {
+            return result.getnSmells() > 0;
+        }
+
+        return false;
+    }
+
 }

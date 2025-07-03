@@ -140,14 +140,8 @@ public class MethodDataSetExecutor {
 
 
     public List<Ticket> getAddTicket(List<Release> releaseList,List<Ticket> allTickets){
-        List<Ticket> releaseTickets;
-        List<Ticket> addTickets = new ArrayList<>();
-        for(int i=0; i<releaseList.size(); i++){
-
-            Release release = releaseList.get(i);
-            releaseTickets = new ArrayList<>(JiraInfoRetrieve.getAllReleaseTicket(release,allTickets));
-            addTickets.addAll(releaseTickets);
-        }
+        List<Ticket> addTickets ;
+        addTickets = new ArrayList<>(JiraInfoRetrieve.getAllReleaseTicket(releaseList.get(releaseList.size()-1),allTickets));
         adjustIvTickets(addTickets, releaseList.get(releaseList.size()-1).getCurrentProportion(), releaseList);
         return addTickets;
     }

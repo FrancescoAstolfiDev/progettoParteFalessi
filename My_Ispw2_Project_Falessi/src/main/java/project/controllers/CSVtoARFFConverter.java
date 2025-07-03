@@ -3,6 +3,7 @@ package project.controllers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import project.statefull.ConstantsWindowsFormat;
+import project.utils.WhatIf;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
 import weka.core.converters.CSVLoader;
@@ -11,11 +12,13 @@ import weka.filters.unsupervised.attribute.Remove;
 import weka.filters.unsupervised.attribute.StringToNominal;
 import java.io.File;
 import java.nio.file.Path;
-
+import java.util.Objects;
 
 
 public class CSVtoARFFConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger("CSVtoARFFConverter");
+    private static final  String ARFF=".arff";
+    private static final String CSV=".csv";
     private CSVtoARFFConverter() {
     }
 
@@ -23,18 +26,21 @@ public class CSVtoARFFConverter {
         Path csvPath = ConstantsWindowsFormat.CSV_PATH;
         Path testCsvPath = ConstantsWindowsFormat.TEST_CSV_PATH;
         Path arffCsvPath=  ConstantsWindowsFormat.ARFF_PATH;
-
+        Path csvFilePathTrain;
+        Path csvFilePathTest;
+        Path arffFilePathTrain;
+        Path arffFilePathTest;
         for (int i = 2; i < numOFRelease; i++) {
             try {
                 // Verifica esistenza directory
                 createDirectoryIfNotExists(String.valueOf(csvPath));
                 createDirectoryIfNotExists(String.valueOf(testCsvPath));
 
-                Path csvFilePathTrain = csvPath.resolve(projectName.toUpperCase() + "Train" + i + ".csv");
-                Path csvFilePathTest = testCsvPath.resolve(projectName.toUpperCase() + "Test" + (i+1) + ".csv");
+                csvFilePathTrain = csvPath.resolve(projectName.toUpperCase() + "Train" + i +CSV);
+                csvFilePathTest = testCsvPath.resolve(projectName.toUpperCase() + "Test" + (i+1) + CSV);
 
-                Path arffFilePathTrain = arffCsvPath.resolve(projectName + "_Train_R" + i + ".arff");
-                Path arffFilePathTest = arffCsvPath.resolve(projectName + "_Test_R" + i + ".arff");
+                arffFilePathTrain = arffCsvPath.resolve(projectName + "_Train_R" + i + ARFF);
+                arffFilePathTest = arffCsvPath.resolve(projectName + "_Test_R" + i + ARFF);
 
                 // Verifica esistenza file
                 if (!new File(String.valueOf(csvFilePathTrain)).exists() || !new File(String.valueOf(csvFilePathTest)).exists()) {
@@ -47,6 +53,13 @@ public class CSVtoARFFConverter {
 
                 // Configurazione per il test set
                 convertFile(String.valueOf(csvFilePathTest), String.valueOf(arffFilePathTest), projectName + "_Test_R" + i);
+                if(i==numOFRelease-1){
+                    for(String matrix: Objects.requireNonNull(WhatIf.getListMatrix())){
+                        csvFilePathTest = testCsvPath.resolve(projectName.toUpperCase() + "Test" + (i+1) +matrix  + CSV);
+                        arffFilePathTest = arffCsvPath.resolve(projectName+"_" +matrix + ARFF);
+                        convertFile(String.valueOf(csvFilePathTest), String.valueOf(arffFilePathTest), matrix);
+                    }
+                }
 
                 LOGGER.info("Conversione completata per Release {} " , i);
 
@@ -54,6 +67,8 @@ public class CSVtoARFFConverter {
                LOGGER.error("Errore durante la conversione della Release {} : {}", i, e.getMessage());
             }
         }
+
+
     }
 
     private static void createDirectoryIfNotExists(String path) {
