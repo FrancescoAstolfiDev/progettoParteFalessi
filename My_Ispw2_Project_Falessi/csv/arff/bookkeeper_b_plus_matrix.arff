@@ -1,4 +1,4 @@
-@relation bookkeeperb_plus_matrix-weka.filters.unsupervised.attribute.Remove-R1-4-weka.filters.unsupervised.attribute.StringToNominal-R1
+@relation b_plus_matrix-weka.filters.unsupervised.attribute.Remove-R1-4-weka.filters.unsupervised.attribute.StringToNominal-R1
 
 @attribute loc numeric
 @attribute wmc numeric
