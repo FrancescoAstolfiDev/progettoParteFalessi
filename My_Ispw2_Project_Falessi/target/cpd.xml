@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pmd-cpd>
+   <duplication lines="44" tokens="260">
+      <file begintoken="8635" column="91" endcolumn="86" endline="892" endtoken="8894"
+            line="849"
+            path="C:\isw2\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\controllers\EvaluationFlow.java"/>
+      <file begintoken="11422" column="101" endcolumn="86" endline="1434" endtoken="11681"
+            line="1391"
+            path="C:\isw2\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\controllers\EvaluationFlow.java"/>
+      <codefragment><![CDATA[            out.println(String.format(WARNING_EMPTY_TEST_SET_MSG, index, FEATURE_SELECTION));
+            return;
+        }
+
+        // Ensure class attribute is set and valid
+        if (trainSet.classIndex() < 0 || trainSet.classIndex() >= trainSet.numAttributes()) {
+            out.println(String.format(WARNING_INVALID_CLASS_INDEX_MSG, "training", index));
+            trainSet.setClassIndex(trainSet.numAttributes() - 1);
+        }
+
+        if (testSet.classIndex() < 0 || testSet.classIndex() >= testSet.numAttributes()) {
+            out.println(String.format(WARNING_INVALID_CLASS_INDEX_MSG, "test", index));
+            testSet.setClassIndex(testSet.numAttributes() - 1);
+        }
+
+        try {
+            AttributeSelection filter = getFilter(trainSet);
+
+            Instances filteredTrainSet = Filter.useFilter(trainSet, filter);
+            Instances filteredTestSet = Filter.useFilter(testSet, filter);
+
+            // Validate the filtered sets before proceeding
+            if (filteredTrainSet == null || filteredTrainSet.numInstances() == 0) {
+                out.println(String.format(WARNING_FEATURE_SELECTION_RESULT_MSG, EMPTY_TRAINING_DATASET_MSG, index));
+                return;
+            }
+
+            if (filteredTestSet == null || filteredTestSet.numInstances() == 0) {
+                out.println(String.format(WARNING_FEATURE_SELECTION_RESULT_MSG, EMPTY_TEST_DATASET_MSG, index));
+                return;
+            }
+
+            // Ensure filtered datasets have at least one attribute plus class
+            if (filteredTrainSet.numAttributes() < 2) {
+                out.println(String.format(WARNING_TOO_FEW_ATTRIBUTES_MSG, index));
+                return;
+            }
+
+            int numAttrFiltered = filteredTrainSet.numAttributes();
+            filteredTrainSet.setClassIndex(numAttrFiltered - 1);
+            filteredTestSet.setClassIndex(numAttrFiltered - 1);
+
+            // Get the feature selection ID for this filtered dataset
+            String featureSelectionId = getFeatureSelectionId(filteredTrainSet, index);]]></codefragment>
+   </duplication>
+   <duplication lines="30" tokens="144">
+      <file begintoken="8307" column="87" endcolumn="75" endline="818" endtoken="8450"
+            line="789"
+            path="C:\isw2\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\controllers\EvaluationFlow.java"/>
+      <file begintoken="12778" column="104" endcolumn="75" endline="1667" endtoken="12921"
+            line="1638"
+            path="C:\isw2\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\controllers\EvaluationFlow.java"/>
+      <codefragment><![CDATA[            out.println(String.format(WARNING_EMPTY_TRAIN_SET_MSG, index, OVERSAMPLING));
+            return;
+        }
+
+        try {
+            Resample filter = new Resample();
+            filter.setBiasToUniformClass(1.0);
+            filter.setNoReplacement(false);
+
+            int numAllInstances = trainSet.numInstances();
+            int classMajorIndex = trainSet.classAttribute().indexOfValue(FALSE_LITERAL);
+            int numMajorInstances = 0;
+
+            // Check if "false" value exists in the class attribute
+            if (classMajorIndex == -1) {
+                // If "false" doesn't exist, assume the first value is the majority class
+                out.println(String.format(WARNING_INVALID_CLASS_INDEX_MSG, DataSetType.TRAINING, index));
+                classMajorIndex = 0;
+            }
+
+            for (int i = 0; i < numAllInstances; i++) {
+                if (trainSet.instance(i).classValue() == classMajorIndex) {
+                    numMajorInstances++;
+                }
+            }
+
+            // Ensure we have a positive sample size to avoid "bound must be positive" errors
+            double sampleSize = ((double) numMajorInstances / numAllInstances) * 2 * 100;
+            if (sampleSize <= 0) {
+                out.println(String.format(WARNING_NOT_ENOUGH_INSTANCES_MSG,OVERSAMPLING, index, USING_DEFAULT_100_PERCENT));]]></codefragment>
+   </duplication>
+   <duplication lines="21" tokens="119">
+      <file begintoken="8100" column="88" endcolumn="13" endline="775" endtoken="8218"
+            line="755"
+            path="C:\isw2\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\controllers\EvaluationFlow.java"/>
+      <file begintoken="12575" column="105" endcolumn="13" endline="1624" endtoken="12693"
+            line="1604"
+            path="C:\isw2\progettoParteFalessi\My_Ispw2_Project_Falessi\src\main\java\project\controllers\EvaluationFlow.java"/>
+      <codefragment><![CDATA[            out.println(String.format(WARNING_EMPTY_TEST_SET_MSG, index, UNDER_SAMPLING));
+            return;
+        }
+
+        // Ensure class attribute is set and valid
+        if (trainSet.classIndex() < 0 || trainSet.classIndex() >= trainSet.numAttributes()) {
+            out.println(String.format(WARNING_INVALID_CLASS_INDEX_MSG, DataSetType.TRAINING, index));
+            trainSet.setClassIndex(trainSet.numAttributes() - 1);
+        }
+
+        try {
+            SpreadSubsample filter = new SpreadSubsample();
+            filter.setInputFormat(trainSet);
+            filter.setDistributionSpread(1.0);
+            Instances underSampledSet = Filter.useFilter(trainSet, filter);
+
+            // Validate the under-sampled set before proceeding
+            if (underSampledSet == null || underSampledSet.numInstances() == 0) {
+                out.println(String.format(WARNING_UNDERSAMPLING_RESULT_MSG, index));
+                return;
+            }]]></codefragment>
+   </duplication>
+</pmd-cpd>
