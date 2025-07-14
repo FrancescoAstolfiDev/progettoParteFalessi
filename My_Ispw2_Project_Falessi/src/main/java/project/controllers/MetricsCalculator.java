@@ -867,7 +867,7 @@ public class MetricsCalculator {
         data.releaseResults.values().forEach(method -> {
             if (method.getReleaseName() != null) {
                 int releaseId = Release.getId(method.getReleaseName(), releaseList);
-                String methodKey = method.getClassPath() + "#" + method.getMethodName();
+                String methodKey = method.getClassPath() + "#" +method.getClassName()+ "#" + method.getMethodName();
                 methodsByRelease
                         .computeIfAbsent(releaseId, k -> new HashMap<>())
                         .computeIfAbsent(methodKey, k -> new ArrayList<>())
@@ -914,7 +914,7 @@ public class MetricsCalculator {
             return Optional.empty();
         }
 
-        Set<String> modifiedSignatures = extractModifiedSignatures(methodsChanged, commitMethods);
+        Set<String> modifiedSignatures = extractModifiedSignatures(methodsChanged);
         return Optional.of(new MethodData(methodsChanged, modifiedSignatures));
     }
 
@@ -924,23 +924,14 @@ public class MetricsCalculator {
         return commitMethods != null && !methodsChanged.isEmpty() && commit != null;
     }
 
-    private Set<String> extractModifiedSignatures(List<MethodInstance> methodsChanged,
-                                                  Map<String, MethodInstance> commitMethods) {
+    private Set<String> extractModifiedSignatures(List<MethodInstance> methodsChanged) {
         Set<String> signatures = new HashSet<>();
         for (MethodInstance changedMethod : methodsChanged) {
-            for (MethodInstance commitMethod : commitMethods.values()) {
-                if (isSameMethod(commitMethod, changedMethod)) {
-                    signatures.add(commitMethod.getClassPath() + "#" + commitMethod.getMethodName());
-                }
-            }
+            signatures.add(changedMethod.getClassPath() + "#" +changedMethod.getClassName()+ "#" + changedMethod.getMethodName());
         }
         return signatures;
     }
 
-    private boolean isSameMethod(MethodInstance method1, MethodInstance method2) {
-        return method1.getMethodName().equals(method2.getMethodName()) &&
-                method1.getClassPath().equals(method2.getClassPath());
-    }
 
     private void updateRefactoredTickets(Ticket ticket,
                                          List<MethodInstance> changedMethods,
@@ -977,20 +968,35 @@ public class MetricsCalculator {
                                  Set<String> modifiedMethodSignatures,
                                  int injectedId,
                                  int fixedId) {
-        // For each release in the range
+        // Verifica parametri di input
+        if (injectedId >= fixedId) {
+            LOGGER.warn("Invalid release range: injectedId {} >= fixedId {}", injectedId, fixedId);
+            return;
+        }
+
         for (int releaseId = injectedId; releaseId < fixedId; releaseId++) {
             Map<String, List<MethodInstance>> releaseMethods = methodsByRelease.get(releaseId);
-            if (releaseMethods != null) {
-                // Update only the modified methods
-                for (String methodSignature : modifiedMethodSignatures) {
-                    List<MethodInstance> methods = releaseMethods.get(methodSignature);
-                    if (methods != null) {
-                        methods.forEach(method -> method.setBuggy(true));
+            if (releaseMethods == null) {
+                continue;
+            }
+
+            for (String methodSignature : modifiedMethodSignatures) {
+                List<MethodInstance> methods = releaseMethods.get(methodSignature);
+                if (methods != null && !methods.isEmpty()) {
+                    for (MethodInstance method : methods) {
+                        // Verifica se il metodo non è già stato marcato come buggy
+                        if (!method.isBuggy()) {
+                            method.setBuggy(true);
+                            // Log per tracciare l'assegnazione della buggyness
+                            LOGGER.debug("Marked method as buggy: {} in release {}",
+                                    methodSignature, releaseId);
+                        }
                     }
                 }
             }
         }
     }
+
 
     //un metodo utile per ordinare i commit in ordine temporale
     private void sortCommits(List<RevCommit> commits){

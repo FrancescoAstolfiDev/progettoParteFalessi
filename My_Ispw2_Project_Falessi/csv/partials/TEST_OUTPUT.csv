@@ -1,3 +1,0 @@
-release,method,path,className,loc,wmc,assignmentsQty,mathOperationsQty,qtyTryCatch,qtyReturn,fanin,fanout,age,nAuth,nr,nSmell,buggy
-1.0.0,method1,path/to/Class1.java,Class1,10,5,3,2,1,1,2,3,5,1,2,0,false
-1.0.0,method2,path/to/Class2.java,Class2,20,10,6,4,2,2,4,6,10,2,4,2,true
