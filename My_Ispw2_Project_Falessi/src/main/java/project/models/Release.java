@@ -86,6 +86,7 @@ public class Release {
 	}
 
 	public void addClassFile(ClassFile classFile) {
+
 		this.classFileMap.put(ClassFile.getKey(classFile), classFile);
 	}
 

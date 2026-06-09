@@ -24,7 +24,7 @@ public class BookkeeperEntry implements EntryProject {
     }
     @Override
     public double getSplit() {
-        return 50/100.0;
+        return 50/100.0;// there are too few release
     }
 
     @Override

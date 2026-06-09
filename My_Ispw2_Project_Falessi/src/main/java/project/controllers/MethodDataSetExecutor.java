@@ -47,8 +47,6 @@ public class MethodDataSetExecutor {
         List<RevCommit> allCommits = gitHubInfoRetrieve.getAllCommits();
         LOGGER.info("Retrieved {} commits ", allCommits.size() );
 
-        jiraInfoRetrieve.sortReleaseList(releaseList);
-
         gitHubInfoRetrieve.orderCommitsByReleaseDate(allCommits, releaseList);
         gitHubInfoRetrieve.setReleaseLastCommit(releaseList);
 
@@ -68,14 +66,13 @@ public class MethodDataSetExecutor {
         }
 
         double proportion = coldStartProportion();// 2.15
-        //se non ho sufficienti ticket in tutto il progetto posso settare il proportion di tutte le release al valore
-        //ottenuto tramite cold start
+        // if there are few ticket with the affected version for the current release its abled the cold start
         if (jiraInfoRetrieve.getTicketsWithValidAV().size() < 5) {
             for (Release release:releaseList){
                 release.setCurrentProportion(proportion);
             }
         }
-        //scorro tutte le release e assegno i vari valori di proportion
+        //scan all the release and set the proportion value
         else {
             for (Release release:releaseList){
                 List<Ticket> ticketsWithAv = getTicketsWithAv(JiraInfoRetrieve.getAllReleaseTicket(release,allTickets));
@@ -87,11 +84,12 @@ public class MethodDataSetExecutor {
                 }
             }
         }
-
+        // analysis of just the first 33% || 50% of the releases
         Projects curProject = Projects.fromString(currentProject);
         int split=Math.max(1, (int) (releaseList.size() * curProject.getSplit()));
         List<Release> avaiableTrainingRelease = releaseList.subList(0, split);
 
+        // inject of the refactored class in to the class of the release
         curProject.setRefactoredClass(releaseList);
         getAllClassesByRelease(avaiableTrainingRelease);
         LOGGER.info("Retrieved {} classes from all the release " , avaiableTrainingRelease.get(avaiableTrainingRelease.size()-1).getReleaseAllClass().size() );
@@ -116,7 +114,7 @@ public class MethodDataSetExecutor {
 
     }
 
-    //method that sets the list of files present in the release
+    //method that sets the list of files present in the release in the last version
     private void getAllClassesByRelease(List<Release> releaseList) throws IOException {
         int len = releaseList.size();
         for (int i = 0; i < len; i++) {

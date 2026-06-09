@@ -15,9 +15,9 @@ public class Ticket {
 	private Release calculatedIv;
 	private List<RevCommit> associatedCommits;
 
-	public Ticket(String key, Release ov, Release fv, Release av) {
+	public Ticket(String key, Release ov, Release fv, Release iv) {
 		this.key = key;
-		this.iv = av;
+		this.iv = iv;
 		this.ov = ov;
 		this.fv = fv;
 		this.associatedCommits = new ArrayList<>();

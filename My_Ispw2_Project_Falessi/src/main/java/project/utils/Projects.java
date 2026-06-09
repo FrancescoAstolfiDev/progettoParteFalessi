@@ -30,8 +30,8 @@ public enum Projects implements EntryProject {
                 return project;
             }
         }
-        throw new IllegalArgumentException("Progetto non valido: " + projectName +
-                ". Progetti validi: " + Arrays.toString(Projects.values()));
+        throw new IllegalArgumentException("Not Valid Project " + projectName +
+                "Valid projects: " + Arrays.toString(Projects.values()));
     }
     public double getSplit(){
         return entryProject.getSplit();

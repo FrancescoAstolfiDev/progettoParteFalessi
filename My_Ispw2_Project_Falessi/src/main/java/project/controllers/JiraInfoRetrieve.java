@@ -144,7 +144,7 @@ public class JiraInfoRetrieve {
 
                 Date temp = firstDateGetter(releaseDate,resolution,firstDate);
                 if(temp == null){
-                    return null;
+                    continue;
                 }
                 firstDate = temp;
             }
