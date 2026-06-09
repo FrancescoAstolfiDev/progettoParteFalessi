@@ -18,7 +18,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import project.models.Ticket;
 
-import static java.lang.System.*;
 
 
 public class JiraInfoRetrieve {
@@ -138,15 +137,15 @@ public class JiraInfoRetrieve {
                     releaseDateString = avElem.getString("releaseDate");
                 }
                 catch(JSONException e){
-                    continue;
+                    continue ;
                 }
-                Date releaseDate = formatter.parse(releaseDateString);
-
-                Date temp = firstDateGetter(releaseDate,resolution,firstDate);
-                if(temp == null){
-                    continue;
+                if (releaseDateString != null) {
+                    Date releaseDate = formatter.parse(releaseDateString);
+                    Date temp = firstDateGetter(releaseDate, resolution, firstDate);
+                    if (temp != null) {
+                        firstDate = temp;
+                    }
                 }
-                firstDate = temp;
             }
         }
         // controllo che IV < OV

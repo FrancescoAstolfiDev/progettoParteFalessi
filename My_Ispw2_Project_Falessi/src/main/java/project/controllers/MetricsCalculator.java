@@ -1414,18 +1414,21 @@ public class MetricsCalculator {
         }
         for (int releaseId = injectedId; releaseId < fixedId; releaseId++) {
             Map<String, List<MethodInstance>> releaseMethods = methodsByRelease.get(releaseId);
-            if (releaseMethods == null) {
-                continue;
-            }
-            for (String methodSignature : modifiedMethodSignatures) {
-                List<MethodInstance> methods = releaseMethods.get(methodSignature);
-                if (methods != null && !methods.isEmpty()) {
-                    for (MethodInstance method : methods) {
-                        if (!method.isBuggy()) {
-                            method.setBuggy(true);
-                            LOGGER.debug("Marked method as buggy: {} in release {}", methodSignature, releaseId);
-                        }
-                    }
+            if (releaseMethods == null) continue;
+            markBuggyMethods(releaseMethods, modifiedMethodSignatures, releaseId);
+        }
+    }
+
+    private void markBuggyMethods(Map<String, List<MethodInstance>> releaseMethods,
+                                   Set<String> modifiedMethodSignatures,
+                                   int releaseId) {
+        for (String methodSignature : modifiedMethodSignatures) {
+            List<MethodInstance> methods = releaseMethods.get(methodSignature);
+            if (methods == null || methods.isEmpty()) continue;
+            for (MethodInstance method : methods) {
+                if (!method.isBuggy()) {
+                    method.setBuggy(true);
+                    LOGGER.debug("Marked method as buggy: {} in release {}", methodSignature, releaseId);
                 }
             }
         }

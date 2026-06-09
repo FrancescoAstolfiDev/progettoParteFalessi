@@ -65,6 +65,9 @@ public class EvaluationFlow {
     private static final String FALSE_LITERAL = "false";
     private static final String UNKNOWN_LITERAL = "unknown";
 
+    private final String trainProject;
+    private final String testProject;
+
     RandomForest randomForestClassifier;
     MultilayerPerceptron multilayerPerceptronClassifier;
     SGD sgdClassifier;
@@ -94,7 +97,17 @@ public class EvaluationFlow {
     List<ResultsHolder> featSelCostSensSGDList;
     List<ResultsHolder> featSelCostSensNBList;
 
-    public EvaluationFlow(){
+    public EvaluationFlow(String trainProject, String testProject) {
+        Projects.fromString(trainProject); // valida il nome del progetto
+        Projects.fromString(testProject);
+        this.trainProject = trainProject;
+        this.testProject  = testProject;
+        init();
+    }
+
+
+
+    private void init(){
         //questi sono i classificatori che utilizzo con parametri ottimizzati per velocità
         // Create RandomForest with default settings similar to Weka example
         this.randomForestClassifier = new RandomForest();
@@ -172,7 +185,9 @@ public class EvaluationFlow {
 
 
     private int determineNumRelease() {
-        return Projects.getNumStepDatasetStatic();
+        int stepTrain = Projects.valueOf(trainProject.toUpperCase()).getNumStepDataset();
+        int stepTest  = Projects.valueOf(testProject.toUpperCase()).getNumStepDataset();
+        return Math.min(stepTrain, stepTest);
     }
 
     private int determineThreadPoolSize() {
@@ -238,8 +253,8 @@ public class EvaluationFlow {
     // Helper method to process a single release
     private void processRelease(int releaseIndex) throws Exception {
         //recupero i dati dai file .arff
-        String trainFileName = Projects.getTrainProject() + "_Train_R" + releaseIndex + ".arff";
-        String testFileName =Projects.getTestProject() + "_Test_R" + releaseIndex + ".arff";
+        String trainFileName = trainProject + "_Train_R" + releaseIndex + ".arff";
+        String testFileName  = testProject  + "_Test_R"  + releaseIndex + ".arff";
         String trainFilePath = ConstantsWindowsFormat.ARFF_PATH.resolve(trainFileName).toString();
         String testFilePath = ConstantsWindowsFormat.ARFF_PATH.resolve(testFileName).toString();
 
@@ -1811,7 +1826,7 @@ public class EvaluationFlow {
 
     //metodo che prende i risultati e li salva su un csv
     public void csvWriter(List<List<ResultsHolder>> list){
-        String path =Projects.getTrainProject()+"ResultsForJMP.csv";
+        String path = trainProject + "ResultsForJMP.csv";
         try (FileWriter writer = new FileWriter(path)) {
 
             writer.write("Classifier,feature selection,sampling,cost sensitive,feature selection id,precision,recall,auc,kappa\n");

@@ -165,13 +165,7 @@ public class PmdRunner {
 
 
 
-    /**
-     * Trova il file Java corrispondente al nome della classe specificato
-     * @param className il nome della classe da cercare
-     * @param projectPath il percorso del progetto in cui cercare
-     * @return il percorso completo del file della classe, o null se non trovato
-     */
-    /**
+     /**
      * Trova il file Java corrispondente al nome della classe specificato
      * usando un approccio manuale che consuma meno risorse di sistema.
      *

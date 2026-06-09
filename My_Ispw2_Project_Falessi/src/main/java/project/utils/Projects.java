@@ -121,26 +121,6 @@ public enum Projects implements EntryProject {
         }
         return null;
     }
-    public static String getTrainProject(){
-        return Projects.BOOKKEEPER.getProjectName();
-    }
-    public static String getTestProject(){
-        return Projects.OPENJPA.getProjectName();
-    }
-    public static int getNumStepDatasetStatic() {
-        String trainSet=getTrainProject();
-        String testSet=getTestProject();
-        int stepTrain = Projects.valueOf(trainSet.toUpperCase()).getNumStepDataset();
-        int stepTest = Projects.valueOf(testSet.toUpperCase()).getNumStepDataset();
-        if(stepTrain==0){
-            throw new IllegalArgumentException("Progetto non valido: " + trainSet +
-                    ". Progetti validi: " + Arrays.toString(Projects.values()));
-        }
-        if(stepTest==0){
-            throw new IllegalArgumentException("Progetto non valido: " + trainSet +
-                    ". Progetti validi: " + Arrays.toString(Projects.values()));
-        }
-        return Math.min(stepTrain,stepTest);
-    }
+
 
 }
