@@ -26,7 +26,7 @@ public class PmdRunner {
 
     static final String RULES_SET_PATH_STRING = ConstantsWindowsFormat.RULES_SET_PATH.toString();
     /**
-     * Esegue l'analisi PMD su un file o directory
+     * Runs PMD analysis on a file or directory
      */
     public static Report runPmdAnalysis(Path sourceFilePath) throws IOException {
         PMDConfiguration configuration = new PMDConfiguration();
@@ -67,17 +67,17 @@ public class PmdRunner {
     }
 
     /**
-     * Estrae solo il nome della classe da un nome di classe completo.
-     * Rimuove il package, il modulo e qualsiasi riferimento a classi interne o anonime.
+     * Extracts only the class name from a full class name.
+     * Removes the package, module and any reference to inner or anonymous classes.
      *
-     * @param fullClassName il nome completo della classe (es. "org.example.benchmark.MyClass$InnerClass")
-     * @return solo il nome della classe (es. "MyClass")
+     * @param fullClassName the full class name (e.g. "org.example.benchmark.MyClass$InnerClass")
+     * @return only the class name (e.g. "MyClass")
      */
     public static String extractClassNameOnly(String fullClassName) {
         int dollarIndex = fullClassName.indexOf('$');
         String cleanName = (dollarIndex != -1) ? fullClassName.substring(0, dollarIndex) : fullClassName;
 
-        // Estrae solo il nome della classe senza package/modulo
+        // Extract only the class name without package/module
         int lastDot = cleanName.lastIndexOf('.');
         return (lastDot != -1) ? cleanName.substring(lastDot + 1) : cleanName;
     }
@@ -91,7 +91,7 @@ public class PmdRunner {
         try {
             String javaFile = findClassFile(className, projectPath);
             if (javaFile == null) {
-                LOGGER.error("File non trovato per la classe: {}" , className);
+                LOGGER.error("File not found for class: {}" , className);
                 return 0;
             }
 
@@ -99,7 +99,7 @@ public class PmdRunner {
 
             Set<String> ruleNames = getRuleNamesFromXml(RULES_SET_PATH_STRING);
 
-            // Inizializza le metriche per questa classe
+            // Initialize metrics for this class
             Map<String, Integer> metrics = new HashMap<>();
             for (String rule : ruleNames) {
                 metrics.put(rule, 0);
@@ -107,14 +107,14 @@ public class PmdRunner {
 
 
 
-            // Conta le occorrenze di ogni tipo di violazione
+            // Count occurrences of each violation type
             Iterator<RuleViolation> violations = report.iterator();
             while (violations.hasNext()) {
                 RuleViolation violation = violations.next();
                 int line = violation.getBeginLine();
                 String ruleName = violation.getRule().getName();
 
-                // Filtra le violazioni tra startLine e endLine (inclusi)
+                // Filter violations between startLine and endLine (inclusive)
                 if (line >= startLine && line <= endLine && metrics.containsKey(ruleName) ) {
                         metrics.put(ruleName, metrics.get(ruleName) + 1);
                         nSmells++;
@@ -124,14 +124,14 @@ public class PmdRunner {
 
 
         } catch (Exception e) {
-            LOGGER.error("Errore nell'analisi della classe {} : {} " ,className, e.getMessage());
+            LOGGER.error("Error analyzing class {} : {} " ,className, e.getMessage());
             nSmells=-1;
         }
 
         return nSmells;
     }
     /**
-     * Estrae i nomi delle regole dal file XML specificato
+     * Extracts rule names from the specified XML file
      */
     private static Set<String> getRuleNamesFromXml(String rulesFilePath) {
         Set<String> ruleNames = new HashSet<>();
@@ -157,7 +157,7 @@ public class PmdRunner {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Errore durante l'estrazione delle regole dal file XML:  {}" , e.getMessage());
+            LOGGER.error("Error extracting rules from XML file: {}" , e.getMessage());
         }
         return ruleNames;
     }
@@ -166,27 +166,27 @@ public class PmdRunner {
 
 
      /**
-     * Trova il file Java corrispondente al nome della classe specificato
-     * usando un approccio manuale che consuma meno risorse di sistema.
+     * Finds the Java file corresponding to the specified class name
+     * using a manual approach that consumes fewer system resources.
      *
-     * @param className il nome della classe da cercare
-     * @param projectPath il percorso del progetto in cui cercare
-     * @return il percorso completo del file della classe, o null se non trovato
+     * @param className the class name to search for
+     * @param projectPath the project path to search in
+     * @return the full path of the class file, or null if not found
      */
     private static String findClassFile(String className, String projectPath) {
         String targetFileName = className + ".java";
 
-        // Coda per BFS
+        // Queue for BFS
         Queue<File> directories = new LinkedList<>();
         directories.add(new File(projectPath));
 
-        // Evita directory non utili (per performance)
+        // Avoid useless directories (for performance)
         Set<String> ignoredDirs = Set.of("target", ".git", "build", "out", "node_modules");
 
-        // Profondità massima (es. evita esplorazioni infinite o troppo profonde)
+        // Maximum depth (e.g. avoid infinite or too deep explorations)
         final int MAX_DEPTH = 20;
 
-        // Mappa directory -> profondità
+        // Map directory -> depth
         Map<File, Integer> depthMap = new HashMap<>();
         depthMap.put(new File(projectPath), 0);
 

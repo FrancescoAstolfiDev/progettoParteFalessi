@@ -211,11 +211,11 @@ public class MethodDataSetExecutor {
         Release injectVersion;
         for (Ticket ticket : tickets) {
             injectVersion=ticket.getIv()==null?ticket.getCalculatedIv():ticket.getIv();
-            // 1. il bug esiste prima della fine della release
-            // 2. il bug viene iniettato e poi viene aperto
-            // 3. il bug viene prima iniettato e poi fixato
-            // 4. il bug viene fixato prima della fine della release[ se no non so che farmene per la buggyness]
-            // 5. per ottimizzare il processo e diminuire i ticket iv! fv!= iv non ha influenza ai fini della chiusura della release
+            // 1. the bug exists before the end of the release
+            // 2. the bug is injected and then opened
+            // 3. the bug is first injected and then fixed
+            // 4. the bug is fixed before the end of the release [otherwise it's not useful for buggyness]
+            // 5. to optimize the process and reduce tickets iv! fv!= iv has no influence on release closure
             if (injectVersion.getId() <= currRelease.getId() &&
                     injectVersion.getId() <= ticket.getOv().getId() &&
                     ticket.getFv().getId() <= currRelease.getId() &&

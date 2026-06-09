@@ -90,13 +90,13 @@ public class RepositoryManager {
      * Creates a backup of the repository
      */
     public void backupRepository() throws IOException {
-        // Verifica dei prerequisiti
+        // Prerequisites verification
         if (repository == null) {
             throw new IOException("Repository not initialized");
         }
 
         try {
-            // Chiude le risorse esistenti
+            // Close existing resources
             if (git != null) {
                 git.close();
             }
@@ -106,14 +106,14 @@ public class RepositoryManager {
             originalRepoPath = gitDir.getParentFile().getAbsolutePath();
             backupRepoPath = originalRepoPath + "_backup_" + System.currentTimeMillis();
 
-            // Crea e verifica la directory di backup
+            // Create and verify the backup directory
             Path backupPath = Paths.get(backupRepoPath);
             Files.createDirectories(backupPath);
 
-            // Copia i file
+            // Copy the files
             copyDirectory(Paths.get(originalRepoPath), backupPath);
 
-            // Riapre il repository originale usando try-with-resources
+            // Reopen the original repository using try-with-resources
             File repoDir = new File(gitHubInfoRetrieve.getPath());
             try (Git tempGit = Git.open(repoDir)) {
                 this.repository = tempGit.getRepository();
@@ -324,7 +324,7 @@ public class RepositoryManager {
             return true;
         } catch (IOException e) {
             if (attempt == maxRetries - 1) {
-                LOGGER.warn("Eliminazione fallita di {} dopo {} tentativi: {}",
+                LOGGER.warn("Failed deletion of {} after {} attempts: {}",
                         path, maxRetries, e.getMessage());
             } else {
                 Thread.sleep(retryDelayMs);
@@ -335,11 +335,11 @@ public class RepositoryManager {
 
 
     private void logDeletionFailure(Path path, int maxRetries) {
-        LOGGER.warn("Impossibile eliminare il file dopo {} tentativi: {}", maxRetries, path);
+        LOGGER.warn("Unable to delete the file after {} attempts: {}", maxRetries, path);
     }
 
     private void handleDeletionError(Exception e) {
-        LOGGER.error("Errore durante l'eliminazione della directory: {}", e.getMessage());
+        LOGGER.error("Error during directory deletion: {}", e.getMessage());
         if (e instanceof InterruptedException) {
             Thread.currentThread().interrupt();
         }
@@ -361,28 +361,28 @@ public class RepositoryManager {
 
     protected void checkoutRelease(RevCommit commit, Path commitTempDir, boolean processAllCommits) {
         try {
-            // Prima prova un checkout pulito
+            // First try a clean checkout
             if (tryCheckout(commit, CheckoutStrategy.CLEAN)) {
                 finalizeCheckoutWithNestedClasses(commitTempDir, commit, processAllCommits);
                 return;
             }
 
-            // Se fallisce, prova con stash
+            // If it fails, try with stash
             if (tryCheckout(commit, CheckoutStrategy.STASH)) {
                 finalizeCheckoutWithNestedClasses(commitTempDir, commit, processAllCommits);
                 return;
             }
 
-            // Ultima risorsa: elimina i file problematici
+            // Last resort: delete problematic files
             if (tryCheckout(commit, CheckoutStrategy.DELETE_PROBLEMATIC)) {
                 finalizeCheckoutWithNestedClasses(commitTempDir, commit, processAllCommits);
                 return;
             }
 
-            throw new GitAPIException("Checkout fallito dopo tutti i tentativi") {
+            throw new GitAPIException("Checkout failed after all attempts") {
                 @Override
                 public String getMessage() {
-                    return "Checkout fallito dopo tutti i tentativi per il commit: " + commit.getName();
+                    return "Checkout failed after all attempts for commit: " + commit.getName();
                 }
             };
 
@@ -392,7 +392,7 @@ public class RepositoryManager {
     }
     private void finalizeCheckoutWithNestedClasses(Path commitTempDir, RevCommit commit, boolean processAllCommits) {
         ensureTempDirectoryExists(commitTempDir);
-        // Modifica qui per gestire le classi annidate
+        // Handle nested classes here
         exportCodeToDirectoryWithNested(commit, commitTempDir, processAllCommits);
     }
 
@@ -402,7 +402,7 @@ public class RepositoryManager {
             int maxFilesToProcess = ConstantSize.MAX_CLASSES_PER_COMMIT;
 
             if (processedFilesCount < maxFilesToProcess) {
-                // Modifica per gestire le classi annidate
+                // Handle nested classes
                 processCommitFilesWithNested(commit, targetDir, processAllCommits, processedFilesCount, maxFilesToProcess);
             }
 
@@ -439,7 +439,7 @@ public class RepositoryManager {
                 String path = entry.getNewPath();
                 if (path.endsWith(JAVA) && !isTestFile(path)) {
                     javaFiles.add(entry);
-                    // Aggiungi un set vuoto per ogni file Java per le sue classi annidate
+                    // Add an empty set for each Java file for its nested classes
                     nestedClassesMap.put(path, new HashSet<>());
                 }
             }
@@ -519,7 +519,7 @@ public class RepositoryManager {
 
             return true;
         } catch (GitAPIException e) {
-            LOGGER.warn("Tentativo di checkout {} fallito per il commit {}: {}",
+            LOGGER.warn("Checkout attempt {} failed for commit {}: {}",
                     strategy, commit.getName(), e.getMessage());
             return false;
         }
@@ -547,7 +547,7 @@ public class RepositoryManager {
         try {
             git.stashCreate().call();
         } catch (Exception e) {
-            LOGGER.warn("Stash fallito, proseguo con il checkout: {}", e.getMessage());
+            LOGGER.warn("Stash failed, proceeding with checkout: {}", e.getMessage());
         }
     }
 
@@ -555,11 +555,11 @@ public class RepositoryManager {
         Path problematicFile = repository.getWorkTree().toPath().resolve(
                 "openjpa-project/src/doc/manual/ref_guide_runtime.xml");
         if (Files.exists(problematicFile)) {
-            LOGGER.info("Eliminazione file problematico: {}", problematicFile);
+            LOGGER.info("Deleting problematic file: {}", problematicFile);
             try {
                 Files.delete(problematicFile);
             } catch (IOException e) {
-                LOGGER.warn("Impossibile eliminare il file problematico: {}", e.getMessage());
+                LOGGER.warn("Unable to delete the problematic file: {}", e.getMessage());
             }
         }
     }

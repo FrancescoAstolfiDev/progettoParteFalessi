@@ -1082,7 +1082,7 @@ public class MetricsCalculator {
             MethodInstance methodInstance = createMethodInstance(method, filledClass, filledMethod, release, nSmell);
             methodInstanceResults.put(MethodInstance.createMethodKey(methodInstance), methodInstance);
         } catch (Exception e) {
-            LOGGER.error("Errore durante l'analisi del metodo: {} - {}",
+            LOGGER.error("Error during method analysis: {} - {}",
                     method.getQualifiedMethodName(), e.getMessage(), e);
         }
     }

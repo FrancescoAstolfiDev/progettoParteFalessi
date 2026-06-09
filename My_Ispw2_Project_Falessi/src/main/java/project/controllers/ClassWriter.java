@@ -22,12 +22,12 @@ public class ClassWriter {
 
     }
     private static final Logger LOGGER = LoggerFactory.getLogger(ClassWriter.class);
-    // Funzione per escape CSV sicuro
+    // Function for safe CSV escaping
     private static  String escapeCsv(String field) {
         if (field == null) return "";
         boolean hasSpecial = field.contains(",") || field.contains("\"") || field.contains("\n") || field.contains("\r") ;
         if (hasSpecial) {
-            field = field.replace("\"", "\"\""); // raddoppia le virgolette
+            field = field.replace("\"", "\"\""); // double the quotes
             return "\"" + field + "\"";
         }
         return field;
@@ -130,19 +130,19 @@ public class ClassWriter {
         }
     }
     private static boolean shouldSkipResult(MethodInstance result, String path) {
-        // Verifica condizioni base
+        // Check base conditions
         if (result.getAge() < 0 || result.getReleaseName() == null) {
             return true;
         }
-        // Gestione matrice B - include instances with nSmells > 0, then set nSmells to 0
+        // Handle B matrix - include instances with nSmells > 0, then set nSmells to 0
         if (path.contains(WhatIf.B_MATRIX.getName()) && !path.contains(WhatIf.B_PLUS_MATRIX.getName())) {
             return result.getnSmells() == 0;
         }
-        // Gestione matrice B_PLUS - include all instances and keep nSmells as is
+        // Handle B_PLUS matrix - include all instances and keep nSmells as is
         if (path.contains(WhatIf.B_PLUS_MATRIX.getName())) {
             return result.getnSmells() == 0;
         }
-        // Gestione matrice C - include only instances with nSmells == 0
+        // Handle C matrix - include only instances with nSmells == 0
         if (path.contains(WhatIf.C_MATRIX.getName())) {
             return result.getnSmells() > 0;
         }

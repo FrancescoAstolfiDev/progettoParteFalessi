@@ -58,15 +58,15 @@ public class OpenjpaEntry implements EntryProject {
                         classFiles.add(filledClass);
                     });
                 } else {
-                    LOGGER.error("Errore durante il parsing del file");
+                    LOGGER.error("Error during file parsing");
                 }
             });
 
             if (!parseResult.isSuccessful() || parseResult.getResult().isEmpty()) {
-                LOGGER.error("Errore durante il parsing del file");
+                LOGGER.error("Error during file parsing");
             }
         } catch (Exception e) {
-            LOGGER.error("Errore durante l'analisi del file: {}", e.getMessage());
+            LOGGER.error("Error during file analysis: {}", e.getMessage());
         }
     }
 

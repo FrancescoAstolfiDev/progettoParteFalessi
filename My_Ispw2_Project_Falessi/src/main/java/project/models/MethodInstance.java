@@ -38,7 +38,7 @@ public class MethodInstance {
 
     @Override
     public String toString() {
-        return " sono nella method instance " + this.methodName + " con il path " + this.classPath + " e con gli smell  "+this.nSmells;
+        return " in method instance " + this.methodName + " with path " + this.classPath + " and smells  "+this.nSmells;
     }
 
     public MethodInstance(String filePath, String methodName, String signature) {
@@ -48,10 +48,10 @@ public class MethodInstance {
         this.fullSignature = filePath + "#" + methodName + signature;
     }
     /**
-     * Crea una chiave univoca per il metodo utilizzando i metodi nativi di CK.
+     * Creates a unique key for the method using the native CK methods.
      *
      * @param method
-     * @return Una chiave univoca per il metodo
+     * @return A unique key for the method
      */
     public static String createMethodKey(MethodInstance method) {
         String releaseName= method.getReleaseName() !=null?
@@ -74,15 +74,15 @@ public class MethodInstance {
             return "";
         }
 
-        // Trova l'indice del carattere '/'
+        // Find the index of the '/' character
         int slashIndex = methodName.indexOf('/');
 
-        // Se trova il carattere '/', restituisce la parte prima di esso
+        // If the '/' character is found, return the part before it
         if (slashIndex != -1) {
             return methodName.substring(0, slashIndex);
         }
 
-        // Se non trova il carattere '/', restituisce il nome originale
+        // If the '/' character is not found, return the original name
         return methodName;
     }
 
@@ -243,12 +243,12 @@ public class MethodInstance {
         if (fullSignature == null || fullSignature.isEmpty()) {
             return "";
         }
-        // Esempio: da "sendRead/3[java.util.ArrayList<java.net.InetSocketAddress>,...]" → "sendRead"
+        // Example: from "sendRead/3[java.util.ArrayList<java.net.InetSocketAddress>,...]" → "sendRead"
         int slashIndex = fullSignature.indexOf('/');
         if (slashIndex != -1) {
             return fullSignature.substring(0, slashIndex);
         }
-        return fullSignature; // fallback: magari è già solo il nome
+        return fullSignature; // fallback: it may already be just the name
     }
 
 }

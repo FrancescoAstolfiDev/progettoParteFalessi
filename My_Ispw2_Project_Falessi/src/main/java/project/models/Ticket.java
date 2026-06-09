@@ -113,7 +113,7 @@ public class Ticket {
 
 		builder.append("Ticket ").append(key);
 
-		// Aggiungi informazioni sulle release
+		// Add release information
 		builder.append("\n  IV: ").append(iv != null ? iv.getId() + " (" + iv.getName() + ")" : "null");
 		builder.append("\n  OV: ").append(ov != null ? ov.getId() + " (" + ov.getName() + ")" : "null");
 		builder.append("\n  FV: ").append(fv != null ? fv.getId() + " (" + fv.getName() + ")" : "null");

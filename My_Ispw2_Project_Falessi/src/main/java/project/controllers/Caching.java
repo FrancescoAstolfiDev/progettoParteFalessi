@@ -402,7 +402,7 @@ public class Caching {
         }
 
         try {
-            // Leggi la cache esistente
+            // Read the existing cache
             JSONObject cacheJson;
             try (java.io.BufferedInputStream bis = new java.io.BufferedInputStream(
                     Files.newInputStream(cacheFilePath), 8192)) {
@@ -410,10 +410,10 @@ public class Caching {
                 cacheJson = new JSONObject(tokener);
             }
 
-            // Converti le chiavi in una lista ordinata
+            // Convert the keys to a sorted list
             List<String> commitHashes = new ArrayList<>(cacheJson.keySet());
 
-            // Determina quanti commit rimuovere (non più di quanti ne esistono)
+            // Determine how many commits to remove (no more than those that exist)
             int commitsToRemove = Math.min(numCommitsToRemove, commitHashes.size());
 
             if (commitsToRemove == 0) {
@@ -421,7 +421,7 @@ public class Caching {
                 return 0;
             }
 
-            // Rimuovi i primi N commit
+            // Remove the first N commits
             int removedCount = 0;
             for (int i = 0; i < commitsToRemove; i++) {
                 String commitHash = commitHashes.get(i);
@@ -429,7 +429,7 @@ public class Caching {
                 removedCount++;
             }
 
-            // Scrivi la cache aggiornata
+            // Write the updated cache
             try (java.io.BufferedWriter writer = Files.newBufferedWriter(cacheFilePath)) {
                 writer.write(cacheJson.toString());
             }

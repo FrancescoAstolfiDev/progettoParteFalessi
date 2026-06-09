@@ -30,12 +30,12 @@ public class ClassFile {
     public static  String extractClassName(String path) {
         if (path == null) return null;
 
-        // Rimuovi l'estensione .java se presente
+        // Remove the .java extension if present
         if (path.endsWith(".java")) {
             path = path.substring(0, path.length() - 5);
         }
 
-        // Prendi l'ultima parte del percorso dopo l'ultimo punto o slash
+        // Take the last part of the path after the last dot or slash
         int lastDot = path.lastIndexOf('.');
         int lastSlash = path.lastIndexOf('/');
         int lastPos = Math.max(lastDot, lastSlash);
@@ -148,17 +148,17 @@ public class ClassFile {
      * TO USE IT FOR CK RESULTS
      * */
     public static String getNameClass(String fullClassName) {
-        // Gestione delle classi anonime e annidate
+        // Handle anonymous and nested classes
         int dollarIndex = fullClassName.indexOf('$');
         String cleanName;
         if (dollarIndex != -1) {
-            // Controlla se dopo il $ c'è un numero o la parola "Anonymous" seguita da numeri
+            // Check if after the $ there is a number or the word "Anonymous" followed by numbers
             String afterDollar = fullClassName.substring(dollarIndex + 1);
             if (afterDollar.matches("\\d+") || afterDollar.matches("Anonymous\\d+")){
-                // È una classe anonima, rimuovi tutto dopo $
+                // It's an anonymous class, remove everything after $
                 cleanName = fullClassName.substring(0, dollarIndex);
             } else {
-                // È una classe annidata normale, mantieni il nome completo
+                // It's a normal nested class, keep the full name
                 cleanName = fullClassName;
             }
         } else {
@@ -174,18 +174,18 @@ public class ClassFile {
         return (lastDot != -1) ? cleanName.substring(lastDot + 1) : cleanName;
     }
     public static String extractPath(String fullClassName) {
-        // Gestione delle classi anonime e annidate
+        // Handle anonymous and nested classes
         int dollarIndex = fullClassName.indexOf('$');
         String cleanName;
 
         if (dollarIndex != -1) {
-            // Se c'è un $, prendiamo solo la parte prima del $
+            // If there is a $, take only the part before the $
             cleanName = fullClassName.substring(0, dollarIndex);
         } else {
             cleanName = fullClassName;
         }
 
-        // Converti i punti in slash e aggiungi l'estensione
+        // Convert dots to slashes and add the extension
         return cleanName.replace('.', '/') + ".java";
     }
 

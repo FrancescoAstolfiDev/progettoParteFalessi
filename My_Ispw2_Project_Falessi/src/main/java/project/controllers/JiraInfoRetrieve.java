@@ -34,7 +34,7 @@ public class JiraInfoRetrieve {
         return this.ticketsWithValidAV;
     }
 
-    //DA JIRA PRENDO LE AFFECTED VERSION, LA FIXED VERSION, LA RESOLUTION DATE, LA CREATION DATE E LA KEY
+    //FROM JIRA I RETRIEVE THE AFFECTED VERSION, THE FIXED VERSION, THE RESOLUTION DATE, THE CREATION DATE AND THE KEY
     public List<Ticket> retrieveTickets(List<Release> releasesList) throws IOException, ParseException {
 
         List<Ticket> allTickets = new ArrayList<>();
@@ -70,27 +70,27 @@ public class JiraInfoRetrieve {
 
         for (int i = 0; i < issueLen; i++) {
 
-            //prendo i-esimo ticket
+            //get the i-th ticket
             JSONObject issue = issues.getJSONObject(i);
 
-            //prendo la key
+            //get the key
             String key = issue.getString("key");
 
-            //accedo area fields
+            //access fields area
             JSONObject fields = issue.getJSONObject("fields");
 
-            //ottengo direttamente creation e resolution date
+            //directly get creation and resolution date
             String resolutionDateString = fields.getString("resolutiondate");
             String creationDateString = fields.getString("created");
 
-            //ottengo le AV se ci sono
+            //get the AV if present
             JSONArray av = fields.getJSONArray("versions");
 
             Date resolutionDate = formatter.parse(resolutionDateString);
             Date creationDate = formatter.parse(creationDateString);
 
 
-            //qui ottengo la release di resolution e di creation del ticket
+            //here I get the resolution and creation release of the ticket
             Release creationRelease = getReleaseFromDate(releasesList,creationDate);
             Release resolutionRelease = getReleaseFromDate(releasesList,resolutionDate);
             if(creationRelease == null || resolutionRelease == null) continue;
@@ -102,7 +102,7 @@ public class JiraInfoRetrieve {
 
 
             Ticket ticket;
-            //se ha AV valido lo salvo
+            //if it has a valid AV, save it
             if(firstDate != null && creationRelease.getDate().before(resolutionRelease.getDate())){
 
                 Release corrRelease = getReleaseFromDate(releasesList,firstDate);
@@ -121,8 +121,8 @@ public class JiraInfoRetrieve {
         return allTickets;
     }
 
-    //Questo metodo va a verificare che la release di creation e le affected version non siano inconsistenti, ovvero
-    //controlla se IV > OV o se IV = OV
+    //This method verifies that the creation release and the affected versions are not inconsistent,
+    //i.e. checks if IV > OV or if IV = OV
     private Date validateAV(Release resolution, Release creation, JSONArray av) throws ParseException {
 
         int avLen = av.length();
@@ -148,7 +148,7 @@ public class JiraInfoRetrieve {
                 }
             }
         }
-        // controllo che IV < OV
+        // check that IV < OV
         if(firstDate != null && creation.getDate().after(firstDate)){
             return firstDate;
         }
@@ -181,13 +181,13 @@ public class JiraInfoRetrieve {
             return new JSONObject(response.body());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new IOException("Richiesta interrotta", e);
+            throw new IOException("Request interrupted", e);
         }
     }
 
 
 
-    //Questo metodo recupera le release di creazione e risoluzione del ticket
+    //This method retrieves the creation and resolution releases of the ticket
     private Release getReleaseFromDate(List<Release> list, Date date){
 
         int len = list.size();
@@ -245,7 +245,7 @@ public class JiraInfoRetrieve {
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new IOException("Richiesta interrotta", e);
+            throw new IOException("Request interrupted", e);
         }
     }
 

@@ -32,7 +32,7 @@ public class CSVtoARFFConverter {
         Path arffFilePathTest;
         for (int i = 2; i < numOFRelease; i++) {
             try {
-                // Verifica esistenza directory
+                // Check directory existence
                 createDirectoryIfNotExists(String.valueOf(csvPath));
                 createDirectoryIfNotExists(String.valueOf(testCsvPath));
 
@@ -42,16 +42,16 @@ public class CSVtoARFFConverter {
                 arffFilePathTrain = arffCsvPath.resolve(projectName + "_Train_R" + i + ARFF);
                 arffFilePathTest = arffCsvPath.resolve(projectName + "_Test_R" + i + ARFF);
 
-                // Verifica esistenza file
+                // Check file existence
                 if (!new File(String.valueOf(csvFilePathTrain)).exists() || !new File(String.valueOf(csvFilePathTest)).exists()) {
-                    LOGGER.error("File CSV mancante per la Release {}", i);
+                    LOGGER.error("Missing CSV file for Release {}", i);
                     continue;
                 }
 
-                // Configurazione per il training set
+                // Configuration for the training set
                 convertFile(String.valueOf(csvFilePathTrain), String.valueOf(arffFilePathTrain), projectName + "_Train_R" + i);
 
-                // Configurazione per il test set
+                // Configuration for the test set
                 convertFile(String.valueOf(csvFilePathTest), String.valueOf(arffFilePathTest), projectName + "_Test_R" + i);
                 if(i==numOFRelease-1){
                     for(String matrix: Objects.requireNonNull(WhatIf.getListMatrix())){
@@ -61,10 +61,10 @@ public class CSVtoARFFConverter {
                     }
                 }
 
-                LOGGER.info("Conversione completata per Release {} " , i);
+                LOGGER.info("Conversion completed for Release {} " , i);
 
             } catch (Exception e) {
-               LOGGER.error("Errore durante la conversione della Release {} : {}", i, e.getMessage());
+               LOGGER.error("Error during conversion of Release {} : {}", i, e.getMessage());
             }
         }
 
@@ -92,7 +92,7 @@ public class CSVtoARFFConverter {
         removeFilter.setInputFormat(data);
         Instances filteredData = Filter.useFilter(data, removeFilter);
 
-        // Converti l'attributo release in nominale
+        // Convert the release attribute to nominal
         StringToNominal stringToNominal = new StringToNominal();
         stringToNominal.setAttributeRange("1"); // Prima colonna (release)
         stringToNominal.setInputFormat(filteredData);

@@ -32,7 +32,7 @@ import static java.lang.System.*;
 
 public class EvaluationFlow {
 
-    // Messaggi di log come variabili di classe
+    // Log messages as class variables
     private static final String THREAD_POOL_MSG = "Using thread pool with %d threads for parallel processing";
     private static final String ERROR_PROCESSING_RELEASE_MSG = "Error processing release %d: %s";
     private static final String ERROR_LOADING_ARFF_MSG = "Error loading ARFF files for release %d: %s";
@@ -46,8 +46,8 @@ public class EvaluationFlow {
     private static final String WARNING_FEATURE_SELECTION_RESULT_MSG = "Warning: Feature selection resulted in %s for release %d. Skipping.";
     private static final String WARNING_TOO_FEW_ATTRIBUTES_MSG = "Warning: Feature selection resulted in too few attributes for release %d. Skipping.";
     private static final String FEATURE_SELECTION_LOG_MSG = "\n=== Feature Selection Results for Release %d ===\n";
-    private static final String CSV_SUCCESS_MSG = "File CSV creato con successo.";
-    private static final String CSV_ERROR_MSG = "Si è verificato un errore durante la creazione del file CSV: %s";
+    private static final String CSV_SUCCESS_MSG = "CSV file created successfully.";
+    private static final String CSV_ERROR_MSG = "An error occurred while creating the CSV file: %s";
     private static final String RELEASE_NUMBER_WARNING_MSG = "Warning: Could not extract release number from relation name: %s";
     private static final String CACHED_FILTER_MSG = "Using cached feature selection filter for release %d";
     private static final String NEW_FILTER_MSG = "Creating new feature selection filter%s";
@@ -98,7 +98,7 @@ public class EvaluationFlow {
     List<ResultsHolder> featSelCostSensNBList;
 
     public EvaluationFlow(String trainProject, String testProject) {
-        Projects.fromString(trainProject); // valida il nome del progetto
+        Projects.fromString(trainProject); // validates the project name
         Projects.fromString(testProject);
         this.trainProject = trainProject;
         this.testProject  = testProject;
@@ -108,7 +108,7 @@ public class EvaluationFlow {
 
 
     private void init(){
-        //questi sono i classificatori che utilizzo con parametri ottimizzati per velocità
+        //these are the classifiers used with parameters optimized for speed
         // Create RandomForest with default settings similar to Weka example
         this.randomForestClassifier = new RandomForest();
         // Print available options for RandomForest
@@ -140,7 +140,7 @@ public class EvaluationFlow {
         this.sgdClassifier.setLearningRate(0.01);
         this.sgdClassifier.setEpochs(500); // Number of epochs
 
-        //queste sono le liste che contengono i risultati delle valutazioni per tipologia di classificatore
+        //these are the lists containing evaluation results per classifier type
         this.standardRFList= new ArrayList<>();
         this.standardNBList= new ArrayList<>();
         this.standardSGDList = new ArrayList<>();
@@ -176,10 +176,10 @@ public class EvaluationFlow {
             }
             writeResults();
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt(); // Ripristina lo stato di interruzione
-            throw new CostumException("Interruzione durante l'evaluation flow", e);
+            Thread.currentThread().interrupt(); // Restore the interruption state
+            throw new CostumException("Interruption during evaluation flow", e);
         } catch (ExecutionException e) {
-            throw new CostumException("Errore durante l'evaluation flow", e);
+            throw new CostumException("Error during evaluation flow", e);
         }
     }
 
@@ -252,7 +252,7 @@ public class EvaluationFlow {
 
     // Helper method to process a single release
     private void processRelease(int releaseIndex) throws Exception {
-        //recupero i dati dai file .arff
+        //retrieve data from .arff files
         String trainFileName = trainProject + "_Train_R" + releaseIndex + ".arff";
         String testFileName  = testProject  + "_Test_R"  + releaseIndex + ".arff";
         String trainFilePath = ConstantsWindowsFormat.ARFF_PATH.resolve(trainFileName).toString();
@@ -264,7 +264,7 @@ public class EvaluationFlow {
             Instances trainSet = trainSource.getDataSet();
             Instances testSet = testSource.getDataSet();
 
-            //setto il parametro buggy come variabile di interesse
+            //set the buggy parameter as the target variable
             trainSet.setClassIndex(trainSet.numAttributes() - 1);
             testSet.setClassIndex(testSet.numAttributes() - 1);
 
@@ -288,8 +288,8 @@ public class EvaluationFlow {
         }
     }
 
-    //metodo che addestra i classificatori in maniera standard, ovvero senza sampling, feature selection o
-    //cost sensitive. Effettua un passo del walk forward per i tre classificatori
+    //method that trains classifiers in a standard manner, i.e. without sampling, feature selection or
+    //cost sensitive. Performs one walk forward step for the three classifiers
     public void evalStandard(Instances trainSet, Instances testSet, int index, boolean isFeatureSelected,
                              boolean isUnderSampled, boolean isOverSampled) {
 
@@ -299,19 +299,19 @@ public class EvaluationFlow {
 
         ensureValidClassIndices(trainSet, testSet);
 
-        // Crea e configura i classificatori thread-local
+        // Create and configure thread-local classifiers
         Map<String, Classifier> threadLocalClassifiers = createThreadLocalClassifiers();
 
-        // Esegui training e valutazione in parallelo
+        // Run training and evaluation in parallel
         List<CompletableFuture<ResultsHolder>> futures = trainAndEvaluateClassifiers(
                 threadLocalClassifiers, trainSet, testSet, index, isFeatureSelected, isUnderSampled);
 
-        // Raccogli i risultati
+        // Collect the results
         List<ResultsHolder> results = futures.stream()
                 .map(CompletableFuture::join)
                 .toList();
 
-        // Salva i risultati nelle liste appropriate
+        // Save results in the appropriate lists
         saveResults(results, isFeatureSelected, isUnderSampled, isOverSampled);
     }
 
@@ -408,7 +408,7 @@ public class EvaluationFlow {
         }
     }
 
-// Nuovi metodi da aggiungere alla classe
+// New methods to add to the class
 
     private void handleClassifierException(Exception e, String classifierType, int index) {
         if ("rf".equals(classifierType)) {
@@ -624,7 +624,7 @@ public class EvaluationFlow {
             List<ResultsHolder> results = evaluateAllClassifiers(
                     costSensitiveClassifier, threadLocalClassifiers, trainSet, testSet, index, isFeatureSelected);
 
-            // Aggiunto false per isUnderSampled e isOverSampled poiché non applicabili per cost-sensitive
+            // Added false for isUnderSampled and isOverSampled as they are not applicable for cost-sensitive
             saveResults(results, isFeatureSelected, false, false);
 
         } catch (Exception e) {
@@ -757,8 +757,8 @@ public class EvaluationFlow {
 
 
 
-    //metodo che addestra i classificatori con under sampling.
-    //Effettua un passo del walk forward per i tre classificatori
+    //method that trains classifiers with under sampling.
+    //Performs one walk forward step for the three classifiers
     public void evalUnderSampling(Instances trainSet, Instances testSet, int index) throws Exception {
         // Validate datasets before processing
         if (trainSet == null || trainSet.numInstances() == 0) {
@@ -796,8 +796,8 @@ public class EvaluationFlow {
         }
     }
 
-    //metodo che addestra i classificatori con over sampling.
-    //Effettua un passo del walk forward per i tre classificatori
+    //method that trains classifiers with over sampling.
+    //Performs one walk forward step for the three classifiers
     public void evalOverSampling(Instances trainSet, Instances testSet, int index) throws Exception {
         // Validate dataset before processing
         if (trainSet == null || trainSet.numInstances() == 0) {
@@ -851,8 +851,8 @@ public class EvaluationFlow {
         }
     }
 
-    //metodo che addestra i classificatori con feature selection.
-    //Effettua un passo del walk forward per i tre classificatori
+    //method that trains classifiers with feature selection.
+    //Performs one walk forward step for the three classifiers
     public void evalFeatureSelection(Instances trainSet, Instances testSet, int index) throws Exception {
         // Validate datasets before processing
         if (trainSet == null || trainSet.numInstances() == 0) {
@@ -926,19 +926,19 @@ public class EvaluationFlow {
 
         ensureValidClassIndices(trainSet, testSet);
 
-        // Crea e configura i classificatori thread-local
+        // Create and configure thread-local classifiers
         Map<String, Classifier> threadLocalClassifiers = createThreadLocalClassifiers();
 
-        // Esegui training e valutazione in parallelo
+        // Run training and evaluation in parallel
         List<CompletableFuture<ResultsHolder>> futures = trainAndEvaluateClassifiersWithFeatureSelectionId(
                 threadLocalClassifiers, trainSet, testSet, index, isFeatureSelected, isUnderSampled, featureSelectionId);
 
-        // Raccogli i risultati
+        // Collect the results
         List<ResultsHolder> results = futures.stream()
                 .map(CompletableFuture::join)
                 .toList();
 
-        // Salva i risultati nelle liste appropriate
+        // Save results in the appropriate lists
         saveResults(results, isFeatureSelected, isUnderSampled, isOverSampled);
     }
 
@@ -1103,7 +1103,7 @@ public class EvaluationFlow {
 
 
 
-    // Per la gestione degli errori generici
+    // For handling generic errors
     private void handleEvaluationError(String operation, int index, Exception e) {
         out.println(String.format(ERROR_CLASSIFIER_EVALUATION_MSG, operation, index, e.getMessage()));
     }
@@ -1280,8 +1280,8 @@ public class EvaluationFlow {
         return releaseIdMap.getOrDefault(featuresKey, "");
     }
 
-    //metodo che addestra i classificatori con sampling e feature selection.
-//Effettua un passo del walk forward per i tre classificatori
+    //method that trains classifiers with sampling and feature selection.
+    //Performs one walk forward step for the three classifiers
     public void evalUnderSampFeatureSelection(Instances trainSet, Instances testSet, int index) {
         if (!validateDatasets(trainSet, testSet, index, "under-sampling with feature selection")) {
             return;
@@ -1393,8 +1393,8 @@ public class EvaluationFlow {
     }
 
 
-    //metodo che addestra i classificatori con cost sensitive e feature selection.
-//Effettua un passo del walk forward per i tre classificatori
+    //method that trains classifiers with cost sensitive and feature selection.
+    //Performs one walk forward step for the three classifiers
     public void evalCostFeatureSelection(Instances trainSet, Instances testSet, int index) throws Exception {
         // Validate datasets before processing
         if (trainSet == null || trainSet.numInstances() == 0) {
@@ -1472,7 +1472,7 @@ public class EvaluationFlow {
             List<ResultsHolder> results = evaluateAllClassifiersWithFeatureSelectionId(
                     costSensitiveClassifier, threadLocalClassifiers, trainSet, testSet, index, isFeatureSelected, featureSelectionId);
 
-            // Aggiunto false per isUnderSampled e isOverSampled poiché non applicabili per cost-sensitive
+            // Added false for isUnderSampled and isOverSampled as they are not applicable for cost-sensitive
             saveResults(results, isFeatureSelected, false, false);
 
         } catch (Exception e) {
@@ -1606,8 +1606,8 @@ public class EvaluationFlow {
         }
     }
 
-    //metodo che addestra i classificatori con cost sensitive e under sampling.
-    //Effettua un passo del walk forward per i tre classificatori
+    //method that trains classifiers with cost sensitive and under sampling.
+    //Performs one walk forward step for the three classifiers
     public void evalCostUnderSampling(Instances trainSet, Instances testSet, int index) throws Exception {
         // Validate datasets before processing
         if (trainSet == null || trainSet.numInstances() == 0) {
@@ -1645,8 +1645,8 @@ public class EvaluationFlow {
         }
     }
 
-    //metodo che addestra i classificatori con cost sensitive e over sampling.
-    //Effettua un passo del walk forward per i tre classificatori
+    //method that trains classifiers with cost sensitive and over sampling.
+    //Performs one walk forward step for the three classifiers
     public void evalCostOverSampling(Instances trainSet, Instances testSet, int index) throws Exception {
         // Validate dataset before processing
         if (trainSet == null || trainSet.numInstances() == 0) {
@@ -1700,8 +1700,8 @@ public class EvaluationFlow {
         }
     }
 
-    //metodo che addestra i classificatori con cost sensitive, under sampling e feature selection.
-    //Effettua un passo del walk forward per i tre classificatori
+    //method that trains classifiers with cost sensitive, under sampling and feature selection.
+    //Performs one walk forward step for the three classifiers
     public void evalCostUnderSampFeatureSelection(Instances trainSet, Instances testSet, int index) {
         if (!validateDatasets(trainSet, testSet, index, "cost sensitive under-sampling with feature selection")) {
             return;
@@ -1726,8 +1726,8 @@ public class EvaluationFlow {
         }
     }
 
-    //metodo che addestra i classificatori con cost sensitive, over sampling e feature selection.
-    //Effettua un passo del walk forward per i tre classificatori
+    //method that trains classifiers with cost sensitive, over sampling and feature selection.
+    //Performs one walk forward step for the three classifiers
     public void evalCostOverSampFeatureSelection(Instances trainSet, Instances testSet, int index) {
         if (!validateDatasets(trainSet, testSet, index, "cost sensitive over-sampling with feature selection")) {
             return;
@@ -1752,8 +1752,8 @@ public class EvaluationFlow {
         }
     }
 
-    //metodo che addestra i classificatori con over sampling e feature selection.
-    //Effettua un passo del walk forward per i tre classificatori
+    //method that trains classifiers with over sampling and feature selection.
+    //Performs one walk forward step for the three classifiers
     public void evalOverSampFeatureSelection(Instances trainSet, Instances testSet, int index) {
         if (!validateDatasets(trainSet, testSet, index, "over-sampling with feature selection")) {
             return;
@@ -1824,7 +1824,7 @@ public class EvaluationFlow {
         }
     }
 
-    //metodo che prende i risultati e li salva su un csv
+    //method that takes the results and saves them to a csv
     public void csvWriter(List<List<ResultsHolder>> list){
         String path = trainProject + "ResultsForJMP.csv";
         try (FileWriter writer = new FileWriter(path)) {

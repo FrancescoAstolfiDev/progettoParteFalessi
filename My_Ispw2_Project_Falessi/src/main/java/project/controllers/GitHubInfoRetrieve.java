@@ -150,7 +150,7 @@ public class GitHubInfoRetrieve {
         CompilationUnit cu = javaParser.parse(fileContent).getResult()
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Java code"));
 
-        // Cerca tutti i metodi nel file, tenendo traccia della gerarchia delle classi
+        // Search all methods in the file, tracking the class hierarchy
         cu.findAll(MethodDeclaration.class).forEach(methodDecl -> {
             String containingClassName = getContainingClassName(methodDecl);
             String fullClassName = className != null ? className : containingClassName;
@@ -263,7 +263,7 @@ public class GitHubInfoRetrieve {
             List<DiffEntry> diffs = diffFormatter.scan(parent.getTree(), commit.getTree());
             getModifiedClasses(searchAdded,diffs,allModifiedClass);
         } catch (IOException e) {
-            //IGNORO QUESTO CASO
+            //IGNORE THIS CASE
         }
         return allModifiedClass;
     }
@@ -308,7 +308,7 @@ public class GitHubInfoRetrieve {
                 byte[] fileContentBytes = loader.getBytes();
                 String fileContent = new String(fileContentBytes);
 
-                // Analizza il contenuto per trovare tutte le classi e i metodi
+                // Analyze the content to find all classes and methods
                 extractClassesAndMethods(fileContent, filePath, release);
             }
         }
@@ -321,38 +321,38 @@ public class GitHubInfoRetrieve {
         CompilationUnit cu = javaParser.parse(fileContent).getResult()
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Java code"));
 
-        // Estrai tutte le classi (principali e annidate)
+        // Extract all classes (main and nested)
         cu.findAll(ClassOrInterfaceDeclaration.class).forEach(classDecl -> {
             String className = getFullClassName(classDecl);
 
-            // Crea un nuovo ClassFile per ogni classe (principale o annidata)
+            // Create a new ClassFile for each class (main or nested)
             ClassFile classFile = new ClassFile(fileContent, filePath);
-            classFile.setClassName(className); // Aggiungiamo il nome completo della classe
+            classFile.setClassName(className); // Add the full class name
 
-            // Estrai i metodi della classe
+            // Extract the methods of the class
             classDecl.getMethods().forEach(methodDecl -> {
                 MethodInstance methodInstance = new MethodInstance();
                 methodInstance.setClassPath(filePath);
-                methodInstance.setClassName(className); // Usa il nome completo della classe
+                methodInstance.setClassName(className); // Use the full class name
                 methodInstance.setMethodName(methodDecl.getNameAsString());
                 methodInstance.setSignature(methodDecl.getSignature().toString());
                 methodInstance.setReleaseName(release.getName());
 
-                // Aggiungi il metodo alla classe
+                // Add the method to the class
                 classFile.addMethod(methodInstance);
             });
 
-            // Aggiungi la classe alla release
+            // Add the class to the release
             release.addClassFile(classFile);
         });
     }
 
     private String getFullClassName(ClassOrInterfaceDeclaration classDecl) {
-        // Ottieni il nome completo della classe includendo le classi annidate
+        // Get the full class name including nested classes
         List<String> classNames = new ArrayList<>();
         classNames.add(classDecl.getNameAsString());
 
-        // Risali l'albero dei nodi per trovare le classi contenitori
+        // Walk up the node tree to find container classes
         classDecl.walk(Node.TreeTraversal.PARENTS, node -> {
             if (node instanceof ClassOrInterfaceDeclaration parentClass) {
                 classNames.add(0, parentClass.getNameAsString());
@@ -364,10 +364,10 @@ public class GitHubInfoRetrieve {
 
 
     /**
-     * Ottiene il contenuto di un file a un commit specifico
-     * @param path Percorso del file
-     * @param commit Commit di riferimento
-     * @return Contenuto del file al commit specificato
+     * Gets the content of a file at a specific commit
+     * @param path File path
+     * @param commit Reference commit
+     * @return File content at the specified commit
      */
     private String getFileContentAtCommit(String path, RevCommit commit) throws IOException {
         if (commit == null) {
@@ -383,7 +383,7 @@ public class GitHubInfoRetrieve {
         try (TreeWalk treeWalk = TreeWalk.forPath(repo, path, commit.getTree())) {
             if (treeWalk == null) {
                 LOGGER.error("getFileContentAtCommit: TreeWalk is null for path: {}" , path);
-                return "not founded val "; // File non trovato
+                return "not founded val "; // File not found
             }
 
             ObjectId objectId = treeWalk.getObjectId(0);
@@ -405,9 +405,9 @@ public class GitHubInfoRetrieve {
         }
     }
     /**
-     * Recupera i metodi modificati o cancellati in un commit specifico
-     * @param commit Il commit da analizzare
-     * @return Lista di MethodInstance modificate o cancellate
+     * Retrieves the methods modified or deleted in a specific commit
+     * @param commit The commit to analyze
+     * @return List of modified or deleted MethodInstance
      */
     public List<MethodInstance> getChangedMethodInstances(RevCommit commit) {
         List<MethodInstance> changedMethods = new ArrayList<>();
@@ -422,7 +422,7 @@ public class GitHubInfoRetrieve {
                     String oldContent = getFileContentAtCommit(diff.getOldPath(), parent);
 
                     if (diff.getChangeType() == DiffEntry.ChangeType.DELETE) {
-                        // Per i file cancellati, estrai tutti i metodi come modificati
+                        // For deleted files, extract all methods as modified
                         changedMethods.addAll(extractMethodsFromFile(oldContent, diff.getOldPath(), null));
                     } else if (diff.getChangeType() == DiffEntry.ChangeType.MODIFY) {
                         String newContent = getFileContentAtCommit(diff.getNewPath(), commit);
@@ -431,7 +431,7 @@ public class GitHubInfoRetrieve {
                 }
             }
         } catch (IOException e) {
-            LOGGER.error("Errore nell'analisi delle modifiche del commit: {}", e.getMessage());
+            LOGGER.error("Error analyzing commit changes: {}", e.getMessage());
         }
 
         return changedMethods;
@@ -442,7 +442,7 @@ public class GitHubInfoRetrieve {
     try {
         return commit.getParent(0);
     } catch (Exception e) {
-        LOGGER.error("Nessun commit padre trovato per {}", commit.getName());
+        LOGGER.error("No parent commit found for {}", commit.getName());
         return null;
     }
 }
@@ -461,25 +461,25 @@ private DiffFormatter setupDiffFormatter() {
 
 
     private void processModifiedFile(String oldContent, String newContent, String filePath, List<MethodInstance> changedMethods) {
-        // Estrai i metodi da entrambe le versioni del file
+        // Extract the methods from both versions of the file
         List<MethodInstance> oldMethods = extractMethodsFromFile(oldContent, filePath, null);
         List<MethodInstance> newMethods = extractMethodsFromFile(newContent, filePath, null);
 
-        // Confronta i metodi per trovare quelli modificati o rimossi
+        // Compare methods to find those that were modified or removed
         for (MethodInstance oldMethod : oldMethods) {
             boolean found = false;
             for (MethodInstance newMethod : newMethods) {
                 if (isSameMethod(oldMethod, newMethod)) {
                     found = true;
                     if (!oldContent.equals(newContent)) {
-                        // Il metodo è stato modificato
+                        // The method was modified
                         changedMethods.add(newMethod);
                     }
                     break;
                 }
             }
             if (!found) {
-                // Il metodo è stato rimosso
+                // The method was removed
                 changedMethods.add(oldMethod);
             }
         }
