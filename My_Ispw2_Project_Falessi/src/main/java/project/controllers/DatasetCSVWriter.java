@@ -17,11 +17,11 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
 
-public class ClassWriter {
-    ClassWriter(){
+public class DatasetCSVWriter {
+    DatasetCSVWriter(){
 
     }
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClassWriter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatasetCSVWriter.class);
     // Function for safe CSV escaping
     private static  String escapeCsv(String field) {
         if (field == null) return "";
@@ -35,7 +35,7 @@ public class ClassWriter {
 
 
 
-    public static void writeResultsToFile(Release actRelease, String projectName, Map<String, MethodInstance> partialResults, DataSetType dataType) {
+    public static void writeResultsToFile(Release actRelease, String projectName, Map<String, MethodInstance> curResults, DataSetType dataType) {
         if (actRelease == null) {
             LOGGER.error("Received partial results but currentProcessingRelease is null");
             return;
@@ -44,11 +44,11 @@ public class ClassWriter {
         try {
             outPath=projectName.toUpperCase()+dataType+ actRelease.getId() ;
             LOGGER.info("Writing  results to {}" , outPath);
-            writeResultsToFile(outPath, partialResults,dataType);
+            writeResultsToFile(outPath, curResults,dataType);
             Projects projects=  Projects.fromString(projectName);
             if(actRelease.getId()==projects.getNumStepDataset()+1){
                 for(String matrix: Objects.requireNonNull(WhatIf.getListMatrix())){
-                    writeResultsToFile(outPath+ matrix, partialResults,dataType);
+                    writeResultsToFile(outPath+ matrix, curResults,dataType);
                 }
             }
         } catch (Exception e) {

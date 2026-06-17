@@ -38,7 +38,7 @@ import org.slf4j.Logger;
  *       IV–FV range reported by the associated {@link Ticket}s.</li>
  *   <li>Computes file-level metrics (NR, age, nAuth) by replaying the commit
  *       history across releases.</li>
- *   <li>Writes the final dataset rows via {@link ClassWriter}.</li>
+ *   <li>Writes the final dataset rows via {@link DatasetCSVWriter}.</li>
  * </ol>
  *
  * <p><b>Thread safety:</b> commit processing runs inside a {@link ForkJoinPool}.
@@ -387,7 +387,7 @@ public class MetricsCalculator {
         } else {
             Caching.saveCommitCache(resultCommitsMethods, projectName);
             assignBuggyness(releaseData);
-            ClassWriter.writeResultsToFile(releaseData.release, projectName, releaseData.releaseResults, releaseData.dataSetType);
+            DatasetCSVWriter.writeResultsToFile(releaseData.release, projectName, releaseData.releaseResults, releaseData.dataSetType);
         }
     }
 
@@ -475,7 +475,7 @@ public class MetricsCalculator {
         }
         if ((log % ConstantSize.FREQUENCY_WRITE_CSV) == 0) {
             assignBuggyness(releaseData);
-            ClassWriter.writeResultsToFile(releaseData.release, projectName, releaseData.releaseResults, DataSetType.PARTIAL);
+            DatasetCSVWriter.writeResultsToFile(releaseData.release, projectName, releaseData.releaseResults, DataSetType.PARTIAL);
         }
     }
 
@@ -524,13 +524,13 @@ public class MetricsCalculator {
         if (data.commitHashesToProcess.isEmpty()) {
             LOGGER.info("No commits to process for release ");
             assignBuggyness(data);
-            ClassWriter.writeResultsToFile(data.release, projectName, data.releaseResults, dataSetType);
+            DatasetCSVWriter.writeResultsToFile(data.release, projectName, data.releaseResults, dataSetType);
             return;
         }
         if (!data.releaseResults.isEmpty() && data.commitHashesToProcess.size() > ConstantSize.FREQUENCY_WRITE_CSV) {
             LOGGER.info("writing before the processing");
             assignBuggyness(data);
-            ClassWriter.writeResultsToFile(data.release, projectName, data.releaseResults, DataSetType.PARTIAL);
+            DatasetCSVWriter.writeResultsToFile(data.release, projectName, data.releaseResults, DataSetType.PARTIAL);
         }
 
         int maxRetries = 3;
@@ -553,7 +553,7 @@ public class MetricsCalculator {
                             release.getName(), maxRetries);
                     Caching.saveCommitCache(resultCommitsMethods, projectName);
                     assignBuggyness(data);
-                    ClassWriter.writeResultsToFile(data.release, projectName, data.releaseResults, dataSetType);
+                    DatasetCSVWriter.writeResultsToFile(data.release, projectName, data.releaseResults, dataSetType);
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

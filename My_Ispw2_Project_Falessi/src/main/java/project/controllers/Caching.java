@@ -103,7 +103,7 @@ public class Caching {
                     methodJson.put("nAuth", method.getnAuth());
                     methodJson.put("nr", method.getNr());
                     methodJson.put("nSmells", method.getnSmells());
-                    // Removed buggyness value from cache as per requirements
+
 
                     // Add the method to the commit JSON
                     commitJson.put(methodKey, methodJson);
