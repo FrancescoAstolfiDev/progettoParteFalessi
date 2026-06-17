@@ -1,0 +1,18 @@
+
+=== Feature Selection Results for Release 8 ===
+Feature Selection ID: FS_R8_1
+Selected Features (3):
+  - age
+  - nAuth
+  - nr
+Discarded Features (9):
+  - loc
+  - wmc
+  - assignmentsQty
+  - mathOperationsQty
+  - qtyTryCatch
+  - qtyReturn
+  - fanin
+  - fanout
+  - nSmell
+

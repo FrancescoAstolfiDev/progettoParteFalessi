@@ -1,0 +1,18 @@
+
+=== Feature Selection Results for Release 6 ===
+Feature Selection ID: FS_R6_1
+Selected Features (4):
+  - wmc
+  - age
+  - nAuth
+  - nr
+Discarded Features (8):
+  - loc
+  - assignmentsQty
+  - mathOperationsQty
+  - qtyTryCatch
+  - qtyReturn
+  - fanin
+  - fanout
+  - nSmell
+

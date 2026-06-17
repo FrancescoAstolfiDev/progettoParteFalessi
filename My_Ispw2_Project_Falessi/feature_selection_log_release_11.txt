@@ -1,0 +1,18 @@
+
+=== Feature Selection Results for Release 11 ===
+Feature Selection ID: FS_R11_1
+Selected Features (4):
+  - loc
+  - age
+  - nAuth
+  - nr
+Discarded Features (8):
+  - wmc
+  - assignmentsQty
+  - mathOperationsQty
+  - qtyTryCatch
+  - qtyReturn
+  - fanin
+  - fanout
+  - nSmell
+

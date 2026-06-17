@@ -1,0 +1,18 @@
+
+=== Feature Selection Results for Release 9 ===
+Feature Selection ID: FS_R9_1
+Selected Features (4):
+  - assignmentsQty
+  - age
+  - nAuth
+  - nr
+Discarded Features (8):
+  - loc
+  - wmc
+  - mathOperationsQty
+  - qtyTryCatch
+  - qtyReturn
+  - fanin
+  - fanout
+  - nSmell
+
